@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account | ArtisanAisle</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="box">
+    <h1>Create Account</h1>
+    <input id="nameInput" type="text" placeholder="Full Name" />
+    <input id="emailInput" type="email" placeholder="Email" />
+    <input id="phoneInput" type="tel" placeholder="Phone Number" />
+    <input id="passwordInput" type="password" placeholder="Password" />
+    <button onclick="createAccount()">Create Account</button>
+    <div class="link">
+      <a href="login.html">Already have an account?</a>
+    </div>
+  </div>
+  <script>
+    function getStoredUsers() {
+      const rawUsers = localStorage.getItem('handicraft_users');
+      if (rawUsers) {
+        try {
+          const parsed = JSON.parse(rawUsers);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          return [];
+        }
+      }
+
+      const legacyUser = localStorage.getItem('handicraft_user');
+      if (legacyUser) {
+        try {
+          const parsed = JSON.parse(legacyUser);
+          return parsed ? [parsed] : [];
+        } catch (error) {
+          return [];
+        }
+      }
+
+      return [];
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem('handicraft_users', JSON.stringify(users));
+      if (users.length > 0) {
+        localStorage.setItem('handicraft_user', JSON.stringify(users[users.length - 1]));
+      }
+    }
+
+    function createAccount() {
+      const name = document.getElementById('nameInput').value.trim();
+      const email = document.getElementById('emailInput').value.trim().toLowerCase();
+      const phone = document.getElementById('phoneInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+
+      if (!name || !email || !phone || !password) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const normalizedPhone = phone.replace(/\D/g, '');
+      if (normalizedPhone.length < 10) {
+        alert('Please enter a valid phone number.');
+        return;
+      }
+
+      const users = getStoredUsers();
+      const duplicate = users.some(user => {
+        const existingEmail = (user.email || '').toLowerCase();
+        const existingPhone = (user.phone || '').replace(/\D/g, '');
+        return existingEmail === email || existingPhone === normalizedPhone;
+      });
+
+      if (duplicate) {
+        alert('An account with this email or phone number already exists.');
+        return;
+      }
+
+      const newUser = { name, email, phone, password };
+      users.push(newUser);
+      saveUsers(users);
+
+      localStorage.setItem('handicraft_logged_in_user', JSON.stringify({ name, email, phone }));
+      localStorage.setItem('handicraft_profile', JSON.stringify({ name, email, phone }));
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,2327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArtisanAisle</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<header>
+
+    <div class="logo">
+        🧺 Artisan<span>AISLE</span>
+    </div>
+
+    <div class="search">
+        <input id="searchInput" type="text" placeholder="Search handmade products..." onkeydown="if(event.key==='Enter'){searchProducts();}">
+        <button type="button" onclick="searchProducts()">Search</button>
+    </div>
+
+    <div class="header-links">
+        <button onclick="showScreen('cart')">🛒 Cart</button>
+        <button onclick="showScreen('orders')">📦 Orders</button>
+        <button id="loginButton" onclick="window.location.href='login.html'">👤 Login</button>
+    </div>
+
+</header>
+
+<nav>
+    <button onclick="showScreen('home')">HOME</button>
+    <button onclick="showScreen('products')">PRODUCTS</button>
+    <button onclick="openAdminDashboard()">ADMIN</button>
+    <button onclick="openSellerDashboard()">SELLER</button>
+    <button onclick="window.location.href='categories.html'">CATEGORIES</button>
+    <button onclick="window.location.href='artisans.html'">ARTISANS</button>
+    <button onclick="window.location.href='about-us.html'">ABOUT US</button>
+    <button onclick="window.location.href='contact.html'">CONTACT</button>
+</nav>
+
+
+<!-- ================= HOME ================= -->
+
+<section id="home" class="screen active">
+
+    <div class="hero">
+
+        <div class="hero-text">
+
+            <h1 id="h11">
+                Discover Unique
+                Handmade Treasures
+            </h1>
+
+            <p>
+                Support local artisans and bring home
+                meaningful handcrafted products.
+            </p>
+
+            <button class="btn"
+                onclick="showScreen('products')">
+                SHOP NOW
+            </button>
+
+        </div>
+
+        <img
+        class="hero-img"
+        src="https://filipinohomes123.s3.ap-southeast-1.amazonaws.com/homestv/articles/dbe5589d-a86b-4bd5-b5a8-76cfa8f127ee.webp">
+
+    </div>
+
+
+    <div class="features">
+
+        <div class="feature">
+            <div class="feature-icon">👥</div>
+            <h3>Support Local Artisans</h3>
+            <p>Empower talented local creators.</p>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">❤️</div>
+            <h3>Handmade with Love</h3>
+            <p>Unique and quality handmade products.</p>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">🛡️</div>
+            <h3>Secure Payments</h3>
+            <p>Safe and reliable transactions.</p>
+        </div>
+
+    </div>
+
+
+    <div class="section-header">
+        <h2 class="section-title">New Products</h2>
+        <span class="section-pill">Just arrived</span>
+    </div>
+
+    <div class="product-grid">
+
+        <div class="product-card" data-category="Bags">
+            <span class="product-badge">New</span>
+            <img src="https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg">
+            <div class="product-info">
+                <h3>Woven Handbag</h3>
+                <p class="price">₱650.00</p>
+                <div class="rating">★★★★★</div>
+                <button class="card-btn" onclick="showProduct('Woven Handbag',650)">View Details</button>
+            </div>
+        </div>
+
+        <div class="product-card" data-category="Woven Items">
+            <span class="product-badge">New</span>
+            <img src="https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow">
+            <div class="product-info">
+                <h3>Rattan Basket</h3>
+                <p class="price">₱550.00</p>
+                <div class="rating">★★★★★</div>
+                <button class="card-btn" onclick="showProduct('Rattan Basket',550)">View Details</button>
+            </div>
+        </div>
+
+        <div class="product-card" data-category="Home Decor">
+            <span class="product-badge">New</span>
+            <img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80">
+            <div class="product-info">
+                <h3>Wooden Vase</h3>
+                <p class="price">₱450.00</p>
+                <div class="rating">★★★★☆</div>
+                <button class="card-btn" onclick="showProduct('Wooden Vase',450)">View Details</button>
+            </div>
+        </div>
+
+        <div class="product-card" data-category="Home Decor">
+            <span class="product-badge">New</span>
+            <img src="https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg">
+            <div class="product-info">
+                <h3>Macrame Wall Hanging</h3>
+                <p class="price">₱750.00</p>
+                <div class="rating">★★★★★</div>
+                <button class="card-btn" onclick="showProduct('Macrame Wall Hanging',750)">View Details</button>
+            </div>
+        </div>
+
+        <div class="product-card" data-category="Accessories">
+            <span class="product-badge">New</span>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA">
+            <div class="product-info">
+                <h3>Traditional Salakot Hat</h3>
+                <p class="price">₱250.00</p>
+                <button class="card-btn" onclick="showProduct('Traditional Salakot Hat',250)">View Details</button>
+            </div>
+        </div>
+
+        <div class="product-card" data-category="Home Decor">
+            <span class="product-badge">Popular</span>
+            <img src="https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow">
+            <div class="product-info">
+                <h3>Handmade Lamp</h3>
+                <p class="price">₱750.00</p>
+                <button class="card-btn" onclick="showProduct('Handmade Lamp',750)">View Details</button>
+            </div>
+        </div>
+
+        <div class="product-card" data-category="Home Decor">
+            <span class="product-badge">Popular</span>
+            <img src="https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg">
+            <div class="product-info">
+                <h3>Ceramic Vase</h3>
+                <p class="price">₱500.00</p>
+                <button class="card-btn" onclick="showProduct('Ceramic Vase',500)">View Details</button>
+            </div>
+        </div>
+
+        <div class="product-card" data-category="Home Decor">
+            <span class="product-badge">Popular</span>
+            <img src="https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA">
+            <div class="product-info">
+                <h3>Ceramic Bowl</h3>
+                <p class="price">₱500.00</p>
+                <button class="card-btn" onclick="showProduct('Ceramic Bowl',500)">View Details</button>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+
+<!-- ================= PRODUCTS ================= -->
+
+<section id="products" class="screen">
+
+    <h1 class="section-title">
+        All Products
+    </h1>
+
+    <div class="product-layout">
+
+        <aside class="categories">
+
+            <h3>Categories</h3>
+
+            <button onclick="filterProducts('All Products')">All Products</button>
+            <button onclick="filterProducts('Bags')">Bags</button>
+            <button onclick="filterProducts('Home Decor')">Home Decor</button>
+            <button onclick="filterProducts('Accessories')">Accessories</button>
+            <button onclick="filterProducts('Woven Items')">Woven Items</button>
+            <button onclick="filterProducts('Wood Crafts')">Wood Crafts</button>
+            <button onclick="filterProducts('Souvenirs')">Souvenirs</button>
+            <button onclick="filterProducts('Jewelry')">Jewelry</button>
+
+        </aside>
+
+
+        <div class="product-grid">
+
+            <div class="product-card" data-category="Bags">
+                <img src="https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg">
+                <div class="product-info">
+                    <h3>Woven Handbag</h3>
+                    <p class="price">₱650.00</p>
+                    <button class="card-btn"
+                    onclick="showProduct('Woven Handbag',650)">
+                    View Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="Woven Items">
+                <img src="https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow">
+                <div class="product-info">
+                    <h3>Rattan Basket</h3>
+                    <p class="price">₱550.00</p>
+                    <button class="card-btn"
+                    onclick="showProduct('Rattan Basket',550)">
+                    View Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="Accessories">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA">
+                <div class="product-info">
+                    <h3>Traditional Salakot Hat</h3>
+                    <p class="price">₱250.00</p>
+                    <button class="card-btn"
+                    onclick="showProduct('Traditional Salakot Hat',250)">
+                    View Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="Home Decor">
+                <img src="https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow">
+                <div class="product-info">
+                    <h3>Handmade Lamp</h3>
+                    <p class="price">₱750.00</p>
+                    <button class="card-btn"
+                    onclick="showProduct('Handmade Lamp',750)">
+                    View Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="Home Decor">
+                <img src="https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg">
+                <div class="product-info">
+                    <h3>Ceramic Vase</h3>
+                    <p class="price">₱500.00</p>
+                    <button class="card-btn"
+                    onclick="showProduct('Ceramic Vase',500)">
+                    View Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="Home Decor">
+                <img src="https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA">
+                <div class="product-info">
+                    <h3>Ceramic Bowl</h3>
+                    <p class="price">₱500.00</p>
+                    <button class="card-btn"
+                    onclick="showProduct('Ceramic Bowl',500)">
+                    View Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="Home Decor">
+                <img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80">
+                <div class="product-info">
+                    <h3>Wooden Vase</h3>
+                    <p class="price">₱450.00</p>
+                    <button class="card-btn"
+                    onclick="showProduct('Wooden Vase',450)">
+                    View Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="Home Decor">
+                <img src="https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg">
+                <div class="product-info">
+                    <h3>Macrame Wall Hanging</h3>
+                    <p class="price">₱750.00</p>
+                    <button class="card-btn"
+                    onclick="showProduct('Macrame Wall Hanging',750)">
+                    View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= PRODUCT DETAILS ================= -->
+
+<section id="details" class="screen">
+
+    <div class="product-detail">
+
+        <img id="detailImage"
+        src="https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg">
+
+        <div class="detail-info">
+
+            <h1 id="detailName">
+                Woven Handbag
+            </h1>
+
+            <div id="detailReviews" class="rating">
+                ★★★★★ (24 reviews)
+            </div>
+
+            <p class="detail-price">
+                ₱<span id="detailPrice">650</span>.00
+            </p>
+
+            <p id="detailDescription">
+                Handmade woven product created by
+                local artisans. Durable, unique and
+                perfect for everyday use.
+            </p>
+
+            <p style="margin-top:15px;">
+                <b>Stock:</b>
+                <span style="color:green;">
+                    In Stock
+                </span>
+            </p>
+
+            <div class="quantity">
+
+                <button onclick="changeQuantity(-1)">
+                    −
+                </button>
+
+                <span id="quantity">
+                    1
+                </span>
+
+                <button onclick="changeQuantity(1)">
+                    +
+                </button>
+
+            </div>
+
+            <button class="btn"
+            onclick="addToCart()">
+                🛒 Add to Cart
+            </button>
+
+            <button
+            style="padding:13px 25px;margin-left:10px;border:1px solid #285c3b;background:rgb(3, 92, 9);border-radius:7px;">
+                Buy Now
+            </button>
+
+            <hr style="margin:25px 0;">
+
+            <p>🚚 Shipping & Delivery</p>
+            <p>❤️ Add to Wishlist</p>
+            <p>⭐ Reviews</p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= CART ================= -->
+
+<section id="cart" class="screen">
+
+    <h1 class="section-title">
+        My Cart
+    </h1>
+
+    <div class="cart-container">
+
+        <div class="cart-items">
+            <div id="cartItems"></div>
+        </div>
+
+
+        <div class="order-summary">
+
+            <h2>Order Summary</h2>
+
+            <div class="summary-line">
+                <span>Subtotal</span>
+                <span id="cartSubtotal">₱0.00</span>
+            </div>
+
+            <div class="summary-line">
+                <span>Shipping</span>
+                <span id="cartShipping">₱60.00</span>
+            </div>
+
+            <div class="summary-line total">
+                <span>Total</span>
+                <span id="cartTotal">₱0.00</span>
+            </div>
+
+            <button class="btn"
+            style="width:100%;margin-top:20px;"
+            onclick="showScreen('checkout')">
+                Proceed to Checkout
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= CHECKOUT ================= -->
+
+<section id="checkout" class="screen">
+
+    <h1 class="section-title">
+        Checkout
+    </h1>
+
+    <div class="checkout">
+
+        <div class="form-box">
+
+            <h2>Shipping Information</h2>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input id="checkoutFullName" type="text"
+                placeholder="Enter your full name">
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input id="checkoutPhone" type="text"
+                placeholder="09XXXXXXXXX">
+            </div>
+
+            <div class="form-group">
+                <label>Address</label>
+                <input id="checkoutAddress" type="text"
+                placeholder="Enter your address">
+            </div>
+
+            <div class="form-group">
+                <label>City / Municipality</label>
+                <input id="checkoutCity" type="text"
+                placeholder="Enter municipality">
+            </div>
+
+            <div class="form-group">
+                <label>Payment Method</label>
+
+                <select id="checkoutPayment">
+                    <option>Cash on Delivery</option>
+                    <option>GCash</option>
+                    <option>Maya</option>
+                    <option>Credit / Debit Card</option>
+                </select>
+
+            </div>
+
+            <button class="btn"
+            style="width:100%;"
+            onclick="placeOrder()">
+                Place Order
+            </button>
+
+        </div>
+
+
+        <div class="checkout-summary">
+
+            <h2>Order Summary</h2>
+            <div id="checkoutSummaryItems"></div>
+
+            <div class="summary-line">
+                <span>Shipping</span>
+                <span id="checkoutShipping">₱60</span>
+            </div>
+
+            <div class="summary-line total">
+                <span>Total</span>
+                <span id="checkoutTotal">₱0.00</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= ORDERS ================= -->
+
+<section id="orders" class="screen">
+
+    <h1 class="section-title">
+        My Orders
+    </h1>
+
+    <div id="ordersList"></div>
+
+</section>
+
+
+<!-- ================= PROFILE ================= -->
+
+<section id="profile" class="screen">
+
+    <div class="form-box profile-form">
+        <h2>Profile Settings</h2>
+        <p style="margin-bottom:20px;">Update your account details so checkout is faster and easier.</p>
+
+        <div class="form-group">
+            <label>Full Name</label>
+            <input id="profileName" type="text" placeholder="Enter your full name">
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input id="profileEmail" type="email" placeholder="Enter your email">
+        </div>
+
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input id="profilePhone" type="text" placeholder="09XXXXXXXXX">
+        </div>
+
+        <div class="form-group">
+            <label>Address</label>
+            <input id="profileAddress" type="text" placeholder="Enter your address">
+        </div>
+
+        <div class="form-group">
+            <label>City / Municipality</label>
+            <input id="profileCity" type="text" placeholder="Enter municipality">
+        </div>
+
+        <div class="form-group">
+            <label>Preferred Payment Method</label>
+            <select id="profilePayment">
+                <option>Cash on Delivery</option>
+                <option>GCash</option>
+                <option>Maya</option>
+                <option>Credit / Debit Card</option>
+            </select>
+        </div>
+
+        <div class="profile-actions">
+            <button class="btn" onclick="saveProfileSettings()">Save Profile</button>
+            <button class="btn" style="background:#8a6100;" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+</section>
+
+
+<!-- ================= SELLER ================= -->
+
+<section id="seller" class="screen">
+
+    <div id="sellerLoginModal" class="seller-login-modal" style="display: none;">
+        <div class="seller-login-box">
+            <div id="sellerLoginForm">
+                <h2>Seller Login</h2>
+                <p>Sign in with your seller account or create one below.</p>
+                <input id="sellerEmailInput" type="email" placeholder="Email Address" />
+                <input id="sellerPasswordInput" type="password" placeholder="Password" />
+                <button class="btn" onclick="submitSellerLogin()">Open Dashboard</button>
+                <button class="secondary-btn" type="button" onclick="showSellerRegisterForm()">Create Account</button>
+                <button class="secondary-btn" onclick="closeSellerLoginModal(); showScreen('home');">Cancel</button>
+            </div>
+
+            <div id="sellerRegisterForm" style="display: none;">
+                <h2>Create Seller Account</h2>
+                <p>Register a new seller profile.</p>
+                <input id="sellerRegisterName" type="text" placeholder="Full Name" />
+                <input id="sellerRegisterEmail" type="email" placeholder="Email Address" />
+                <input id="sellerRegisterPassword" type="password" placeholder="Password" />
+                <button class="btn" onclick="submitSellerRegister()">Create Account</button>
+                <button class="secondary-btn" type="button" onclick="showSellerLoginForm()">Back to Login</button>
+                <button class="secondary-btn" onclick="closeSellerLoginModal(); showScreen('home');">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+
+        <aside class="sidebar">
+
+            <h2>🧺 ArtisanAisle</h2>
+
+            <button data-seller-view="dashboard">🏠 Dashboard</button>
+            <button data-seller-view="products">🛍️ My Products</button>
+            <button data-seller-view="add-product">➕ Add Product</button>
+            <button data-seller-view="orders">📦 Orders</button>
+            <button data-seller-view="inventory">📊 Inventory</button>
+            <button data-seller-view="profile">👤 Profile</button>
+            <button onclick="sellerLogout()">🚪 Logout</button>
+
+        </aside>
+
+        <div class="dashboard-content">
+            <div id="sellerContent"></div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= ADMIN ================= -->
+
+<section id="admin" class="screen">
+
+    <div id="adminLoginModal" class="admin-login-modal" style="display: none;">
+        <div class="admin-login-box">
+            <h2>Admin Login</h2>
+            <p>Enter the dashboard password to continue.</p>
+            <input id="adminPasswordInput" type="password" placeholder="Password" />
+            <button class="btn" onclick="submitAdminLogin()">Open Dashboard</button>
+            <button class="secondary-btn" onclick="closeAdminLoginModal(); showScreen('home');">Cancel</button>
+        </div>
+    </div>
+
+    <div class="dashboard">
+
+        <aside class="sidebar">
+
+            <h2>🧺 ArtisanAisle</h2>
+
+            <button data-admin-view="dashboard">🏠 Dashboard</button>
+            <button data-admin-view="users">👥 Users</button>
+            <button data-admin-view="sellers">🧑‍🎨 Sellers</button>
+            <button data-admin-view="products">🛍️ Products</button>
+            <button data-admin-view="orders">📦 Orders</button>
+            <button data-admin-view="reports">📊 Reports</button>
+            <button data-admin-view="settings">⚙️ Settings</button>
+            <button onclick="adminLogout()">🚪 Logout</button>
+
+        </aside>
+
+
+        <div class="dashboard-content">
+
+            <div id="adminContent"></div>
+
+        </div>
+
+    </div>
+
+</section>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<footer>
+    <p>© 2026 ArtisanAisle | Supporting Local Artisans</p>
+</footer>
+
+
+<script>
+
+/* ================= SCREEN NAVIGATION ================= */
+
+function showScreen(screenID) {
+
+    document.querySelectorAll(".screen")
+    .forEach(screen => {
+        screen.classList.remove("active");
+    });
+
+    document.getElementById(screenID)
+    .classList.add("active");
+
+    if (screenID === "checkout") {
+        populateCheckoutForm();
+    } else if (screenID === "profile") {
+        fillProfileForm();
+    } else if (screenID === "products") {
+        updateProductsDisplay();
+    }
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+
+/* ================= PRODUCT ================= */
+
+let selectedProduct = {
+    name: "Woven Handbag",
+    price: 650,
+    image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg"
+};
+let quantity = 1;
+
+function getProductDetails(name) {
+    const products = {
+        "Woven Handbag": {
+            image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg",
+            description: "Handmade woven product created by local artisans. Durable, unique and perfect for everyday use.",
+            reviews: "★★★★★ (24 reviews)"
+        },
+        "Rattan Basket": {
+            image: "https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
+            description: "A handcrafted rattan basket made with care for storage, decor, and everyday convenience.",
+            reviews: "★★★★★ (18 reviews)"
+        },
+        "Wooden Vase": {
+            image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80",
+            description: "A beautifully finished wooden vase that adds warmth and elegance to any room.",
+            reviews: "★★★★☆ (12 reviews)"
+        },
+        "Macrame Wall Hanging": {
+            image: "https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg",
+            description: "An artisan-made macrame wall hanging that brings texture and charm to your space.",
+            reviews: "★★★★★ (30 reviews)"
+        },
+        "Handmade Lamp": {
+            image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
+            description: "Warm handcrafted lamp with natural woven details, perfect for cozy corners and ambient lighting.",
+            reviews: "★★★★☆ (14 reviews)"
+        },
+        "Ceramic Vase": {
+            image: "https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg",
+            description: "A handmade ceramic vase with an elegant curve for fresh flowers, dried stems, or tabletop decor.",
+            reviews: "★★★★☆ (20 reviews)"
+        },
+        "Ceramic Bowl": {
+            image: "https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA",
+            description: "A beautiful glazed ceramic bowl handcrafted for serving, display, or everyday table use.",
+            reviews: "★★★★☆ (16 reviews)"
+        },
+
+        "Handmade Lamp": {
+            image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
+            description: "Warm handcrafted lamp with natural woven details, perfect for cozy corners and ambient lighting.",
+            reviews: "★★★★☆ (14 reviews)"
+        },
+        "Ceramic Vase": {
+            image: "https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg",
+            description: "A handmade ceramic vase with an elegant curve for fresh flowers, dried stems, or tabletop decor.",
+            reviews: "★★★★☆ (20 reviews)"
+        },
+        "Ceramic Bowl": {
+            image: "https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA",
+            description: "A beautiful glazed ceramic bowl handcrafted for serving, display, or everyday table use.",
+            reviews: "★★★★☆ (16 reviews)"
+        },
+        "Traditional Salakot Hat": {
+            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA",
+            description: "A classic Filipino salakot handmade from bamboo and rattan, ideal for sun protection and cultural décor.",
+            reviews: "★★★★☆ (8 reviews)"
+        }
+    };
+
+    return products[name] || {
+        image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=500&q=80",
+        description: "Handmade woven product created by local artisans. Durable, unique and perfect for everyday use.",
+        reviews: "★★★★★ (24 reviews)"
+    };
+}
+
+let selectedCategory = "All Products";
+
+function updateProductsDisplay() {
+    const query = document.getElementById("searchInput")
+        .value.trim()
+        .toLowerCase();
+
+    const cards = document.querySelectorAll("#products .product-card");
+
+    cards.forEach(card => {
+        const title = card.querySelector("h3").innerText.toLowerCase();
+        const cardCategory = (card.getAttribute("data-category") || "").toLowerCase();
+        const matchesCategory = selectedCategory === "All Products" || cardCategory === selectedCategory.toLowerCase();
+        const matchesQuery = query === "" || title.includes(query);
+        card.style.display = matchesCategory && matchesQuery ? "block" : "none";
+    });
+
+    document.querySelectorAll(".categories button").forEach(button => {
+        const buttonText = button.innerText.trim();
+        const isActive = buttonText === selectedCategory;
+        button.style.fontWeight = isActive ? "bold" : "normal";
+        button.style.color = isActive ? "#285c3b" : "";
+        button.style.background = isActive ? "#e7eee8" : "";
+        button.style.borderRadius = isActive ? "5px" : "";
+    });
+}
+
+function filterProducts(category) {
+    selectedCategory = category;
+    updateProductsDisplay();
+    showScreen("products");
+}
+
+function searchProducts() {
+    updateProductsDisplay();
+    showScreen("products");
+}
+
+function renderHomeProducts() {
+    const homeGrid = document.querySelector('#home .product-grid');
+    if (!homeGrid) return;
+
+    const products = getCatalogProducts().slice(0, 8);
+    homeGrid.innerHTML = products.map(product => `
+        <div class="product-card" data-category="${product.category}">
+            ${product.isNew ? '<span class="product-badge">New</span>' : ''}
+            <img src="${product.image}" alt="${product.name}">
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p class="price">₱${Number(product.price).toLocaleString()}.00</p>
+                <div class="rating">★★★★★</div>
+                <button class="card-btn" onclick="showProduct('${product.name}', ${product.price})">View Details</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderCatalogProducts() {
+    const catalogGrid = document.querySelector('#products .product-grid');
+    if (!catalogGrid) return;
+
+    const products = getCatalogProducts();
+    catalogGrid.innerHTML = products.map(product => `
+        <div class="product-card" data-category="${product.category}">
+            <img src="${product.image}" alt="${product.name}">
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p class="price">₱${Number(product.price).toLocaleString()}.00</p>
+                <button class="card-btn" onclick="showProduct('${product.name}', ${product.price})">View Details</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function showProduct(name, price) {
+    const catalogProduct = getCatalogProducts().find(product => product.name === name);
+    const productDetails = getProductDetails(name);
+    const image = catalogProduct?.image || productDetails.image;
+
+    selectedProduct = {
+        name,
+        price,
+        image
+    };
+    quantity = 1;
+
+    document.getElementById("detailName")
+    .innerText = name;
+
+    document.getElementById("detailPrice")
+    .innerText = price;
+
+    document.getElementById("detailImage")
+    .src = image;
+
+    document.getElementById("detailDescription")
+    .innerText = productDetails.description;
+
+    document.getElementById("detailReviews")
+    .innerText = productDetails.reviews;
+
+    document.getElementById("quantity")
+    .innerText = quantity;
+
+    showScreen("details");
+}
+
+
+/* ================= QUANTITY ================= */
+
+function changeQuantity(amount) {
+
+    quantity += amount;
+
+    if(quantity < 1) {
+        quantity = 1;
+    }
+
+    document.getElementById("quantity")
+    .innerText = quantity;
+}
+
+
+/* ================= CART ================= */
+
+function getCart() {
+    return JSON.parse(localStorage.getItem("handicraft_cart") || "[]");
+}
+
+function saveCart(cart) {
+    localStorage.setItem("handicraft_cart", JSON.stringify(cart));
+}
+
+function renderCart() {
+    const cart = getCart();
+    const cartItems = document.getElementById("cartItems");
+    const cartSubtotal = document.getElementById("cartSubtotal");
+    const cartShipping = document.getElementById("cartShipping");
+    const cartTotal = document.getElementById("cartTotal");
+    const checkoutSummaryItems = document.getElementById("checkoutSummaryItems");
+    const checkoutTotal = document.getElementById("checkoutTotal");
+
+    if (cartItems) {
+        if (cart.length === 0) {
+            cartItems.innerHTML = "<p>Your cart is empty.</p>";
+        } else {
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <img src="${item.image}">
+                    <div>
+                        <h3>${item.name}</h3>
+                        <p class="price">₱${item.price.toLocaleString()}.00</p>
+                        <p>Quantity: ${item.quantity}</p>
+                    </div>
+                </div>
+            `).join("");
+        }
+    }
+
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shipping = cart.length > 0 ? 60 : 0;
+    const total = subtotal + shipping;
+
+    if (cartSubtotal) cartSubtotal.innerText = `₱${subtotal.toLocaleString()}.00`;
+    if (cartShipping) cartShipping.innerText = `₱${shipping.toLocaleString()}.00`;
+    if (cartTotal) cartTotal.innerText = `₱${total.toLocaleString()}.00`;
+    if (checkoutSummaryItems) {
+        if (cart.length === 0) {
+            checkoutSummaryItems.innerHTML = "<div class=\"summary-line\"><span>No items</span><span>₱0</span></div>";
+        } else {
+            checkoutSummaryItems.innerHTML = cart.map(item => `
+                <div class="summary-line">
+                    <span>${item.name} × ${item.quantity}</span>
+                    <span>₱${(item.price * item.quantity).toLocaleString()}</span>
+                </div>
+            `).join("");
+        }
+    }
+    if (checkoutTotal) checkoutTotal.innerText = `₱${total.toLocaleString()}.00`;
+}
+
+function addToCart() {
+    const cart = getCart();
+    const existing = cart.find(item => item.name === selectedProduct.name);
+
+    if (existing) {
+        existing.quantity += quantity;
+    } else {
+        cart.push({
+            name: selectedProduct.name,
+            price: selectedProduct.price,
+            image: selectedProduct.image,
+            quantity
+        });
+    }
+
+    saveCart(cart);
+    renderCart();
+    updateHeader();
+    alert(`${selectedProduct.name} has been added to your cart!`);
+    showScreen("cart");
+}
+
+
+/* ================= CHECKOUT ================= */
+
+function getOrders() {
+    return JSON.parse(localStorage.getItem("handicraft_orders") || "[]");
+}
+
+function saveOrders(orders) {
+    localStorage.setItem("handicraft_orders", JSON.stringify(orders));
+}
+
+function renderOrders() {
+    const orders = getOrders();
+    const ordersList = document.getElementById("ordersList");
+
+    if (!ordersList) return;
+
+    if (orders.length === 0) {
+        ordersList.innerHTML = "<p>No orders yet.</p>";
+        return;
+    }
+
+    ordersList.innerHTML = orders.map(order => {
+        const statusClass = order.status.toLowerCase();
+        return `
+            <div class="order-card">
+                <div>
+                    <h3>${order.id}</h3>
+                    <p>${order.date}</p>
+                    <p>${order.items} Item${order.items > 1 ? 's' : ''}</p>
+                    <p>Payment: ${order.paymentMethod || 'Cash on Delivery'}</p>
+                    <strong>₱${order.total.toLocaleString()}.00</strong>
+                </div>
+                <span class="status ${statusClass}">${order.status}</span>
+            </div>
+        `;
+    }).join("");
+}
+
+function getProfile() {
+    return JSON.parse(localStorage.getItem("handicraft_profile") || "null");
+}
+
+function saveProfile(profile) {
+    localStorage.setItem("handicraft_profile", JSON.stringify(profile));
+}
+
+function fillProfileForm() {
+    const profile = getProfile() || {};
+    const user = getLoggedInUser() || {};
+
+    document.getElementById("profileName").value = profile.name || user.name || "";
+    document.getElementById("profileEmail").value = profile.email || user.email || "";
+    document.getElementById("profilePhone").value = profile.phone || "";
+    document.getElementById("profileAddress").value = profile.address || "";
+    document.getElementById("profileCity").value = profile.city || "";
+    document.getElementById("profilePayment").value = profile.paymentMethod || "Cash on Delivery";
+}
+
+function saveProfileSettings() {
+    const profile = {
+        name: document.getElementById("profileName").value.trim(),
+        email: document.getElementById("profileEmail").value.trim(),
+        phone: document.getElementById("profilePhone").value.trim(),
+        address: document.getElementById("profileAddress").value.trim(),
+        city: document.getElementById("profileCity").value.trim(),
+        paymentMethod: document.getElementById("profilePayment").value
+    };
+
+    saveProfile(profile);
+
+    const user = getLoggedInUser() || {};
+    if (profile.name) user.name = profile.name;
+    if (profile.email) user.email = profile.email;
+    localStorage.setItem("handicraft_logged_in_user", JSON.stringify(user));
+
+    populateCheckoutForm();
+    updateHeader();
+    alert("Profile updated successfully!");
+}
+
+function populateCheckoutForm() {
+    const profile = getProfile() || {};
+
+    document.getElementById("checkoutFullName").value = profile.name || "";
+    document.getElementById("checkoutPhone").value = profile.phone || "";
+    document.getElementById("checkoutAddress").value = profile.address || "";
+    document.getElementById("checkoutCity").value = profile.city || "";
+    document.getElementById("checkoutPayment").value = profile.paymentMethod || "Cash on Delivery";
+}
+
+function placeOrder() {
+    const cart = getCart();
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shipping = cart.length > 0 ? 60 : 0;
+    const total = subtotal + shipping;
+
+    const fullName = document.getElementById("checkoutFullName").value.trim();
+    const phone = document.getElementById("checkoutPhone").value.trim();
+    const address = document.getElementById("checkoutAddress").value.trim();
+    const city = document.getElementById("checkoutCity").value.trim();
+    const paymentMethod = document.getElementById("checkoutPayment").value;
+
+    if (cart.length === 0) {
+        alert("Your cart is empty.");
+        return;
+    }
+
+    if (!fullName || !phone || !address || !city) {
+        alert("Please complete your delivery information before placing the order.");
+        return;
+    }
+
+    const profile = getProfile() || {};
+    const updatedProfile = {
+        ...profile,
+        name: fullName,
+        phone,
+        address,
+        city,
+        paymentMethod
+    };
+    saveProfile(updatedProfile);
+
+    const orders = getOrders();
+    const newOrder = {
+        id: `#ORD-${String(orders.length + 1).padStart(5, '0')}`,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        items: cart.reduce((sum, item) => sum + item.quantity, 0),
+        total,
+        status: ['Processing', 'Shipped', 'Delivered'][Math.floor(Math.random() * 3)],
+        paymentMethod
+    };
+
+    orders.unshift(newOrder);
+    saveOrders(orders);
+    recordSales(total);
+    localStorage.removeItem("handicraft_cart");
+    renderCart();
+    renderOrders();
+    updateHeader();
+
+    alert("Your order has been placed successfully!");
+
+    showScreen("orders");
+}
+
+
+/* ================= LOGIN STATE ================= */
+
+function getLoggedInUser() {
+    return JSON.parse(localStorage.getItem("handicraft_logged_in_user") || "null");
+}
+
+function setLoggedInUser(user) {
+    localStorage.setItem("handicraft_logged_in_user", JSON.stringify(user));
+}
+
+function clearLoggedInUser() {
+    localStorage.removeItem("handicraft_logged_in_user");
+}
+
+function updateHeader() {
+    const user = getLoggedInUser();
+    const loginButton = document.getElementById("loginButton");
+
+    if (!loginButton) return;
+
+    const cartCount = getCart().reduce((sum, item) => sum + item.quantity, 0);
+
+    if (user) {
+        loginButton.innerText = `👤 ${user.name.split(" ")[0]}`;
+        loginButton.onclick = function() {
+            showScreen("profile");
+        };
+    } else {
+        loginButton.innerText = "👤 Login";
+        loginButton.onclick = function() {
+            window.location.href = "login.html";
+        };
+    }
+
+    const cartButton = document.querySelector(".header-links button:first-child");
+    if (cartButton) {
+        cartButton.innerText = `🛒 Cart (${cartCount})`;
+    }
+}
+
+function logout() {
+    clearLoggedInUser();
+    updateHeader();
+    window.location.href = "index.html";
+}
+
+const SELLER_PASSWORD = "seller123";
+const ADMIN_PASSWORD = "@SIMPS2026";
+let adminCurrentView = "dashboard";
+let sellerCurrentView = "dashboard";
+
+const defaultCatalogProducts = [
+    { id: "P-3001", name: "Woven Handbag", category: "Bags", price: 650, status: "Active", image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg", isNew: true },
+    { id: "P-3002", name: "Rattan Basket", category: "Woven Items", price: 550, status: "Active", image: "https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow", isNew: true },
+    { id: "P-3003", name: "Wooden Vase", category: "Home Decor", price: 450, status: "Active", image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80", isNew: true },
+    { id: "P-3004", name: "Macrame Wall Hanging", category: "Home Decor", price: 750, status: "Active", image: "https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg", isNew: true },
+    { id: "P-3005", name: "Traditional Salakot Hat", category: "Accessories", price: 250, status: "Active", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA", isNew: true },
+    { id: "P-3006", name: "Handmade Lamp", category: "Home Decor", price: 750, status: "Active", image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow", isNew: false },
+    { id: "P-3007", name: "Ceramic Vase", category: "Home Decor", price: 500, status: "Active", image: "https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg", isNew: false },
+    { id: "P-3008", name: "Ceramic Bowl", category: "Home Decor", price: 500, status: "Active", image: "https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA", isNew: false }
+];
+
+const defaultSalesHistory = [
+    { month: 'Jan', revenue: 12400, orders: 44 },
+    { month: 'Feb', revenue: 14850, orders: 50 },
+    { month: 'Mar', revenue: 17220, orders: 58 },
+    { month: 'Apr', revenue: 19680, orders: 61 },
+    { month: 'May', revenue: 21340, orders: 68 },
+    { month: 'Jun', revenue: 24480, orders: 74 }
+];
+
+const defaultAdminData = {
+    users: [
+        { id: "U-1001", name: "Maria Santos", email: "maria@email.com", role: "Customer", status: "Active" },
+        { id: "U-1002", name: "John Cruz", email: "john@email.com", role: "Customer", status: "Active" },
+        { id: "U-1003", name: "Ana Reyes", email: "ana@email.com", role: "Seller", status: "Suspended" },
+        { id: "U-1004", name: "Liza Gomez", email: "liza@email.com", role: "Customer", status: "Active" }
+    ],
+    sellers: [
+        { id: "S-2001", name: "Luna Crafts", email: "luna@craft.com", category: "Home Decor", status: "Active" },
+        { id: "S-2002", name: "Bahay Looms", email: "bahay@loom.com", category: "Bags", status: "Pending" },
+        { id: "S-2003", name: "Pangasinan Weaves", email: "pangasinan@weave.com", category: "Accessories", status: "Suspended" }
+    ],
+    products: [
+        { id: "P-3001", name: "Woven Handbag", category: "Bags", price: 650, status: "Active" },
+        { id: "P-3002", name: "Rattan Basket", category: "Home Decor", price: 550, status: "Active" },
+        { id: "P-3003", name: "Wooden Vase", category: "Home Decor", price: 450, status: "Suspended" },
+        { id: "P-3004", name: "Traditional Salakot Hat", category: "Accessories", price: 250, status: "Active" }
+    ],
+    orders: [
+        { id: "#ORD-00023", customer: "Maria Santos", amount: 1160, status: "Processing" },
+        { id: "#ORD-00022", customer: "John Cruz", amount: 750, status: "Shipped" },
+        { id: "#ORD-00021", customer: "Ana Reyes", amount: 800, status: "Delivered" },
+        { id: "#ORD-00020", customer: "Liza Gomez", amount: 640, status: "Pending" }
+    ],
+    reports: {
+        revenue: 64520,
+        buyers: 128,
+        sellers: 35,
+        stockAlerts: 7
+    }
+};
+
+function getCatalogProducts() {
+    const stored = JSON.parse(localStorage.getItem("artisan_catalog_products") || "null");
+    if (stored && stored.length) return stored;
+    localStorage.setItem("artisan_catalog_products", JSON.stringify(defaultCatalogProducts));
+    return defaultCatalogProducts;
+}
+
+function saveCatalogProducts(products) {
+    localStorage.setItem("artisan_catalog_products", JSON.stringify(products));
+}
+
+function addCatalogProduct(product) {
+    const products = getCatalogProducts();
+    const merged = [product, ...products];
+    saveCatalogProducts(merged);
+    renderHomeProducts();
+    renderCatalogProducts();
+    updateProductsDisplay();
+}
+
+function getSalesHistory() {
+    const stored = JSON.parse(localStorage.getItem("artisan_sales_history") || "null");
+    if (stored && stored.length) return stored;
+    localStorage.setItem("artisan_sales_history", JSON.stringify(defaultSalesHistory));
+    return defaultSalesHistory;
+}
+
+function saveSalesHistory(salesHistory) {
+    localStorage.setItem("artisan_sales_history", JSON.stringify(salesHistory));
+}
+
+function recordSales(orderTotal) {
+    const salesHistory = getSalesHistory();
+    const currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
+    const monthIndex = salesHistory.findIndex(item => item.month === currentMonth);
+
+    if (monthIndex >= 0) {
+        salesHistory[monthIndex].revenue += Math.round(orderTotal);
+        salesHistory[monthIndex].orders += 1;
+    } else {
+        salesHistory.push({ month: currentMonth, revenue: Math.round(orderTotal), orders: 1 });
+    }
+
+    saveSalesHistory(salesHistory);
+    renderAdminDashboard();
+    renderSellerDashboard();
+}
+
+function getCatalogCategoryBreakdown() {
+    const products = getCatalogProducts();
+    const result = {};
+    products.forEach(product => {
+        const category = product.category || 'Other';
+        result[category] = (result[category] || 0) + 1;
+    });
+    return result;
+}
+
+function getCategoryColor(index) {
+    const colors = ['#3c8d5d', '#d9a65f', '#7e5bbd', '#e06f56', '#49a1d9', '#9f7aea', '#f97316'];
+    return colors[index % colors.length];
+}
+
+function getAdminData() {
+    return JSON.parse(localStorage.getItem("artisan_admin_data") || "null") || defaultAdminData;
+}
+
+function saveAdminData(data) {
+    localStorage.setItem("artisan_admin_data", JSON.stringify(data));
+}
+
+function openAdminDashboard() {
+    showScreen("admin");
+    const loggedIn = localStorage.getItem("artisan_admin_logged_in") === "true";
+
+    if (!loggedIn) {
+        openAdminLoginModal();
+        return;
+    }
+
+    renderAdminDashboard();
+}
+
+function openAdminLoginModal() {
+    const modal = document.getElementById("adminLoginModal");
+    if (modal) {
+        modal.style.display = "flex";
+    }
+    const input = document.getElementById("adminPasswordInput");
+    if (input) {
+        input.value = "";
+        input.focus();
+    }
+}
+
+function closeAdminLoginModal() {
+    const modal = document.getElementById("adminLoginModal");
+    if (modal) modal.style.display = "none";
+}
+
+function submitAdminLogin() {
+    const input = document.getElementById("adminPasswordInput");
+    const password = input ? input.value.trim() : "";
+
+    if (password === ADMIN_PASSWORD) {
+        localStorage.setItem("artisan_admin_logged_in", "true");
+        closeAdminLoginModal();
+        renderAdminDashboard();
+    } else {
+        alert("Incorrect password. Please try again.");
+    }
+}
+
+function openSellerDashboard() {
+    showScreen("seller");
+    const loggedIn = localStorage.getItem("artisan_seller_logged_in") === "true";
+    const currentSellerId = getCurrentSellerId();
+    const sellerAccount = getSellerAccounts().find(account => account.id === currentSellerId);
+
+    if (!loggedIn) {
+        openSellerLoginModal();
+        return;
+    }
+
+    if (sellerAccount && sellerAccount.status && sellerAccount.status !== "Active") {
+        localStorage.removeItem("artisan_seller_logged_in");
+        alert("This seller account is not approved yet or is suspended.");
+        openSellerLoginModal();
+        return;
+    }
+
+    renderSellerDashboard();
+}
+
+function openSellerLoginModal() {
+    const modal = document.getElementById("sellerLoginModal");
+    if (modal) modal.style.display = "flex";
+
+    const input = document.getElementById("sellerPasswordInput");
+    if (input) {
+        input.value = "";
+        input.focus();
+    }
+}
+
+function closeSellerLoginModal() {
+    const modal = document.getElementById("sellerLoginModal");
+    if (modal) modal.style.display = "none";
+}
+
+function getSellerAccounts() {
+    const stored = JSON.parse(localStorage.getItem("artisan_seller_accounts") || "[]");
+    return Array.isArray(stored) ? stored : [];
+}
+
+function saveSellerAccounts(accounts) {
+    localStorage.setItem("artisan_seller_accounts", JSON.stringify(accounts));
+}
+
+function getCurrentSellerId() {
+    return localStorage.getItem("artisan_current_seller_id") || "default-seller";
+}
+
+function getSellerStorageKey(prefix, sellerId = getCurrentSellerId()) {
+    return `${prefix}_${sellerId || "default-seller"}`;
+}
+
+function initializeSellerAccountData(sellerId = getCurrentSellerId()) {
+    const sellerProductsKey = getSellerStorageKey("artisan_seller_products", sellerId);
+    const sellerSalesKey = getSellerStorageKey("artisan_seller_sales_history", sellerId);
+
+    if (!localStorage.getItem(sellerProductsKey)) {
+        localStorage.setItem(sellerProductsKey, JSON.stringify([]));
+    }
+
+    if (!localStorage.getItem(sellerSalesKey)) {
+        const zeroMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(month => ({
+            month,
+            revenue: 0,
+            orders: 0
+        }));
+        localStorage.setItem(sellerSalesKey, JSON.stringify(zeroMonths));
+    }
+}
+
+function getSellerProducts(sellerId = getCurrentSellerId()) {
+    const stored = JSON.parse(localStorage.getItem(getSellerStorageKey("artisan_seller_products", sellerId)) || "[]");
+    return Array.isArray(stored) ? stored : [];
+}
+
+function saveSellerProducts(products, sellerId = getCurrentSellerId()) {
+    localStorage.setItem(getSellerStorageKey("artisan_seller_products", sellerId), JSON.stringify(products));
+}
+
+function getSellerSalesHistory(sellerId = getCurrentSellerId()) {
+    const stored = JSON.parse(localStorage.getItem(getSellerStorageKey("artisan_seller_sales_history", sellerId)) || "[]");
+    if (!Array.isArray(stored) || stored.length === 0) {
+        const zeroMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(month => ({
+            month,
+            revenue: 0,
+            orders: 0
+        }));
+        localStorage.setItem(getSellerStorageKey("artisan_seller_sales_history", sellerId), JSON.stringify(zeroMonths));
+        return zeroMonths;
+    }
+    return stored;
+}
+
+function saveSellerSalesHistory(salesHistory, sellerId = getCurrentSellerId()) {
+    localStorage.setItem(getSellerStorageKey("artisan_seller_sales_history", sellerId), JSON.stringify(salesHistory));
+}
+
+function showSellerRegisterForm() {
+    document.getElementById("sellerLoginForm").style.display = "none";
+    document.getElementById("sellerRegisterForm").style.display = "block";
+    setTimeout(() => document.getElementById("sellerRegisterName")?.focus(), 50);
+}
+
+function showSellerLoginForm() {
+    document.getElementById("sellerRegisterForm").style.display = "none";
+    document.getElementById("sellerLoginForm").style.display = "block";
+    setTimeout(() => document.getElementById("sellerPasswordInput")?.focus(), 50);
+}
+
+function submitSellerRegister() {
+    const name = document.getElementById("sellerRegisterName")?.value.trim();
+    const email = document.getElementById("sellerRegisterEmail")?.value.trim();
+    const password = document.getElementById("sellerRegisterPassword")?.value.trim();
+
+    if (!name || !email || !password) {
+        alert("Please fill in your name, email, and password.");
+        return;
+    }
+
+    const accounts = getSellerAccounts();
+    const duplicate = accounts.find(account => account.email && account.email.toLowerCase() === email.toLowerCase());
+    if (duplicate) {
+        alert("A seller account with this email already exists.");
+        return;
+    }
+
+    const newAccount = {
+        id: `S-${String(accounts.length + 1).padStart(4, "0")}`,
+        name,
+        email,
+        password,
+        category: "General",
+        status: "Pending"
+    };
+
+    accounts.unshift(newAccount);
+    saveSellerAccounts(accounts);
+
+    const adminData = getAdminData();
+    const adminSellerMatch = adminData.sellers.find(item => item.email && item.email.toLowerCase() === email.toLowerCase());
+    if (!adminSellerMatch) {
+        adminData.sellers.unshift({
+            id: newAccount.id,
+            name,
+            email,
+            category: "General",
+            status: "Pending"
+        });
+        saveAdminData(adminData);
+    }
+
+    localStorage.setItem("artisan_current_seller_id", newAccount.id);
+    localStorage.setItem("artisan_current_seller_name", name);
+    localStorage.removeItem("artisan_seller_logged_in");
+    initializeSellerAccountData(newAccount.id);
+    closeSellerLoginModal();
+    showSellerLoginForm();
+    alert("Seller account created successfully. Your account is pending admin approval before you can access the seller dashboard.");
+}
+
+function submitSellerLogin() {
+    const emailInput = document.getElementById("sellerEmailInput");
+    const passwordInput = document.getElementById("sellerPasswordInput");
+    const email = emailInput ? emailInput.value.trim().toLowerCase() : "";
+    const password = passwordInput ? passwordInput.value.trim() : "";
+
+    const accounts = getSellerAccounts();
+    const matchedAccount = accounts.find(account => account.email && account.email.toLowerCase() === email && account.password === password);
+
+    if (matchedAccount) {
+        localStorage.setItem("artisan_current_seller_id", matchedAccount.id);
+        localStorage.setItem("artisan_current_seller_name", matchedAccount.name);
+
+        if (matchedAccount.status === "Pending") {
+            localStorage.removeItem("artisan_seller_logged_in");
+            alert("Your seller account is pending admin approval. You can log in, but the dashboard will stay locked until approved.");
+            return;
+        }
+
+        if (matchedAccount.status === "Suspended") {
+            localStorage.removeItem("artisan_seller_logged_in");
+            alert("This seller account has been suspended.");
+            return;
+        }
+
+        localStorage.setItem("artisan_seller_logged_in", "true");
+        initializeSellerAccountData(matchedAccount.id);
+        closeSellerLoginModal();
+        renderSellerDashboard();
+        return;
+    }
+
+    alert("Incorrect seller email or password. Please try again.");
+}
+
+function sellerLogout() {
+    localStorage.removeItem("artisan_seller_logged_in");
+    localStorage.removeItem("artisan_current_seller_name");
+    localStorage.removeItem("artisan_current_seller_id");
+    closeSellerLoginModal();
+    showScreen("home");
+    alert("You have been logged out from the seller portal.");
+}
+
+function renderSellerDashboard() {
+    const sellerContent = document.getElementById("sellerContent");
+    if (!sellerContent) return;
+
+    const view = sellerCurrentView || "dashboard";
+    const sellerId = getCurrentSellerId();
+    initializeSellerAccountData(sellerId);
+    const salesHistory = getSellerSalesHistory(sellerId);
+    const allProducts = getSellerProducts(sellerId);
+    const totalSales = salesHistory.reduce((sum, item) => sum + item.revenue, 0);
+    const totalOrders = salesHistory.reduce((sum, item) => sum + item.orders, 0);
+    const maxRevenue = Math.max(...salesHistory.map(item => item.revenue), 1);
+    const sellerName = localStorage.getItem("artisan_current_seller_name") || "Juan Dela Cruz";
+    const pendingOrders = 0;
+
+    const dashboardHtml = `
+        <div class="admin-content-header">
+            <div>
+                <h1>Seller Dashboard</h1>
+                <p>Welcome back, ${sellerName}!</p>
+            </div>
+            <div class="admin-lock-status">
+                <span class="lock-indicator lock-open"></span>
+                <span>Active</span>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-box"><h3>Total Products</h3><p>${allProducts.length}</p></div>
+            <div class="summary-box"><h3>Total Orders</h3><p>${totalOrders}</p></div>
+            <div class="summary-box"><h3>Total Sales</h3><p>₱${totalSales.toLocaleString()}.00</p></div>
+            <div class="summary-box"><h3>Pending Orders</h3><p>${pendingOrders}</p></div>
+        </div>
+
+        <div class="chart-panel">
+            <div class="chart-header">
+                <div><p class="chart-kicker">Performance</p><h2>Sales Overview</h2></div>
+                <span class="chart-badge">Live</span>
+            </div>
+            <div class="bar-chart" aria-label="Seller sales chart">
+                ${salesHistory.map(item => `
+                    <div class="bar-group">
+                        <div class="bar" style="height: ${(item.revenue / maxRevenue) * 100}%"></div>
+                        <span>${item.month}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="admin-panel">
+            <div class="admin-panel-header"><h2>Recent Orders</h2></div>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td>#ORD-00000</td><td>--</td><td>₱0</td><td><span class="status-badge status-pending">No sales yet</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    const productsHtml = `
+        <div class="admin-panel">
+            <div class="admin-panel-header"><h2>My Products</h2></div>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Status</th></tr></thead>
+                    <tbody>
+                        ${allProducts.length === 0 ? '<tr><td colspan="5">No products added yet.</td></tr>' : allProducts.length === 0 ? '<tr><td colspan="5">No products added yet.</td></tr>' : allProducts.length === 0 ? '<tr><td colspan="5">No products added yet.</td></tr>' : allProducts.length === 0 ? '<tr><td colspan="5">No products added yet.</td></tr>' : allProducts.map(product => `
+                            <tr>
+                                <td>${product.id}</td>
+                                <td>${product.name}</td>
+                                <td>${product.category}</td>
+                                <td>₱${Number(product.price).toLocaleString()}.00</td>
+                                <td><span class="status-badge ${product.status === 'Active' ? 'status-active' : 'status-suspended'}">${product.status}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    const addProductHtml = `
+        <div class="settings-panel">
+            <div class="settings-header"><h2>Add Product</h2></div>
+            <form class="admin-form" onsubmit="event.preventDefault(); addSellerProductFromForm();">
+                <input id="sellerProductName" placeholder="Product Name" required>
+                <select id="sellerProductCategory">
+                    <option value="Bags">Bags</option>
+                    <option value="Home Decor">Home Decor</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Woven Items">Woven Items</option>
+                    <option value="Wood Crafts">Wood Crafts</option>
+                    <option value="Souvenirs">Souvenirs</option>
+                    <option value="Jewelry">Jewelry</option>
+                </select>
+                <input id="sellerProductPrice" type="number" min="1" placeholder="Price" required>
+                <input id="sellerProductStock" type="number" min="1" placeholder="Stock Quantity" required>
+                <input id="sellerProductImage" type="file" accept="image/*">
+                <button class="btn" type="submit">Save Product</button>
+            </form>
+        </div>
+    `;
+
+    const ordersHtml = `
+        <div class="admin-panel">
+            <div class="admin-panel-header"><h2>Orders</h2></div>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td>#ORD-00023</td><td>Maria Santos</td><td>2</td><td>₱1,160.00</td><td><span class="status-badge status-pending">Processing</span></td></tr>
+                        <tr><td>#ORD-00022</td><td>Juan Dela Cruz</td><td>1</td><td>₱750.00</td><td><span class="status-badge status-active">Shipped</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    const inventoryHtml = `
+        <div class="admin-panel">
+            <div class="admin-panel-header"><h2>Inventory</h2></div>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th><th>Availability</th></tr></thead>
+                    <tbody>
+                        <tr><td>Woven Handbag</td><td>45</td><td>12</td><td><span class="status-badge status-active">In Stock</span></td></tr>
+                        <tr><td>Rattan Basket</td><td>18</td><td>10</td><td><span class="status-badge status-active">In Stock</span></td></tr>
+                        <tr><td>Wooden Vase</td><td>7</td><td>15</td><td><span class="status-badge status-suspended">Low Stock</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    const profileHtml = `
+        <div class="settings-panel">
+            <div class="settings-header"><h2>Seller Profile</h2></div>
+            <div class="settings-grid">
+                <label><span>Seller Name</span><input value="Juan Dela Cruz" /></label>
+                <label><span>Business Name</span><input value="Luna Crafts" /></label>
+                <label><span>Email</span><input value="juan@lunacrafts.com" /></label>
+                <label><span>Phone</span><input value="0917-123-4567" /></label>
+            </div>
+            <div style="margin-top:20px;"><button class="btn" onclick="alert('Profile updated successfully.')">Save Profile</button></div>
+        </div>
+    `;
+
+    const contentMap = {
+        dashboard: dashboardHtml,
+        products: productsHtml,
+        "add-product": addProductHtml,
+        orders: ordersHtml,
+        inventory: inventoryHtml,
+        profile: profileHtml
+    };
+
+    sellerContent.innerHTML = contentMap[view] || dashboardHtml;
+
+    document.querySelectorAll("[data-seller-view]").forEach(button => {
+        button.onclick = function () {
+            sellerCurrentView = this.dataset.sellerView;
+            renderSellerDashboard();
+        };
+    });
+}
+
+function adminLogout() {
+    clearLoggedInUser();
+    localStorage.removeItem("artisan_admin_logged_in");
+    updateHeader();
+    showScreen("home");
+    alert("You have been logged out from the admin dashboard.");
+}
+
+function renderAdminDashboard() {
+    const adminContent = document.getElementById("adminContent");
+    if (!adminContent) return;
+
+    const data = getAdminData();
+    const view = adminCurrentView || "dashboard";
+    const combinedSellers = Array.from(new Map(
+        [...data.sellers, ...getSellerAccounts().map(account => ({
+            id: account.id,
+            name: account.name,
+            email: account.email,
+            category: account.category || "General",
+            status: account.status || "Pending"
+        }))].map(seller => [`${seller.email || seller.id}`.toLowerCase(), seller])).values()
+    );
+
+    const salesHistory = getSalesHistory();
+    const totalRevenue = salesHistory.reduce((sum, item) => sum + item.revenue, 0);
+    const salesData = salesHistory.map(item => item.revenue);
+    const maxRevenue = Math.max(...salesData, 1);
+    const categoryBreakdown = getCatalogCategoryBreakdown();
+    const categoryLabels = Object.keys(categoryBreakdown);
+    const categoryValues = Object.values(categoryBreakdown);
+    const categoryTotal = categoryValues.reduce((sum, value) => sum + value, 0) || 1;
+    const pieGradient = categoryValues.length ? (
+        categoryValues.reduce((acc, val, index) => {
+            const percent = (val / categoryTotal) * 100;
+            const start = acc.last || 0;
+            const end = start + percent;
+            acc.colors.push(`${getCategoryColor(index)} ${start}% ${end}%`);
+            acc.last = end;
+            return acc;
+        }, { colors: [], last: 0 }).colors.join(', ')
+    ) : 'rgba(120,120,120,0.2)';
+
+    const dashboardHtml = `
+        <div class="admin-content-header">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>System overview</p>
+            </div>
+            <div class="admin-lock-status">
+                <span class="lock-indicator lock-open" id="lockIndicator"></span>
+                <span id="lockLabel">Unlocked</span>
+                <button class="lock-button" id="adminLockButton" onclick="toggleAdminLock()">Lock Dashboard</button>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-box"><h3>Total Users</h3><p>${data.users.length}</p></div>
+            <div class="summary-box"><h3>Total Sellers</h3><p>${data.sellers.length}</p></div>
+            <div class="summary-box"><h3>Total Products</h3><p>${getCatalogProducts().length}</p></div>
+            <div class="summary-box"><h3>Total Revenue</h3><p>₱${totalRevenue.toLocaleString()}.00</p></div>
+        </div>
+
+        <div class="admin-metrics-grid">
+            <div class="metric-card">
+                <div class="metric-heading"><span>Category Mix</span><strong>Live</strong></div>
+                <div class="donut-wrap"><div class="donut-chart donut-one" style="background: conic-gradient(${pieGradient})" aria-label="Product categories pie chart"></div></div>
+                <ul class="legend-list">
+                    ${categoryLabels.map((label, index) => `
+                        <li><span class="dot" style="background:${getCategoryColor(index)}"></span>${label} ${Math.round((categoryBreakdown[label] / categoryTotal) * 100)}%</li>
+                    `).join('')}
+                </ul>
+            </div>
+            <div class="metric-card">
+                <div class="metric-heading"><span>Customer Types</span><strong>Live</strong></div>
+                <div class="donut-wrap"><div class="donut-chart donut-two" style="background: conic-gradient(#3c8d5d 0 46%, #d9a65f 46% 80%, #49a1d9 80% 100%)" aria-label="Customer segments pie chart"></div></div>
+                <ul class="legend-list">
+                    <li><span class="dot dot-green"></span>Repeat Buyers 46%</li>
+                    <li><span class="dot dot-gold"></span>New Buyers 34%</li>
+                    <li><span class="dot dot-sky"></span>Wholesale 20%</li>
+                </ul>
+            </div>
+            <div class="metric-card">
+                <div class="metric-heading"><span>Sales Channels</span><strong>By Source</strong></div>
+                <div class="donut-wrap"><div class="donut-chart donut-three" style="background: conic-gradient(#3c8d5d 0 54%, #d9a65f 54% 82%, #7e5bbd 82% 100%)" aria-label="Sales channels pie chart"></div></div>
+                <ul class="legend-list">
+                    <li><span class="dot dot-green"></span>Website 54%</li>
+                    <li><span class="dot dot-gold"></span>Marketplace 28%</li>
+                    <li><span class="dot dot-purple"></span>Direct 18%</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="chart-panel">
+            <div class="chart-header">
+                <div><p class="chart-kicker">Performance</p><h2>Sales Overview</h2></div>
+                <span class="chart-badge">Live</span>
+            </div>
+            <div class="bar-chart" aria-label="Bar chart of sales performance">
+                ${salesHistory.map(item => `
+                    <div class="bar-group">
+                        <div class="bar" style="height: ${(item.revenue / maxRevenue) * 100}%"></div>
+                        <span>${item.month}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    const usersHtml = `
+        <div class="admin-panel">
+            <div class="admin-panel-header">
+                <h2>User Management</h2>
+                <button class="secondary-btn" onclick="addUserFromForm()">Add User</button>
+            </div>
+            <form class="admin-form" onsubmit="event.preventDefault(); addUserFromForm();">
+                <input id="userName" placeholder="Name" required>
+                <input id="userEmail" type="email" placeholder="Email" required>
+                <select id="userRole">
+                    <option>Customer</option>
+                    <option>Seller</option>
+                    <option>Admin</option>
+                </select>
+                <select id="userStatus">
+                    <option>Active</option>
+                    <option>Suspended</option>
+                    <option>Pending</option>
+                </select>
+                <button class="btn" type="submit">Save</button>
+            </form>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${data.users.map(user => `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td>${user.name}</td>
+                                <td>${user.email}</td>
+                                <td>${user.role}</td>
+                                <td><span class="status-badge ${user.status === 'Active' ? 'status-active' : user.status === 'Suspended' ? 'status-suspended' : 'status-pending'}">${user.status}</span></td>
+                                <td>
+                                    <button class="action-btn ${user.status === 'Suspended' ? 'restore' : 'suspend'}" onclick="toggleUserStatus('${user.id}')">${user.status === 'Suspended' ? 'Restore' : 'Suspend'}</button>
+                                    <button class="action-btn delete" onclick="deleteUser('${user.id}')">Delete</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    const sellersHtml = `
+        <div class="admin-panel">
+            <div class="admin-panel-header">
+                <h2>Seller Management</h2>
+                <button class="secondary-btn" onclick="addSellerFromForm()">Add Seller</button>
+            </div>
+            <form class="admin-form" onsubmit="event.preventDefault(); addSellerFromForm();">
+                <input id="sellerName" placeholder="Seller Name" required>
+                <input id="sellerEmail" type="email" placeholder="Seller Email" required>
+                <input id="sellerCategory" placeholder="Category" required>
+                <select id="sellerStatus">
+                    <option>Active</option>
+                    <option>Pending</option>
+                    <option>Suspended</option>
+                </select>
+                <button class="btn" type="submit">Save</button>
+            </form>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Category</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${combinedSellers.map(seller => `
+                            <tr>
+                                <td>${seller.id}</td>
+                                <td>${seller.name}</td>
+                                <td>${seller.email}</td>
+                                <td>${seller.category}</td>
+                                <td><span class="status-badge ${seller.status === 'Active' ? 'status-active' : seller.status === 'Suspended' ? 'status-suspended' : 'status-pending'}">${seller.status}</span></td>
+                                <td>
+                                    <button class="action-btn ${seller.status === 'Pending' ? 'restore' : seller.status === 'Suspended' ? 'restore' : 'suspend'}" onclick="toggleSellerStatus('${seller.id}')">${seller.status === 'Pending' ? 'Approve' : seller.status === 'Suspended' ? 'Restore' : 'Suspend'}</button>
+                                    <button class="action-btn delete" onclick="deleteSeller('${seller.id}')">Delete</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    const productsHtml = `
+        <div class="admin-panel">
+            <div class="admin-panel-header">
+                <h2>Product Management</h2>
+                <button class="secondary-btn" onclick="addProductFromForm()">Add Product</button>
+            </div>
+            <form class="admin-form" onsubmit="event.preventDefault(); addProductFromForm();">
+                <input id="productName" placeholder="Product Name" required>
+                <input id="productCategory" placeholder="Category" required>
+                <input id="productPrice" type="number" min="1" placeholder="Price" required>
+                <select id="productStatus">
+                    <option>Active</option>
+                    <option>Suspended</option>
+                    <option>Pending</option>
+                </select>
+                <button class="btn" type="submit">Save</button>
+            </form>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${data.products.map(product => `
+                            <tr>
+                                <td>${product.id}</td>
+                                <td>${product.name}</td>
+                                <td>${product.category}</td>
+                                <td>₱${Number(product.price).toLocaleString()}.00</td>
+                                <td><span class="status-badge ${product.status === 'Active' ? 'status-active' : product.status === 'Suspended' ? 'status-suspended' : 'status-pending'}">${product.status}</span></td>
+                                <td>
+                                    <button class="action-btn ${product.status === 'Suspended' ? 'restore' : 'suspend'}" onclick="toggleProductStatus('${product.id}')">${product.status === 'Suspended' ? 'Restore' : 'Suspend'}</button>
+                                    <button class="action-btn delete" onclick="deleteProduct('${product.id}')">Delete</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    const ordersHtml = `
+        <div class="admin-panel">
+            <div class="admin-panel-header"><h2>Order Overview</h2></div>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+                    <tbody>
+                        ${data.orders.map(order => `
+                            <tr>
+                                <td>${order.id}</td>
+                                <td>${order.customer}</td>
+                                <td>₱${Number(order.amount).toLocaleString()}.00</td>
+                                <td><span class="status-badge ${order.status === 'Delivered' ? 'status-active' : order.status === 'Processing' ? 'status-pending' : 'status-suspended'}">${order.status}</span></td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    const reportsHtml = `
+        <div class="admin-panel">
+            <div class="admin-panel-header"><h2>Reports</h2></div>
+            <div class="reports-list">
+                <div class="report-box">
+                    <h3>Revenue Summary</h3>
+                    <ul>
+                        <li><span>Total Revenue</span><strong>₱${Number(data.reports.revenue).toLocaleString()}.00</strong></li>
+                        <li><span>New Buyers</span><strong>${data.reports.buyers}</strong></li>
+                        <li><span>Active Sellers</span><strong>${data.reports.sellers}</strong></li>
+                    </ul>
+                </div>
+                <div class="report-box">
+                    <h3>Operational Alerts</h3>
+                    <ul>
+                        <li><span>Low Stock Items</span><strong>${data.reports.stockAlerts}</strong></li>
+                        <li><span>Pending Reviews</span><strong>14</strong></li>
+                        <li><span>Disputes</span><strong>3</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const settingsHtml = `
+        <div class="settings-panel">
+            <div class="settings-header">
+                <h2>Admin Settings</h2>
+                <button class="secondary-btn" onclick="saveAdminSettings()">Save Settings</button>
+            </div>
+            <div class="settings-grid">
+                <label>
+                    <span>Auto-approve sellers</span>
+                    <select id="settingAutoApprove">
+                        <option>Enabled</option>
+                        <option>Manual Review</option>
+                        <option>Disabled</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Inventory alerts</span>
+                    <select id="settingInventoryAlerts">
+                        <option>Enabled</option>
+                        <option>Quiet Mode</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Maintenance mode</span>
+                    <select id="settingMaintenance">
+                        <option>Off</option>
+                        <option>On</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Default payout period</span>
+                    <select id="settingPayout">
+                        <option>Weekly</option>
+                        <option selected>Bi-Weekly</option>
+                        <option>Monthly</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+    `;
+
+    const contentMap = {
+        dashboard: dashboardHtml,
+        users: usersHtml,
+        sellers: sellersHtml,
+        products: productsHtml,
+        orders: ordersHtml,
+        reports: reportsHtml,
+        settings: settingsHtml
+    };
+
+    adminContent.innerHTML = contentMap[view] || dashboardHtml;
+    bindAdminSidebar();
+    loadAdminSettings();
+    loadAdminLockState();
+}
+
+function bindAdminSidebar() {
+    const buttons = document.querySelectorAll("[data-admin-view]");
+    buttons.forEach(button => {
+        button.onclick = function () {
+            adminCurrentView = this.dataset.adminView;
+            renderAdminDashboard();
+        };
+    });
+}
+
+function toggleAdminLock() {
+    const isLocked = localStorage.getItem("artisan_admin_locked") === "true";
+    const nextState = !isLocked;
+    localStorage.setItem("artisan_admin_locked", String(nextState));
+    loadAdminLockState();
+    alert(nextState ? "Admin dashboard locked." : "Admin dashboard unlocked.");
+}
+
+function loadAdminLockState() {
+    const indicator = document.getElementById("lockIndicator");
+    const label = document.getElementById("lockLabel");
+    const button = document.getElementById("adminLockButton");
+
+    if (!indicator || !label || !button) return;
+
+    const isLocked = localStorage.getItem("artisan_admin_locked") === "true";
+    if (isLocked) {
+        indicator.className = "lock-indicator lock-closed";
+        label.innerText = "Locked";
+        button.innerText = "Unlock Dashboard";
+    } else {
+        indicator.className = "lock-indicator lock-open";
+        label.innerText = "Unlocked";
+        button.innerText = "Lock Dashboard";
+    }
+}
+
+function saveAdminSettings() {
+    const settings = {
+        autoApprove: document.getElementById("settingAutoApprove")?.value || "Enabled",
+        inventoryAlerts: document.getElementById("settingInventoryAlerts")?.value || "Enabled",
+        maintenance: document.getElementById("settingMaintenance")?.value || "Off",
+        payout: document.getElementById("settingPayout")?.value || "Bi-Weekly"
+    };
+    localStorage.setItem("artisan_admin_settings", JSON.stringify(settings));
+    alert("Admin settings saved successfully.");
+}
+
+function loadAdminSettings() {
+    const settings = JSON.parse(localStorage.getItem("artisan_admin_settings") || "{}");
+    if (!settings) return;
+    if (document.getElementById("settingAutoApprove") && settings.autoApprove) document.getElementById("settingAutoApprove").value = settings.autoApprove;
+    if (document.getElementById("settingInventoryAlerts") && settings.inventoryAlerts) document.getElementById("settingInventoryAlerts").value = settings.inventoryAlerts;
+    if (document.getElementById("settingMaintenance") && settings.maintenance) document.getElementById("settingMaintenance").value = settings.maintenance;
+    if (document.getElementById("settingPayout") && settings.payout) document.getElementById("settingPayout").value = settings.payout;
+}
+
+function addUserFromForm() {
+    const name = document.getElementById("userName")?.value.trim();
+    const email = document.getElementById("userEmail")?.value.trim();
+    const role = document.getElementById("userRole")?.value;
+    const status = document.getElementById("userStatus")?.value;
+    if (!name || !email) return;
+
+    const data = getAdminData();
+    const id = `U-${String(data.users.length + 101).padStart(4, "0")}`;
+    data.users.unshift({ id, name, email, role, status });
+    saveAdminData(data);
+    renderAdminDashboard();
+}
+
+function toggleUserStatus(userId) {
+    const data = getAdminData();
+    const user = data.users.find(item => item.id === userId);
+    if (!user) return;
+    user.status = user.status === "Suspended" ? "Active" : "Suspended";
+    saveAdminData(data);
+    renderAdminDashboard();
+}
+
+function deleteUser(userId) {
+    const data = getAdminData();
+    data.users = data.users.filter(item => item.id !== userId);
+    saveAdminData(data);
+    renderAdminDashboard();
+}
+
+function addSellerFromForm() {
+    const name = document.getElementById("sellerName")?.value.trim();
+    const email = document.getElementById("sellerEmail")?.value.trim();
+    const category = document.getElementById("sellerCategory")?.value.trim();
+    const status = document.getElementById("sellerStatus")?.value;
+    if (!name || !email || !category) return;
+
+    const data = getAdminData();
+    const id = `S-${String(data.sellers.length + 201).padStart(4, "0")}`;
+    data.sellers.unshift({ id, name, email, category, status });
+    saveAdminData(data);
+    renderAdminDashboard();
+}
+
+function toggleSellerStatus(sellerId) {
+    const data = getAdminData();
+    const seller = data.sellers.find(item => item.id === sellerId);
+    if (!seller) return;
+
+    if (seller.status === "Pending") {
+        seller.status = "Active";
+    } else {
+        seller.status = seller.status === "Suspended" ? "Active" : "Suspended";
+    }
+
+    saveAdminData(data);
+
+    const accounts = getSellerAccounts();
+    const matchedAccount = accounts.find(item => item.id === sellerId || (item.email && seller.email && item.email.toLowerCase() === seller.email.toLowerCase()));
+    if (matchedAccount) {
+        matchedAccount.status = seller.status;
+        saveSellerAccounts(accounts);
+    }
+
+    renderAdminDashboard();
+}
+
+function deleteSeller(sellerId) {
+    const data = getAdminData();
+    data.sellers = data.sellers.filter(item => item.id !== sellerId);
+    saveAdminData(data);
+
+    const accounts = getSellerAccounts();
+    const filteredAccounts = accounts.filter(item => item.id !== sellerId);
+    saveSellerAccounts(filteredAccounts);
+
+    renderAdminDashboard();
+}
+
+function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) return resolve("");
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result || "");
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+function addSellerProductFromForm() {
+    const name = document.getElementById("sellerProductName")?.value.trim();
+    const category = document.getElementById("sellerProductCategory")?.value.trim();
+    const price = Number(document.getElementById("sellerProductPrice")?.value || 0);
+    const stock = Number(document.getElementById("sellerProductStock")?.value || 0);
+    const imageFile = document.getElementById("sellerProductImage")?.files?.[0];
+
+    if (!name || !category || !price || !stock) {
+        alert("Please complete all product fields.");
+        return;
+    }
+
+    readFileAsDataUrl(imageFile).then(imageData => {
+        const sellerId = getCurrentSellerId();
+        const sellerProducts = getSellerProducts(sellerId);
+        const globalProducts = getCatalogProducts();
+        const nextId = `P-${String(sellerProducts.length + 301).padStart(4, "0")}`;
+        const product = {
+            id: nextId,
+            name,
+            category,
+            price,
+            status: "Active",
+            image: imageData || "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80",
+            isNew: true,
+            stock,
+            sellerId
+        };
+
+        sellerProducts.unshift(product);
+        saveSellerProducts(sellerProducts, sellerId);
+
+        const mergedProducts = [product, ...globalProducts.filter(item => item.name !== name)];
+        saveCatalogProducts(mergedProducts);
+
+        renderHomeProducts();
+        renderCatalogProducts();
+        updateProductsDisplay();
+        renderSellerDashboard();
+        alert("Product added successfully and published to the storefront.");
+    }).catch(() => {
+        alert("Unable to process the uploaded image.");
+    });
+}
+
+function addProductFromForm() {
+    const name = document.getElementById("productName")?.value.trim();
+    const category = document.getElementById("productCategory")?.value.trim();
+    const price = Number(document.getElementById("productPrice")?.value || 0);
+    const status = document.getElementById("productStatus")?.value;
+    if (!name || !category || !price) return;
+
+    const data = getAdminData();
+    const id = `P-${String(data.products.length + 301).padStart(4, "0")}`;
+    data.products.unshift({ id, name, category, price, status });
+    saveAdminData(data);
+    renderAdminDashboard();
+}
+
+function toggleProductStatus(productId) {
+    const data = getAdminData();
+    const product = data.products.find(item => item.id === productId);
+    if (!product) return;
+    product.status = product.status === "Suspended" ? "Active" : "Suspended";
+    saveAdminData(data);
+    renderAdminDashboard();
+}
+
+function deleteProduct(productId) {
+    const data = getAdminData();
+    data.products = data.products.filter(item => item.id !== productId);
+    saveAdminData(data);
+    renderAdminDashboard();
+}
+
+window.onload = function() {
+    renderHomeProducts();
+    renderCatalogProducts();
+    updateProductsDisplay();
+    updateHeader();
+    renderCart();
+    renderOrders();
+    renderAdminDashboard();
+    renderSellerDashboard();
+    loadAdminSettings();
+    if (localStorage.getItem("artisan_admin_logged_in") === "true") {
+        renderAdminDashboard();
+    } else {
+        closeAdminLoginModal();
+    }
+    if (localStorage.getItem("artisan_seller_logged_in") === "true") {
+        renderSellerDashboard();
+    } else {
+        closeSellerLoginModal();
+    }
+};
+</script>
+</body>
+</html>
