@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "firebase-config.js",
+  "type": "module",
   "scripts": {
     "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview"
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
@@ -15,12 +16,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/nielsabuco/Artisan-AISLE/issues"
   },
   "homepage": "https://github.com/nielsabuco/Artisan-AISLE#readme",
   "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.0",
     "vite": "^8.2.2"
   }
 }
