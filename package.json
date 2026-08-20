@@ -1,0 +1,26 @@
+{
+  "name": "artisan-aisle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "firebase-config.js",
+  "scripts": {
+    "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nielsabuco/Artisan-AISLE.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nielsabuco/Artisan-AISLE/issues"
+  },
+  "homepage": "https://github.com/nielsabuco/Artisan-AISLE#readme",
+  "devDependencies": {
+    "vite": "^8.2.2"
+  }
+}
