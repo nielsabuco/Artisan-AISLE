@@ -1,11 +1,12 @@
 import './styles.css';
 window.FIREBASE_CONFIG = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCwECi3B33jKF-dZ2l9gDquWibjHdvVUO8",
+  authDomain: "artisan-79f5d.firebaseapp.com",
+  projectId: "artisan-79f5d",
+  storageBucket: "artisan-79f5d.firebasestorage.app",
+  messagingSenderId: "789206394557",
+  appId: "1:789206394557:web:f6eca0481844215afbf9d4",
+  measurementId: "G-7JMZPE7Y2F"
 };
 const firebaseApp = firebase.initializeApp(window.FIREBASE_CONFIG);
 const firestore = firebase.firestore();
