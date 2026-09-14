@@ -9,48 +9,35 @@
 <body>
   <div class="box">
     <h1>Create Account</h1>
-    <input id="nameInput" type="text" placeholder="Full Name" />
-    <input id="emailInput" type="email" placeholder="Email" />
-    <input id="phoneInput" type="tel" placeholder="Phone Number" />
-    <input id="passwordInput" type="password" placeholder="Password" />
-    <button onclick="createAccount()">Create Account</button>
+    <input id="nameInput" type="text" autocomplete="name" placeholder="Full Name" />
+    <input id="emailInput" type="email" autocomplete="email" placeholder="Email" />
+    <input id="phoneInput" type="tel" autocomplete="tel" placeholder="Phone Number" />
+    <input id="passwordInput" type="password" autocomplete="new-password" placeholder="Password (6+ characters)" />
+    <button id="createAccountButton" onclick="createAccount()">Create Account</button>
+    <div class="social-login" aria-label="Social account creation options">
+      <button type="button" class="secondary-btn" onclick="createWithProvider('google')">Create with Google</button>
+      <button type="button" class="secondary-btn" onclick="createWithProvider('facebook')">Create with Facebook</button>
+    </div>
     <div class="link">
       <a href="login.html">Already have an account?</a>
     </div>
   </div>
+  <script type="module" src="firebase-config.js"></script>
   <script>
-    function getStoredUsers() {
-      const rawUsers = localStorage.getItem('handicraft_users');
-      if (rawUsers) {
-        try {
-          const parsed = JSON.parse(rawUsers);
-          return Array.isArray(parsed) ? parsed : [];
-        } catch (error) {
-          return [];
+  (async () => {
+    // Wait for Firebase to be ready
+    await new Promise(resolve => {
+      const checkFirebase = () => {
+        if (window.firebaseApi) {
+          resolve();
+        } else {
+          setTimeout(checkFirebase, 10);
         }
-      }
+      };
+      checkFirebase();
+    });
 
-      const legacyUser = localStorage.getItem('handicraft_user');
-      if (legacyUser) {
-        try {
-          const parsed = JSON.parse(legacyUser);
-          return parsed ? [parsed] : [];
-        } catch (error) {
-          return [];
-        }
-      }
-
-      return [];
-    }
-
-    function saveUsers(users) {
-      localStorage.setItem('handicraft_users', JSON.stringify(users));
-      if (users.length > 0) {
-        localStorage.setItem('handicraft_user', JSON.stringify(users[users.length - 1]));
-      }
-    }
-
-    function createAccount() {
+    async function createAccount() {
       const name = document.getElementById('nameInput').value.trim();
       const email = document.getElementById('emailInput').value.trim().toLowerCase();
       const phone = document.getElementById('phoneInput').value.trim();
@@ -61,32 +48,57 @@
         return;
       }
 
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+      if (password.length < 6) {
+        alert('Your password must be at least 6 characters.');
+        return;
+      }
+
       const normalizedPhone = phone.replace(/\D/g, '');
       if (normalizedPhone.length < 10) {
         alert('Please enter a valid phone number.');
         return;
       }
 
-      const users = getStoredUsers();
-      const duplicate = users.some(user => {
-        const existingEmail = (user.email || '').toLowerCase();
-        const existingPhone = (user.phone || '').replace(/\D/g, '');
-        return existingEmail === email || existingPhone === normalizedPhone;
-      });
-
-      if (duplicate) {
-        alert('An account with this email or phone number already exists.');
-        return;
+      const button = document.getElementById('createAccountButton');
+      button.disabled = true;
+      try {
+        await window.firebaseApi.authReady;
+        await window.firebaseApi.signUp({ name, email, phone, password });
+        localStorage.setItem('handicraft_logged_in_user', JSON.stringify({ name, email, phone }));
+        localStorage.setItem('handicraft_profile', JSON.stringify({ name, email, phone }));
+        window.location.href = 'index.html';
+      } catch (error) {
+        alert(error.code === 'auth/email-already-in-use' ? 'An account with this email already exists.' : error.message);
+        button.disabled = false;
       }
-
-      const newUser = { name, email, phone, password };
-      users.push(newUser);
-      saveUsers(users);
-
-      localStorage.setItem('handicraft_logged_in_user', JSON.stringify({ name, email, phone }));
-      localStorage.setItem('handicraft_profile', JSON.stringify({ name, email, phone }));
-      window.location.href = 'index.html';
     }
+
+    async function createWithProvider(providerName) {
+      const buttons = document.querySelectorAll('.social-login button');
+      buttons.forEach(button => { button.disabled = true; });
+      try {
+        await window.firebaseApi.authReady;
+        const user = providerName === 'google'
+          ? await window.firebaseApi.signInWithGoogle()
+          : await window.firebaseApi.signInWithFacebook();
+        const name = user.displayName || user.email?.split('@')[0] || 'Customer';
+        const userProfile = { name, firstName: name.split(/\s+/)[0], email: user.email, photoURL: user.photoURL || '' };
+        localStorage.setItem('handicraft_logged_in_user', JSON.stringify(userProfile));
+        localStorage.setItem('handicraft_profile', JSON.stringify(userProfile));
+        window.location.href = 'index.html';
+      } catch (error) {
+        alert(error.message || 'Unable to create the account with this provider.');
+        buttons.forEach(button => { button.disabled = false; });
+      }
+    }
+
+    window.createWithProvider = createWithProvider;
+    window.createAccount = createAccount;
+  })();
   </script>
 </body>
 </html>
