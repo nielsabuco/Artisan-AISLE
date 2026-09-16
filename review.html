@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Write a Review | ArtisanAisle</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="box">
+    <h1>Write a Review</h1>
+    <p id="reviewProduct">Loading product...</p>
+    <p id="reviewMessage"></p>
+    <form id="reviewForm" hidden>
+      <label for="reviewRating">Rating</label>
+      <select id="reviewRating" required>
+        <option value="5">5 - Excellent</option>
+        <option value="4">4 - Very good</option>
+        <option value="3">3 - Good</option>
+        <option value="2">2 - Fair</option>
+        <option value="1">1 - Poor</option>
+      </select>
+      <label for="reviewComment">Your review</label>
+      <textarea id="reviewComment" rows="6" required></textarea>
+      <button class="btn" type="submit">Publish Review</button>
+    </form>
+    <p><a href="index.html">Back to ArtisanAisle</a></p>
+  </main>
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module">
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('orderId');
+    const productId = params.get('productId');
+    const productName = params.get('productName') || 'this product';
+    const form = document.getElementById('reviewForm');
+    const message = document.getElementById('reviewMessage');
+    document.getElementById('reviewProduct').textContent = `Reviewing: ${productName}`;
+
+    const fail = text => {
+      message.textContent = text;
+      form.hidden = true;
+    };
+
+    await window.firebaseApi?.authReady;
+    if (!window.firebaseApi?.currentUser) {
+      window.location.href = 'login.html';
+    } else if (!orderId || !productId) {
+      fail('This review link is incomplete.');
+    } else {
+      const order = await window.firebaseApi.getOrder(orderId);
+      const purchased = order?.productIds?.includes(productId) || order?.orderItems?.some(item => item.productId === productId);
+      if (!order || order.uid !== window.firebaseApi.currentUser.uid || order.status !== 'Delivered' || !purchased) {
+        fail('Reviews are available only for products in your delivered orders.');
+      } else {
+        form.hidden = false;
+      }
+    }
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      try {
+        const profile = JSON.parse(localStorage.getItem('handicraft_profile') || localStorage.getItem('handicraft_logged_in_user') || '{}');
+        await window.firebaseApi.saveReview({
+          orderId,
+          productId,
+          rating: Number(document.getElementById('reviewRating').value),
+          comment: document.getElementById('reviewComment').value.trim(),
+          reviewerName: profile.name || profile.firstName
+        });
+        message.textContent = 'Your review is now live on the product page.';
+        form.hidden = true;
+      } catch (error) {
+        message.textContent = error.message;
+      }
+    });
+  </script>
+</body>
+</html>

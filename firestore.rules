@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owns(data) { return signedIn() && data.uid == request.auth.uid; }
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+    }
+
+    match /users/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow write: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      match /private/{document} {
+        allow read, write: if signedIn() && request.auth.uid == uid;
+      }
+    }
+
+    match /sellers/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow write: if isAdmin() || (signedIn() && request.auth.uid == uid);
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAdmin() || (signedIn() && request.resource.data.sellerId == request.auth.uid);
+      allow delete: if isAdmin() || (signedIn() && resource.data.sellerId == request.auth.uid);
+      allow update: if signedIn() && (
+        isAdmin()
+        ||
+        resource.data.sellerId == request.auth.uid
+        || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'status', 'lastStockOrderId', 'updatedAt'])
+          && request.resource.data.lastStockOrderId != resource.data.lastStockOrderId
+          && request.resource.data.stock >= 0
+          && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastStockOrderId)).data.uid == request.auth.uid
+          && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastStockOrderId)).data.status == 'Processing'
+          && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastStockOrderId)).data.productIds.hasAny([productId])
+          && request.resource.data.stock == resource.data.stock - getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastStockOrderId)).data.stockDeductions[productId]
+        )
+      );
+    }
+
+    match /orders/{orderId} {
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow read: if isAdmin() || (signedIn() && (resource.data.uid == request.auth.uid || resource.data.sellerIds.hasAny([request.auth.uid])));
+      allow update: if signedIn()
+        && (
+          (resource.data.uid == request.auth.uid && request.resource.data.uid == resource.data.uid)
+          || (
+            resource.data.sellerIds.hasAny([request.auth.uid])
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+          )
+        );
+    }
+
+    match /reviews/{reviewId} {
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.uid == request.auth.uid
+        && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.status == 'Delivered'
+        && request.resource.data.productId in get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.productIds;
+      allow read: if true;
+    }
+
+    match /contactMessages/{messageId} {
+      allow create: if true;
+      allow read: if isAdmin();
+    }
+  }
+}

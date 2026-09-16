@@ -16,7 +16,7 @@
     <div class="header-links">
       <a href="index.html">🛒 Cart</a>
       <a href="index.html">📦 Orders</a>
-      <a href="login.html">👤 Login</a>
+      <a id="loginButton" href="login.html">👤 Login</a>
     </div>
   </header>
 
@@ -38,6 +38,12 @@
     <section class="card">
       <h2>Get in Touch</h2>
       <p>We would love to hear from you.</p>
+      <form id="contactForm" class="form-box">
+        <div class="form-group"><label for="contactName">Name</label><input id="contactName" required /></div>
+        <div class="form-group"><label for="contactEmail">Email</label><input id="contactEmail" type="email" required /></div>
+        <div class="form-group"><label for="contactMessage">Message</label><textarea id="contactMessage" required></textarea></div>
+        <button class="btn" type="submit">Send Message</button>
+      </form>
       <div class="contact-list">
         <p>Email: support@handicrafthub.com</p>
         <p>Phone: +63 9853551524</p>
@@ -49,5 +55,37 @@
   <footer>
     <p>© 2026 ArtisanAisle | Supporting Local Artisans</p>
   </footer>
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="header-auth.js"></script>
+  <script>
+  (async () => {
+    // Wait for Firebase to be ready
+    await new Promise(resolve => {
+      const checkFirebase = () => {
+        if (window.firebaseApi) {
+          resolve();
+        } else {
+          setTimeout(checkFirebase, 10);
+        }
+      };
+      checkFirebase();
+    });
+
+    document.getElementById('contactForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      try {
+        await window.firebaseApi.saveContactMessage({
+          name: document.getElementById('contactName').value.trim(),
+          email: document.getElementById('contactEmail').value.trim(),
+          message: document.getElementById('contactMessage').value.trim()
+        });
+        event.target.reset();
+        alert('Your message has been sent.');
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  })();
+  </script>
 </body>
 </html>

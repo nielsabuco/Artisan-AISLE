@@ -9,66 +9,88 @@
 <body>
   <div class="box">
     <h1>Login</h1>
-    <input id="loginInput" type="text" placeholder="Email or Phone Number" />
+    <input id="loginInput" type="email" autocomplete="email" placeholder="Email address" />
     <input id="passwordInput" type="password" placeholder="Password" />
-    <button onclick="loginUser()">Login</button>
+    <button id="loginButton" onclick="loginUser()">Login</button>
+    <div class="social-login" aria-label="Social login options">
+      <button type="button" class="secondary-btn" onclick="loginWithProvider('google')">Continue with Google</button>
+      <button type="button" class="secondary-btn" onclick="loginWithProvider('facebook')">Continue with Facebook</button>
+    </div>
     <div class="link">
       <a href="create-account.html">Create an account</a>
     </div>
   </div>
-  <script>
-    function getStoredUsers() {
-      const rawUsers = localStorage.getItem('handicraft_users');
-      if (rawUsers) {
-        try {
-          const parsed = JSON.parse(rawUsers);
-          return Array.isArray(parsed) ? parsed : [];
-        } catch (error) {
-          return [];
-        }
-      }
+  <script type="module">
+  import { firebaseApi } from './firebase-config.js';
 
-      const legacyUser = localStorage.getItem('handicraft_user');
-      if (legacyUser) {
-        try {
-          const parsed = JSON.parse(legacyUser);
-          return parsed ? [parsed] : [];
-        } catch (error) {
-          return [];
-        }
-      }
+  (() => {
 
-      return [];
-    }
-
-    function loginUser() {
+    async function loginUser() {
       const identifier = document.getElementById('loginInput').value.trim();
       const password = document.getElementById('passwordInput').value.trim();
 
       if (!identifier || !password) {
-        alert('Please enter your email/phone and password.');
+        alert('Please enter your email and password.');
         return;
       }
 
-      const users = getStoredUsers();
-      const normalizedIdentifier = identifier.toLowerCase();
-      const normalizedPhone = identifier.replace(/\D/g, '');
-
-      const storedUser = users.find(user => {
-        const existingEmail = (user.email || '').toLowerCase();
-        const existingPhone = (user.phone || '').replace(/\D/g, '');
-        return existingEmail === normalizedIdentifier || existingPhone === normalizedPhone;
-      });
-
-      if (!storedUser || storedUser.password !== password) {
-        alert('Invalid email/phone or password.');
+      if (!/^\S+@\S+\.\S+$/.test(identifier)) {
+        alert('Please enter a valid email address.');
         return;
       }
-
-      localStorage.setItem('handicraft_logged_in_user', JSON.stringify({ name: storedUser.name, email: storedUser.email, phone: storedUser.phone }));
-      localStorage.setItem('handicraft_profile', JSON.stringify({ name: storedUser.name, email: storedUser.email, phone: storedUser.phone }));
-      window.location.href = 'index.html';
+      if (password.length < 6) {
+        alert('Your password must be at least 6 characters.');
+        return;
+      }
+      const button = document.getElementById('loginButton');
+      button.disabled = true;
+      try {
+        await firebaseApi.authReady;
+        const result = await firebaseApi.signIn(identifier.toLowerCase(), password);
+        const storedProfile = await firebaseApi.getUserProfile(result.user.uid);
+        const fullName = storedProfile?.name || storedProfile?.firstName || storedProfile?.firstname || result.user.displayName || '';
+        const userProfile = {
+          ...(storedProfile || {}),
+          name: fullName,
+          firstName: fullName.trim().split(/\s+/)[0] || result.user.email.split('@')[0],
+          email: storedProfile?.email || result.user.email
+        };
+        localStorage.setItem('handicraft_logged_in_user', JSON.stringify(userProfile));
+        localStorage.setItem('handicraft_profile', JSON.stringify(userProfile));
+        window.location.href = 'index.html';
+      } catch (error) {
+        alert(error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found'
+          ? 'Invalid email or password.'
+          : error.message || 'Unable to log in.');
+        button.disabled = false;
+      }
     }
+
+    async function loginWithProvider(providerName) {
+      const buttons = document.querySelectorAll('.social-login button');
+      buttons.forEach(button => { button.disabled = true; });
+      try {
+        await firebaseApi.authReady;
+        const user = providerName === 'google'
+          ? await firebaseApi.signInWithGoogle()
+          : await firebaseApi.signInWithFacebook();
+        const storedProfile = await firebaseApi.getUserProfile(user.uid);
+        const name = storedProfile?.name || user.displayName || user.email?.split('@')[0] || 'Customer';
+        const userProfile = { ...(storedProfile || {}), name, firstName: name.split(/\s+/)[0], email: user.email };
+        localStorage.setItem('handicraft_logged_in_user', JSON.stringify(userProfile));
+        localStorage.setItem('handicraft_profile', JSON.stringify(userProfile));
+        window.location.href = 'index.html';
+      } catch (error) {
+        alert(error.code === 'auth/account-exists-with-different-credential'
+          ? 'This email already uses another sign-in method.'
+          : error.message || 'Social login failed.');
+        buttons.forEach(button => { button.disabled = false; });
+      }
+    }
+
+    window.loginWithProvider = loginWithProvider;
+    window.loginUser = loginUser;
+  })();
   </script>
 </body>
 </html>
