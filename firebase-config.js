@@ -55,6 +55,10 @@ const records = name => collection(firestore, name);
 const mapSnapshot = snapshot => snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
 const authReady = new Promise(resolve => onAuthStateChanged(firebaseAuth, user => {
     window.firebaseUser = user;
+    if (!user) {
+        localStorage.removeItem('artisan_admin_logged_in');
+        localStorage.removeItem('artisan_admin_login_at');
+    }
     if (typeof updateHeader === 'function') updateHeader();
     resolve(user);
 }));
@@ -141,24 +145,31 @@ const api = {
     adminWrite: async (collectionName, recordId, data) => {
         const user = await requireUser();
         const profile = await api.getAdminProfile(user.uid);
-        if (profile?.role !== 'Admin') throw new Error('Admin access is required.');
+        if (!profile || profile.uid !== user.uid || profile.role !== 'Admin' || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
+            throw new Error('Admin access is required for the exact Firebase UID assigned to this admin account.');
+        }
         await setDoc(doc(firestore, collectionName, recordId), { ...data, updatedAt: serverTimestamp() }, { merge: true });
     },
     adminDelete: async (collectionName, recordId) => {
         const user = await requireUser();
         const profile = await api.getAdminProfile(user.uid);
-        if (profile?.role !== 'Admin') throw new Error('Admin access is required.');
+        if (!profile || profile.uid !== user.uid || profile.role !== 'Admin' || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
+            throw new Error('Admin access is required for the exact Firebase UID assigned to this admin account.');
+        }
         await deleteDoc(doc(firestore, collectionName, recordId));
     },
     subscribeAdminData: async () => {
         const user = firebaseAuth.currentUser;
         if (!user) throw new Error('Please sign in as an admin first.');
         const profile = await api.getAdminProfile(user.uid);
-        if (profile?.role !== 'Admin') throw new Error('This account is not an Admin account.');
+        if (!profile || profile.uid !== user.uid || profile.role !== 'Admin' || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
+            throw new Error('This account is not the approved admin UID for the Firestore admin role.');
+        }
         if (window.firebaseAdminUnsubscribe) window.firebaseAdminUnsubscribe();
 
         const adminData = window.firebaseAdminData = {
             users: [],
+            admins: [],
             sellers: [],
             products: [],
             orders: [],
@@ -171,7 +182,13 @@ const api = {
         const unsubscribers = ['users', 'sellers', 'products', 'orders', 'reviews', 'contactMessages'].map(name => onSnapshot(
             records(name),
             snapshot => {
-                adminData[name] = mapSnapshot(snapshot);
+                const records = mapSnapshot(snapshot);
+                if (name === 'users') {
+                    adminData.users = records.filter(record => record.role !== 'Admin');
+                    adminData.admins = records.filter(record => record.role === 'Admin');
+                } else {
+                    adminData[name] = records;
+                }
                 adminData.loadedCollections += 1;
                 adminData.loading = adminData.loadedCollections < 6;
                 adminData.lastSyncedAt = new Date();
@@ -205,8 +222,19 @@ const api = {
         const user = await requireUser();
         const reference = doc(firestore, 'products', productId);
         const product = await getDoc(reference);
-        if (!product.exists() || product.data().sellerId !== user.uid) throw new Error('You can only delete your own products.');
-        await updateDoc(reference, { deleted: true, deletedAt: serverTimestamp() });
+        if (!product.exists()) throw new Error('This product no longer exists in Firestore.');
+
+        const profile = await api.getAdminProfile(user.uid);
+        const isExactAdmin = profile?.uid === user.uid
+            && profile.role === 'Admin'
+            && profile.email?.toLowerCase() === user.email?.toLowerCase();
+        const isOwner = product.data().sellerId === user.uid;
+
+        if (!isExactAdmin && !isOwner) {
+            throw new Error('You can only delete products listed by your seller account.');
+        }
+
+        await deleteDoc(reference);
     },
     createOrder: async order => {
         const user = await requireUser();
@@ -255,16 +283,12 @@ const api = {
 };
 
 window.firebaseApi = api;
+export { api as firebaseApi };
 
 onSnapshot(records('products'), snapshot => {
     const remoteProducts = mapSnapshot(snapshot).filter(product => !product.deleted);
-    const localProducts = typeof getCatalogProducts === 'function' ? getCatalogProducts() : [];
-    const products = [
-        ...remoteProducts,
-        ...localProducts.filter(localProduct => !remoteProducts.some(remoteProduct =>
-            remoteProduct.id === localProduct.id || remoteProduct.name === localProduct.name
-        ))
-    ];
+    const products = remoteProducts;
+    window.firebaseProductsLoaded = true;
     window.firebaseProducts = products;
     if (typeof saveCatalogProducts === 'function') saveCatalogProducts(products);
     if (typeof renderHomeProducts === 'function') renderHomeProducts();

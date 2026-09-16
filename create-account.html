@@ -22,20 +22,10 @@
       <a href="login.html">Already have an account?</a>
     </div>
   </div>
-  <script type="module" src="firebase-config.js"></script>
-  <script>
-  (async () => {
-    // Wait for Firebase to be ready
-    await new Promise(resolve => {
-      const checkFirebase = () => {
-        if (window.firebaseApi) {
-          resolve();
-        } else {
-          setTimeout(checkFirebase, 10);
-        }
-      };
-      checkFirebase();
-    });
+  <script type="module">
+  import { firebaseApi } from './firebase-config.js';
+
+  (() => {
 
     async function createAccount() {
       const name = document.getElementById('nameInput').value.trim();
@@ -66,10 +56,11 @@
       const button = document.getElementById('createAccountButton');
       button.disabled = true;
       try {
-        await window.firebaseApi.authReady;
-        await window.firebaseApi.signUp({ name, email, phone, password });
-        localStorage.setItem('handicraft_logged_in_user', JSON.stringify({ name, email, phone }));
-        localStorage.setItem('handicraft_profile', JSON.stringify({ name, email, phone }));
+        await firebaseApi.authReady;
+        const user = await firebaseApi.signUp({ name, email, phone, password });
+        const userProfile = { name, firstName: name.split(/\s+/)[0], email: user.email, phone };
+        localStorage.setItem('handicraft_logged_in_user', JSON.stringify(userProfile));
+        localStorage.setItem('handicraft_profile', JSON.stringify(userProfile));
         window.location.href = 'index.html';
       } catch (error) {
         alert(error.code === 'auth/email-already-in-use' ? 'An account with this email already exists.' : error.message);
@@ -81,10 +72,10 @@
       const buttons = document.querySelectorAll('.social-login button');
       buttons.forEach(button => { button.disabled = true; });
       try {
-        await window.firebaseApi.authReady;
+        await firebaseApi.authReady;
         const user = providerName === 'google'
-          ? await window.firebaseApi.signInWithGoogle()
-          : await window.firebaseApi.signInWithFacebook();
+          ? await firebaseApi.signInWithGoogle()
+          : await firebaseApi.signInWithFacebook();
         const name = user.displayName || user.email?.split('@')[0] || 'Customer';
         const userProfile = { name, firstName: name.split(/\s+/)[0], email: user.email, photoURL: user.photoURL || '' };
         localStorage.setItem('handicraft_logged_in_user', JSON.stringify(userProfile));

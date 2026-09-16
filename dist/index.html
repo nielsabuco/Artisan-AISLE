@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ArtisanAisle</title>
-  <script type="module" crossorigin src="/assets/firebase-config-B8hnrGot.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/firebase-config-B_pJ4l_7.css">
+  <script type="module" crossorigin src="/assets/firebase-config-4iQRZ-iB.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/firebase-config-DkJLJ5P0.css">
 </head>
 
 <body>
@@ -32,14 +32,14 @@
 </header>
 
 <nav>
-    <button onclick="showScreen('home')">HOME</button>
-    <button onclick="showScreen('products')">PRODUCTS</button>
-    <button onclick="openAdminDashboard()">ADMIN</button>
-    <button onclick="openSellerDashboard()">SELLER</button>
-    <button onclick="window.location.href='categories.html'">CATEGORIES</button>
-    <button onclick="window.location.href='artisans.html'">ARTISANS</button>
-    <button onclick="window.location.href='about-us.html'">ABOUT US</button>
-    <button onclick="window.location.href='contact.html'">CONTACT</button>
+    <button class="nav-btn active" data-screen="home" onclick="showScreen('home')">HOME</button>
+    <button class="nav-btn" data-screen="products" onclick="showScreen('products')">PRODUCTS</button>
+    <button class="nav-btn" data-screen="admin" onclick="openAdminDashboard()">ADMIN</button>
+    <button class="nav-btn" data-screen="seller" onclick="openSellerDashboard()">SELLER</button>
+    <button class="nav-btn" data-screen="categories" onclick="window.location.href='categories.html'">CATEGORIES</button>
+    <button class="nav-btn" data-screen="artisans" onclick="window.location.href='artisans.html'">ARTISANS</button>
+    <button class="nav-btn" data-screen="about" onclick="window.location.href='about-us.html'">ABOUT US</button>
+    <button class="nav-btn" data-screen="contact" onclick="window.location.href='contact.html'">CONTACT</button>
 </nav>
 
 
@@ -383,6 +383,7 @@
             </button>
 
             <button
+            onclick="buyNow()"
             style="padding:13px 25px;margin-left:10px;border:1px solid #285c3b;background:rgb(3, 92, 9);border-radius:7px;">
                 Buy Now
             </button>
@@ -436,7 +437,7 @@
 
             <button class="btn"
             style="width:100%;margin-top:20px;"
-            onclick="showScreen('checkout')">
+            onclick="goToCheckout()">
                 Proceed to Checkout
             </button>
 
@@ -655,8 +656,8 @@
         <div class="admin-login-box">
             <h2>Admin Login</h2>
             <p>Sign in with the Firebase account marked as Admin.</p>
-            <input id="adminEmailInput" type="email" value="reniel.sabuco@ssu.edu.ph" autocomplete="username" placeholder="Admin email" />
-            <input id="adminPasswordInput" type="password" value="NIELsabuco2006" autocomplete="current-password" placeholder="Password" />
+            <input id="adminEmailInput" type="email" autocomplete="username" placeholder="Admin email" />
+            <input id="adminPasswordInput" type="password" autocomplete="current-password" placeholder="Password" />
             <button class="btn" onclick="submitAdminLogin()">Open Dashboard</button>
             <button class="secondary-btn" onclick="closeAdminLoginModal(); showScreen('home');">Cancel</button>
         </div>
@@ -718,6 +719,13 @@
 
 /* ================= SCREEN NAVIGATION ================= */
 
+function updateNavigationState(activeScreen) {
+    document.querySelectorAll(".nav-btn").forEach(button => {
+        const isActive = button.dataset.screen === activeScreen;
+        button.classList.toggle("active", isActive);
+    });
+}
+
 function showScreen(screenID) {
     if (["cart", "checkout", "orders", "profile"].includes(screenID) && !getLoggedInUser() && !window.firebaseApi?.currentUser) {
         window.location.href = "login.html";
@@ -729,8 +737,12 @@ function showScreen(screenID) {
         screen.classList.remove("active");
     });
 
-    document.getElementById(screenID)
-    .classList.add("active");
+    const targetScreen = document.getElementById(screenID);
+    if (targetScreen) {
+        targetScreen.classList.add("active");
+    }
+
+    updateNavigationState(screenID);
 
     if (screenID === "checkout") {
         populateCheckoutForm();
@@ -1016,13 +1028,32 @@ function getCart() {
     return JSON.parse(localStorage.getItem("handicraft_cart") || "[]");
 }
 
+function isCartItemSelected(item) {
+    return item.selected !== false;
+}
+
+function getSelectedCartItems() {
+    return getCart().filter(isCartItemSelected);
+}
+
 function saveCart(cart) {
-    localStorage.setItem("handicraft_cart", JSON.stringify(cart));
-    if (window.firebaseApi?.currentUser) window.firebaseApi.saveCart(cart).catch(console.error);
+    const normalizedCart = Array.isArray(cart) ? cart.map(item => ({ ...item, selected: item.selected !== false })) : [];
+    localStorage.setItem("handicraft_cart", JSON.stringify(normalizedCart));
+    if (window.firebaseApi?.currentUser) window.firebaseApi.saveCart(normalizedCart).catch(console.error);
+}
+
+function toggleCartSelection(itemKey, checked) {
+    const cart = getCart();
+    const item = findCartItem(cart, itemKey);
+    if (!item) return;
+    item.selected = checked;
+    saveCart(cart);
+    renderCart();
 }
 
 function renderCart() {
     const cart = getCart();
+    const selectedCart = cart.filter(isCartItemSelected);
     const cartItems = document.getElementById("cartItems");
     const cartSubtotal = document.getElementById("cartSubtotal");
     const cartShipping = document.getElementById("cartShipping");
@@ -1034,31 +1065,45 @@ function renderCart() {
         if (cart.length === 0) {
             cartItems.innerHTML = "<p>Your cart is empty.</p>";
         } else {
-            cartItems.innerHTML = cart.map(item => `
+            cartItems.innerHTML = cart.map(item => {
+                const itemKey = encodeURIComponent(item.productId || item.name);
+                const selected = isCartItemSelected(item) ? 'checked' : '';
+                return `
                 <div class="cart-item">
+                    <label style="display:flex;align-items:center;gap:10px;">
+                        <input type="checkbox" ${selected} onchange="toggleCartSelection('${itemKey}', this.checked)" />
+                    </label>
                     <img src="${item.image}">
                     <div>
                         <h3>${item.name}</h3>
                         <p class="price">₱${item.price.toLocaleString()}.00</p>
-                        <p>Quantity: ${item.quantity}</p>
+                        <div class="cart-item-controls">
+                            <div class="cart-quantity-control" aria-label="Quantity for ${item.name}">
+                                <button type="button" onclick="changeCartItemQuantity('${itemKey}', -1)" aria-label="Decrease quantity">−</button>
+                                <span>${item.quantity}</span>
+                                <button type="button" onclick="changeCartItemQuantity('${itemKey}', 1)" aria-label="Increase quantity">+</button>
+                            </div>
+                            <button type="button" class="remove-cart-item" onclick="removeFromCart('${itemKey}')">Remove</button>
+                        </div>
                     </div>
                 </div>
-            `).join("");
+            `;
+            }).join("");
         }
     }
 
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = cart.length > 0 ? 60 : 0;
+    const subtotal = selectedCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shipping = selectedCart.length > 0 ? 60 : 0;
     const total = subtotal + shipping;
 
     if (cartSubtotal) cartSubtotal.innerText = `₱${subtotal.toLocaleString()}.00`;
     if (cartShipping) cartShipping.innerText = `₱${shipping.toLocaleString()}.00`;
     if (cartTotal) cartTotal.innerText = `₱${total.toLocaleString()}.00`;
     if (checkoutSummaryItems) {
-        if (cart.length === 0) {
-            checkoutSummaryItems.innerHTML = "<div class=\"summary-line\"><span>No items</span><span>₱0</span></div>";
+        if (selectedCart.length === 0) {
+            checkoutSummaryItems.innerHTML = "<div class=\"summary-line\"><span>No items selected</span><span>₱0</span></div>";
         } else {
-            checkoutSummaryItems.innerHTML = cart.map(item => `
+            checkoutSummaryItems.innerHTML = selectedCart.map(item => `
                 <div class="summary-line">
                     <span>${item.name} × ${item.quantity}</span>
                     <span>₱${(item.price * item.quantity).toLocaleString()}</span>
@@ -1069,8 +1114,32 @@ function renderCart() {
     if (checkoutTotal) checkoutTotal.innerText = `₱${total.toLocaleString()}.00`;
 }
 
+async function goToCheckout() {
+    await window.firebaseApi?.authReady;
+    await waitForLiveProducts();
+
+    const currentUser = window.firebaseApi?.currentUser || getLoggedInUser();
+    if (!currentUser) {
+        alert("Please log in before proceeding to checkout.");
+        window.location.href = "login.html";
+        return;
+    }
+
+    cleanupUnavailableCartItems();
+
+    const selectedCart = getSelectedCartItems();
+    if (selectedCart.length === 0) {
+        alert("Please select at least one item before proceeding to checkout.");
+        return;
+    }
+
+    renderCart();
+    showScreen("checkout");
+}
+
 async function addToCart() {
     await window.firebaseApi?.authReady;
+    await waitForLiveProducts();
     if (!window.firebaseApi?.currentUser) {
         alert("Please log in before adding items to your cart.");
         window.location.href = "login.html";
@@ -1108,6 +1177,69 @@ async function addToCart() {
     updateHeader();
     alert(`${selectedProduct.name} has been added to your cart!`);
     showScreen("cart");
+}
+
+function findCartItem(cart, itemKey) {
+    const decodedKey = decodeURIComponent(itemKey);
+    return cart.find(item => item.productId === decodedKey || item.name === decodedKey);
+}
+
+function changeCartItemQuantity(itemKey, amount) {
+    const cart = getCart();
+    const item = findCartItem(cart, itemKey);
+    if (!item) return;
+
+    const nextQuantity = item.quantity + amount;
+    if (nextQuantity < 1) {
+        removeFromCart(itemKey);
+        return;
+    }
+
+    const availableStock = Number(item.stock);
+    if (amount > 0 && Number.isFinite(availableStock) && nextQuantity > availableStock) {
+        alert(`Only ${availableStock} item${availableStock === 1 ? '' : 's'} available.`);
+        return;
+    }
+
+    item.quantity = nextQuantity;
+    saveCart(cart);
+    renderCart();
+    updateHeader();
+}
+
+function removeFromCart(itemKey) {
+    const cart = getCart();
+    const item = findCartItem(cart, itemKey);
+    if (!item) return;
+    const remainingCart = cart.filter(cartItem => cartItem !== item);
+    saveCart(remainingCart);
+    renderCart();
+    updateHeader();
+}
+
+function cleanupUnavailableCartItems() {
+    const cart = getCart();
+    if (!cart.length) return;
+
+    const liveProducts = getCatalogProducts();
+    const validIds = new Set(liveProducts.map(product => product.id));
+    const validNames = new Set(liveProducts.map(product => product.name));
+
+    const cleanedCart = cart.filter(item => {
+        const product = liveProducts.find(candidate => candidate.id === item.productId || candidate.name === item.name);
+        if (!product) return false;
+        const stock = Number(product.stock);
+        if (Number.isFinite(stock) && stock <= 0) return false;
+        if (Number.isFinite(stock) && Number(item.quantity) > stock) {
+            item.quantity = stock;
+            if (item.quantity < 1) return false;
+        }
+        return true;
+    });
+
+    if (cleanedCart.length !== cart.length) {
+        saveCart(cleanedCart);
+    }
 }
 
 
@@ -1209,15 +1341,42 @@ function populateCheckoutForm() {
     document.getElementById("checkoutPayment").value = profile.paymentMethod || "Cash on Delivery";
 }
 
-async function placeOrder() {
-    await window.firebaseApi?.authReady;
-    if (!window.firebaseApi?.currentUser) {
-        window.location.href = "login.html";
+async function placeOrderForItems(items, options = {}) {
+    const { clearSelectedFromCart = true } = options;
+
+    if (!Array.isArray(items) || items.length === 0) {
+        alert("Please select at least one item before placing the order.");
         return;
     }
+
     const cart = getCart();
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = cart.length > 0 ? 60 : 0;
+    const liveProducts = getCatalogProducts();
+    const validItems = items.reduce((orderItems, item) => {
+        const product = liveProducts.find(candidate => candidate.id === item.productId || candidate.name === item.name);
+        const stock = Number(product?.stock);
+        if (!product || (Number.isFinite(stock) && (stock <= 0 || item.quantity > stock))) return orderItems;
+
+        orderItems.push({
+            ...item,
+            productId: product.id,
+            sellerId: product.sellerId || item.sellerId,
+            name: product.name,
+            price: Number(product.price),
+            image: product.image,
+            stock: product.stock,
+            quantity: Number(item.quantity)
+        });
+        return orderItems;
+    }, []);
+
+    if (validItems.length === 0) {
+        const missingItems = items.map(item => item.name || 'Product').join(', ');
+        alert(`The following items are no longer available: ${missingItems}. No order was placed, so your cart was not changed.`);
+        return;
+    }
+
+    const subtotal = validItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shipping = validItems.length > 0 ? 60 : 0;
     const total = subtotal + shipping;
 
     const fullName = document.getElementById("checkoutFullName").value.trim();
@@ -1226,21 +1385,19 @@ async function placeOrder() {
     const city = document.getElementById("checkoutCity").value.trim();
     const paymentMethod = document.getElementById("checkoutPayment").value;
 
-    if (cart.length === 0) {
-        alert("Your cart is empty.");
-        return;
-    }
-
     if (!fullName || !phone || !address || !city) {
         alert("Please complete your delivery information before placing the order.");
         return;
     }
 
     const stockDeductions = {};
-    for (const item of cart) {
-        const product = getCatalogProducts().find(candidate => candidate.id === item.productId || candidate.name === item.name);
+    for (const item of validItems) {
+        const product = liveProducts.find(candidate => candidate.id === item.productId || candidate.name === item.name);
         const availableStock = Number(product?.stock);
-        if (!product || !Number.isFinite(availableStock)) continue;
+        if (!product || !Number.isFinite(availableStock)) {
+            alert(`${item.name || 'This product'} is no longer available.`);
+            return;
+        }
         stockDeductions[product.id] = (stockDeductions[product.id] || 0) + item.quantity;
         if (stockDeductions[product.id] > availableStock) {
             alert(`${product.name} does not have enough stock.`);
@@ -1263,12 +1420,12 @@ async function placeOrder() {
     const newOrder = {
         id: `#ORD-${String(orders.length + 1).padStart(5, '0')}`,
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        items: cart.reduce((sum, item) => sum + item.quantity, 0),
+        items: validItems.reduce((sum, item) => sum + item.quantity, 0),
         total,
         uid: window.firebaseApi.currentUser.uid,
         status: "Processing",
-        productId: cart[0]?.productId,
-        orderItems: cart,
+        productId: validItems[0]?.productId,
+        orderItems: validItems,
         paymentMethod
     };
 
@@ -1279,8 +1436,8 @@ async function placeOrder() {
             total: newOrder.total,
             productId: newOrder.productId,
             orderItems: newOrder.orderItems,
-            sellerIds: [...new Set(cart.map(item => item.sellerId).filter(Boolean))],
-            productIds: [...new Set(cart.map(item => item.productId).filter(Boolean))],
+            sellerIds: [...new Set(validItems.map(item => item.sellerId).filter(Boolean))],
+            productIds: [...new Set(validItems.map(item => item.productId).filter(Boolean))],
             stockDeductions,
             paymentMethod
         });
@@ -1290,15 +1447,100 @@ async function placeOrder() {
         alert(error.message);
         return;
     }
+
+    if (clearSelectedFromCart) {
+        const selectedKeys = new Set(validItems.flatMap(item => [item.productId, item.name]).filter(Boolean));
+        const remainingCart = cart.filter(item => {
+            return !selectedKeys.has(item.productId) && !selectedKeys.has(item.name);
+        });
+        saveCart(remainingCart);
+    }
+
     recordSales(total);
-    localStorage.removeItem("handicraft_cart");
     renderCart();
     renderOrders();
     updateHeader();
 
     alert("Your order has been placed successfully!");
-
     showScreen("orders");
+}
+
+async function placeOrder() {
+    await window.firebaseApi?.authReady;
+    const productsReady = await waitForLiveProducts();
+    if (!window.firebaseApi?.currentUser) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    if (!productsReady) {
+        alert("The product catalog is still loading. Please try again in a moment.");
+        return;
+    }
+
+    const cart = getCart();
+    const selectedCart = cart.filter(isCartItemSelected);
+    if (selectedCart.length === 0) {
+        alert("Please select at least one item before placing the order.");
+        return;
+    }
+
+    await placeOrderForItems(selectedCart, { clearSelectedFromCart: true });
+}
+
+async function buyNow() {
+    await window.firebaseApi?.authReady;
+    const productsReady = await waitForLiveProducts();
+    if (!window.firebaseApi?.currentUser) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    if (!productsReady) {
+        alert("The product catalog is still loading. Please try again in a moment.");
+        return;
+    }
+
+    const qty = Number(quantity || 1);
+    const product = selectedProduct;
+    if (!product) {
+        alert("Please select a product first.");
+        return;
+    }
+
+    const availableStock = Number(product.stock);
+    if (Number.isFinite(availableStock) && qty > availableStock) {
+        alert(`Only ${availableStock} item${availableStock === 1 ? '' : 's'} available.`);
+        return;
+    }
+
+    const userProfile = getProfile() || {};
+    const productItem = {
+        productId: product.id,
+        sellerId: product.sellerId,
+        name: product.name,
+        price: Number(product.price),
+        image: product.image,
+        stock: product.stock,
+        quantity: qty,
+        selected: true
+    };
+
+    const checkout = {
+        fullName: userProfile.name || getLoggedInUser()?.name || "",
+        phone: userProfile.phone || "",
+        address: userProfile.address || "",
+        city: userProfile.city || "",
+        paymentMethod: userProfile.paymentMethod || "Cash on Delivery"
+    };
+
+    document.getElementById("checkoutFullName").value = checkout.fullName;
+    document.getElementById("checkoutPhone").value = checkout.phone;
+    document.getElementById("checkoutAddress").value = checkout.address;
+    document.getElementById("checkoutCity").value = checkout.city;
+    document.getElementById("checkoutPayment").value = checkout.paymentMethod;
+
+    await placeOrderForItems([productItem], { clearSelectedFromCart: false });
 }
 
 async function reviewOrder(orderId, productId) {
@@ -1419,14 +1661,26 @@ const defaultAdminData = {
 };
 
 function getCatalogProducts() {
+    const remoteProducts = window.firebaseProductsLoaded && Array.isArray(window.firebaseProducts)
+        ? window.firebaseProducts
+        : null;
     const stored = JSON.parse(localStorage.getItem("artisan_catalog_products") || "null");
-    if (stored && stored.length) return stored;
-    localStorage.setItem("artisan_catalog_products", JSON.stringify(defaultCatalogProducts));
-    return defaultCatalogProducts;
+    const products = remoteProducts || (stored && stored.length ? stored : defaultCatalogProducts);
+    localStorage.setItem("artisan_catalog_products", JSON.stringify(products));
+    return products;
+}
+
+async function waitForLiveProducts() {
+    for (let attempt = 0; attempt < 100 && !window.firebaseProductsLoaded; attempt += 1) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    return window.firebaseProductsLoaded === true;
 }
 
 function saveCatalogProducts(products) {
-    localStorage.setItem("artisan_catalog_products", JSON.stringify(products));
+    const normalized = Array.isArray(products) ? products : [];
+    window.firebaseProducts = normalized;
+    localStorage.setItem("artisan_catalog_products", JSON.stringify(normalized));
 }
 
 function addCatalogProduct(product) {
@@ -1490,14 +1744,38 @@ function saveAdminData(data) {
 }
 
 function openAdminDashboard() {
-    showScreen("admin");
-    const loggedIn = localStorage.getItem("artisan_admin_logged_in") === "true";
+    const currentUser = window.firebaseApi?.currentUser;
+    const loggedIn = isAdminSessionValid();
 
-    if (!loggedIn) {
+    if (!loggedIn && !currentUser) {
         openAdminLoginModal();
         return;
     }
 
+    if (currentUser) {
+        window.firebaseApi.getAdminProfile(currentUser.uid)
+            .then(profile => {
+                const matchesExactAdmin = !!profile && profile.uid === currentUser.uid && profile.role === "Admin" && profile.email?.toLowerCase() === currentUser.email?.toLowerCase();
+                if (!matchesExactAdmin) {
+                    clearAdminSession();
+                    alert("This account is not the approved admin UID for this Firebase project.");
+                    openAdminLoginModal();
+                    return;
+                }
+
+                localStorage.setItem("artisan_admin_logged_in", "true");
+                localStorage.setItem("artisan_admin_login_at", String(Date.now()));
+                showScreen("admin");
+                renderAdminDashboard();
+            })
+            .catch(() => {
+                clearAdminSession();
+                openAdminLoginModal();
+            });
+        return;
+    }
+
+    showScreen("admin");
     renderAdminDashboard();
 }
 
@@ -1506,6 +1784,8 @@ function openAdminLoginModal() {
     if (modal) {
         modal.style.display = "flex";
     }
+    const emailInput = document.getElementById("adminEmailInput");
+    if (emailInput) emailInput.value = "";
     const input = document.getElementById("adminPasswordInput");
     if (input) {
         input.value = "";
@@ -1516,12 +1796,48 @@ function openAdminLoginModal() {
 function closeAdminLoginModal() {
     const modal = document.getElementById("adminLoginModal");
     if (modal) modal.style.display = "none";
+    const emailInput = document.getElementById("adminEmailInput");
+    const passwordInput = document.getElementById("adminPasswordInput");
+    if (emailInput) emailInput.value = "";
+    if (passwordInput) passwordInput.value = "";
+}
+
+const ADMIN_SESSION_DURATION = 30 * 60 * 1000;
+let adminSessionTimeout;
+
+function clearAdminSession() {
+    localStorage.removeItem("artisan_admin_logged_in");
+    localStorage.removeItem("artisan_admin_login_at");
+    clearTimeout(adminSessionTimeout);
+}
+
+function isAdminSessionValid() {
+    const loggedIn = localStorage.getItem("artisan_admin_logged_in") === "true";
+    const loginAt = Number(localStorage.getItem("artisan_admin_login_at"));
+    if (!loggedIn || !Number.isFinite(loginAt) || Date.now() - loginAt >= ADMIN_SESSION_DURATION) {
+        clearAdminSession();
+        return false;
+    }
+    scheduleAdminLogout(loginAt);
+    return true;
+}
+
+function scheduleAdminLogout(loginAt = Date.now()) {
+    clearTimeout(adminSessionTimeout);
+    const remaining = Math.max(0, ADMIN_SESSION_DURATION - (Date.now() - loginAt));
+    adminSessionTimeout = setTimeout(() => {
+        endAdminSession("Your admin session expired after 30 minutes.");
+    }, remaining);
 }
 
 async function submitAdminLogin() {
     const email = document.getElementById("adminEmailInput")?.value.trim().toLowerCase();
     const input = document.getElementById("adminPasswordInput");
     const password = input ? input.value.trim() : "";
+
+    const defaultAdminEmail = "reniel.sabuco@ssu.edu.ph";
+    const defaultAdminPassword = "@SIMPS2026";
+    const isDefaultAdmin = email === defaultAdminEmail.toLowerCase() && password === defaultAdminPassword;
 
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
         alert("Please enter a valid admin email address.");
@@ -1534,17 +1850,56 @@ async function submitAdminLogin() {
 
     try {
         await window.firebaseApi.authReady;
+
         if (!window.firebaseApi.currentUser || window.firebaseApi.currentUser.email?.toLowerCase() !== email) {
-            await window.firebaseApi.signIn(email, password);
+            try {
+                await window.firebaseApi.signIn(email, password);
+            } catch (signInError) {
+                if (!isDefaultAdmin || signInError?.code !== "auth/user-not-found") {
+                    throw signInError;
+                }
+
+                const createdUser = await window.firebaseApi.signUp({
+                    name: "System Admin",
+                    email,
+                    phone: "0000000000",
+                    password
+                });
+
+                await window.firebaseApi.saveUserProfile({
+                    name: "System Admin",
+                    firstName: "System",
+                    email: createdUser.email,
+                    phone: "0000000000"
+                }, "Admin");
+            }
         }
-        const user = window.firebaseApi.currentUser;
-        const profile = await window.firebaseApi.getAdminProfile(user.uid);
-        if (profile?.role !== "Admin") {
-            throw new Error(`Admin access is not enabled for ${user.email}. In Firebase Console, create or update users/${user.uid} and set role to Admin.`);
-        }
+
+            const user = window.firebaseApi.currentUser;
+            if (!user) {
+                throw new Error("Admin account is not available. Please sign in with a valid admin account.");
+            }
+
+            let profile = await window.firebaseApi.getAdminProfile(user.uid);
+            if (!profile || profile.uid !== user.uid || profile.role !== "Admin" || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
+                profile = await window.firebaseApi.saveUserProfile({
+                    name: profile?.name || user.displayName || "System Admin",
+                    firstName: profile?.firstName || user.displayName?.split(/\s+/)[0] || "System",
+                    email: user.email,
+                    phone: profile?.phone || "0000000000"
+                }, "Admin");
+            }
+
+            if (!profile || profile.uid !== user.uid || profile.role !== "Admin" || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
+                throw new Error("This Firebase account is not the approved admin UID for the Firestore admin role.");
+            }
+
         await window.firebaseApi.subscribeAdminData();
         localStorage.setItem("artisan_admin_logged_in", "true");
+        localStorage.setItem("artisan_admin_login_at", String(Date.now()));
+        scheduleAdminLogout();
         closeAdminLoginModal();
+        showScreen("admin");
         renderAdminDashboard();
     } catch (error) {
         alert(error.message || "Unable to sign in as admin.");
@@ -1938,12 +2293,19 @@ function renderSellerDashboard() {
     });
 }
 
-function adminLogout() {
+async function endAdminSession(message) {
+    clearAdminSession();
+    if (window.firebaseApi?.currentUser) {
+        await window.firebaseApi.signOut().catch(console.error);
+    }
     clearLoggedInUser();
-    localStorage.removeItem("artisan_admin_logged_in");
     updateHeader();
     showScreen("home");
-    alert("You have been logged out from the admin dashboard.");
+    if (message) alert(message);
+}
+
+function adminLogout() {
+    endAdminSession("You have been logged out from the admin dashboard.");
 }
 
 function renderAdminDashboard() {
@@ -1970,7 +2332,8 @@ function renderAdminDashboard() {
     }, []);
     const fallbackData = getAdminData();
     const data = liveData ? {
-        users: liveData.users,
+        users: liveData.users.filter(user => user.role !== 'Admin'),
+        admins: liveData.admins || [],
         sellers: liveData.sellers,
         products: liveData.products.filter(product => !product.deleted),
         orders: liveOrders.map(order => ({
@@ -1980,7 +2343,7 @@ function renderAdminDashboard() {
         })),
         reports: {
             ...fallbackData.reports,
-            buyers: liveData.users.filter(user => user.role !== 'Seller').length,
+            buyers: liveData.users.filter(user => user.role !== 'Seller' && user.role !== 'Admin').length,
             sellers: liveData.sellers.length,
             reviews: liveData.reviews.length,
             contactMessages: liveData.contactMessages.length,
@@ -2041,6 +2404,7 @@ function renderAdminDashboard() {
 
         <div class="summary-grid">
             <div class="summary-box"><h3>Total Users</h3><p>${data.users.length}</p></div>
+            <div class="summary-box"><h3>Administrators</h3><p>${data.admins?.length || 0}</p></div>
             <div class="summary-box"><h3>Total Sellers</h3><p>${data.sellers.length}</p></div>
             <div class="summary-box"><h3>Total Products</h3><p>${liveData ? data.products.length : getCatalogProducts().length}</p></div>
             <div class="summary-box"><h3>Delivered Sales</h3><p>₱${totalRevenue.toLocaleString()}.00</p></div>
@@ -2106,7 +2470,6 @@ function renderAdminDashboard() {
                 <select id="userRole">
                     <option>Customer</option>
                     <option>Seller</option>
-                    <option>Admin</option>
                 </select>
                 <select id="userStatus">
                     <option>Active</option>
@@ -2453,6 +2816,18 @@ async function deleteSeller(sellerId) {
     if (!confirm('Delete this seller profile from Firestore?')) return;
     try {
         await window.firebaseApi.adminDelete('sellers', sellerId);
+        const sellerProducts = getCatalogProducts().filter(product => product.sellerId === sellerId);
+        for (const product of sellerProducts) {
+            try {
+                await window.firebaseApi.adminDelete('products', product.id);
+            } catch (error) {
+                console.warn('Failed to delete seller product during seller removal:', error);
+            }
+        }
+        saveCatalogProducts(getCatalogProducts().filter(product => product.sellerId !== sellerId));
+        renderHomeProducts();
+        renderCatalogProducts();
+        renderAdminDashboard();
     } catch (error) {
         alert(error.message);
     }
@@ -2523,18 +2898,41 @@ async function addSellerProductFromForm() {
 }
 
 async function deleteSellerProduct(productId) {
-    const sellerId = window.firebaseApi.currentUser?.uid;
+    await window.firebaseApi?.authReady;
+    const currentUser = window.firebaseApi?.currentUser;
+    const currentUserId = currentUser?.uid;
     const product = getCatalogProducts().find(item => item.id === productId);
-    if (!sellerId || !product || product.sellerId !== sellerId) {
+
+    if (!currentUserId || !product) {
+        alert("This product is no longer available.");
+        return;
+    }
+
+    let isAdmin = false;
+    try {
+        const profile = await window.firebaseApi.getAdminProfile(currentUserId);
+        isAdmin = profile?.uid === currentUserId
+            && profile.role === "Admin"
+            && profile.email?.toLowerCase() === currentUser.email?.toLowerCase();
+    } catch (error) {
+        isAdmin = false;
+    }
+
+    if (!isAdmin && product.sellerId !== currentUserId) {
         alert("You can only delete products uploaded by your seller account.");
         return;
     }
-    if (!confirm(`Delete "${product.name}" uploaded by ${product.sellerName || 'your seller account'}?`)) return;
+
+    if (!confirm(`Delete "${product.name}" uploaded by ${product.sellerName || 'this seller'}?`)) return;
     try {
         await window.firebaseApi.deleteProduct(productId);
-        saveSellerProducts(getSellerProducts(sellerId).filter(product => product.id !== productId), sellerId);
-        saveCatalogProducts(getCatalogProducts().filter(product => product.id !== productId));
+        saveSellerProducts(getSellerProducts(currentUserId).filter(item => item.id !== productId), currentUserId);
+        saveCatalogProducts(getCatalogProducts().filter(item => item.id !== productId));
+        renderHomeProducts();
+        renderCatalogProducts();
+        updateProductsDisplay();
         renderSellerDashboard();
+        renderAdminDashboard();
     } catch (error) {
         alert(error.message);
     }
@@ -2596,12 +2994,18 @@ async function deleteProduct(productId) {
     if (!confirm('Delete this product from Firestore?')) return;
     try {
         await window.firebaseApi.adminDelete('products', productId);
+        saveCatalogProducts(getCatalogProducts().filter(product => product.id !== productId));
+        renderHomeProducts();
+        renderCatalogProducts();
+        updateProductsDisplay();
+        renderAdminDashboard();
     } catch (error) {
         alert(error.message);
     }
 }
 
 window.onload = function() {
+    cleanupUnavailableCartItems();
     renderHomeProducts();
     renderCatalogProducts();
     updateProductsDisplay();
@@ -2611,7 +3015,7 @@ window.onload = function() {
     renderAdminDashboard();
     renderSellerDashboard();
     loadAdminSettings();
-    if (localStorage.getItem("artisan_admin_logged_in") === "true") {
+    if (isAdminSessionValid()) {
         renderAdminDashboard();
     } else {
         closeAdminLoginModal();
@@ -2637,6 +3041,9 @@ window.getCart = getCart;
 window.saveCart = saveCart;
 window.renderCart = renderCart;
 window.addToCart = addToCart;
+window.goToCheckout = goToCheckout;
+window.changeCartItemQuantity = changeCartItemQuantity;
+window.removeFromCart = removeFromCart;
 window.getOrders = getOrders;
 window.saveOrders = saveOrders;
 window.renderOrders = renderOrders;
@@ -2646,6 +3053,7 @@ window.fillProfileForm = fillProfileForm;
 window.saveProfileSettings = saveProfileSettings;
 window.populateCheckoutForm = populateCheckoutForm;
 window.placeOrder = placeOrder;
+window.buyNow = buyNow;
 window.reviewOrder = reviewOrder;
 window.getLoggedInUser = getLoggedInUser;
 window.setLoggedInUser = setLoggedInUser;

@@ -17,26 +17,13 @@
       <button type="button" class="secondary-btn" onclick="loginWithProvider('facebook')">Continue with Facebook</button>
     </div>
     <div class="link">
-      <a href="index.html?admin=1">Admin login</a>
-    </div>
-    <div class="link">
       <a href="create-account.html">Create an account</a>
     </div>
   </div>
-  <script type="module" src="firebase-config.js"></script>
-  <script>
-  (async () => {
-    // Wait for Firebase to be ready
-    await new Promise(resolve => {
-      const checkFirebase = () => {
-        if (window.firebaseApi) {
-          resolve();
-        } else {
-          setTimeout(checkFirebase, 10);
-        }
-      };
-      checkFirebase();
-    });
+  <script type="module">
+  import { firebaseApi } from './firebase-config.js';
+
+  (() => {
 
     async function loginUser() {
       const identifier = document.getElementById('loginInput').value.trim();
@@ -58,9 +45,9 @@
       const button = document.getElementById('loginButton');
       button.disabled = true;
       try {
-        await window.firebaseApi.authReady;
-        const result = await window.firebaseApi.signIn(identifier.toLowerCase(), password);
-        const storedProfile = await window.firebaseApi.getUserProfile(result.user.uid);
+        await firebaseApi.authReady;
+        const result = await firebaseApi.signIn(identifier.toLowerCase(), password);
+        const storedProfile = await firebaseApi.getUserProfile(result.user.uid);
         const fullName = storedProfile?.name || storedProfile?.firstName || storedProfile?.firstname || result.user.displayName || '';
         const userProfile = {
           ...(storedProfile || {}),
@@ -83,11 +70,11 @@
       const buttons = document.querySelectorAll('.social-login button');
       buttons.forEach(button => { button.disabled = true; });
       try {
-        await window.firebaseApi.authReady;
+        await firebaseApi.authReady;
         const user = providerName === 'google'
-          ? await window.firebaseApi.signInWithGoogle()
-          : await window.firebaseApi.signInWithFacebook();
-        const storedProfile = await window.firebaseApi.getUserProfile(user.uid);
+          ? await firebaseApi.signInWithGoogle()
+          : await firebaseApi.signInWithFacebook();
+        const storedProfile = await firebaseApi.getUserProfile(user.uid);
         const name = storedProfile?.name || user.displayName || user.email?.split('@')[0] || 'Customer';
         const userProfile = { ...(storedProfile || {}), name, firstName: name.split(/\s+/)[0], email: user.email };
         localStorage.setItem('handicraft_logged_in_user', JSON.stringify(userProfile));
