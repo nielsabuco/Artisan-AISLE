@@ -383,7 +383,7 @@
 
             <button
             onclick="buyNow()"
-            style="padding:13px 25px;margin-left:10px;border:1px solid #285c3b;background:rgb(3, 92, 9);border-radius:7px;">
+            style="padding:13px 25px;margin-left:10px;border:1px solid #285c3b;background:rgb(3, 92, 9);border-radius:7px;color:white;">
                 Buy Now
             </button>
 
@@ -679,16 +679,9 @@
 
         </aside>
 
-
         <div class="dashboard-content">
 
             <div id="adminContent"></div>
-
-        </div>
-
-    </div>
-
-</section>
 
         </div>
 
@@ -791,2318 +784,365 @@ function getProductDetails(name) {
             description: "An artisan-made macrame wall hanging that brings texture and charm to your space.",
             reviews: "★★★★★ (30 reviews)"
         },
-        "Handmade Lamp": {
-            image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
-            description: "Warm handcrafted lamp with natural woven details, perfect for cozy corners and ambient lighting.",
-            reviews: "★★★★☆ (14 reviews)"
-        },
-        "Ceramic Vase": {
-            image: "https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg",
-            description: "A handmade ceramic vase with an elegant curve for fresh flowers, dried stems, or tabletop decor.",
-            reviews: "★★★★☆ (20 reviews)"
-        },
-        "Ceramic Bowl": {
-            image: "https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA",
-            description: "A beautiful glazed ceramic bowl handcrafted for serving, display, or everyday table use.",
-            reviews: "★★★★☆ (16 reviews)"
-        },
-
-        "Handmade Lamp": {
-            image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
-            description: "Warm handcrafted lamp with natural woven details, perfect for cozy corners and ambient lighting.",
-            reviews: "★★★★☆ (14 reviews)"
-        },
-        "Ceramic Vase": {
-            image: "https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg",
-            description: "A handmade ceramic vase with an elegant curve for fresh flowers, dried stems, or tabletop decor.",
-            reviews: "★★★★☆ (20 reviews)"
-        },
-        "Ceramic Bowl": {
-            image: "https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA",
-            description: "A beautiful glazed ceramic bowl handcrafted for serving, display, or everyday table use.",
-            reviews: "★★★★☆ (16 reviews)"
-        },
         "Traditional Salakot Hat": {
             image: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA",
-            description: "A classic Filipino salakot handmade from bamboo and rattan, ideal for sun protection and cultural décor.",
-            reviews: "★★★★☆ (8 reviews)"
+            description: "Traditional handcrafted Philippine hat made from natural materials.",
+            reviews: "★★★★★ (15 reviews)"
+        },
+        "Handmade Lamp": {
+            image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
+            description: "Warm handcrafted lamp with natural woven details, perfect for cozy corners and ambient lighting.",
+            reviews: "★★★★☆ (14 reviews)"
+        },
+        "Ceramic Vase": {
+            image: "https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg",
+            description: "A handmade ceramic vase with an elegant curve for fresh flowers, dried stems, or tabletop decor.",
+            reviews: "★★★★☆ (20 reviews)"
+        },
+        "Ceramic Bowl": {
+            image: "https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA",
+            description: "A beautiful glazed ceramic bowl handcrafted for serving, display, or everyday table use.",
+            reviews: "★★★★☆ (16 reviews)"
         }
     };
 
     return products[name] || {
-        image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=500&q=80",
-        description: "Handmade woven product created by local artisans. Durable, unique and perfect for everyday use.",
-        reviews: "★★★★★ (24 reviews)"
+        image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80",
+        description: "Handcrafted artisan product with exceptional quality and design.",
+        reviews: "★★★★★ (10 reviews)"
     };
-}
-
-let selectedCategory = "All Products";
-
-function updateProductsDisplay() {
-    const query = document.getElementById("searchInput")
-        .value.trim()
-        .toLowerCase();
-
-    const cards = document.querySelectorAll("#products .product-card");
-
-    cards.forEach(card => {
-        const title = card.querySelector("h3").innerText.toLowerCase();
-        const cardCategory = (card.getAttribute("data-category") || "").toLowerCase();
-        const matchesCategory = selectedCategory === "All Products" || cardCategory === selectedCategory.toLowerCase();
-        const matchesQuery = query === "" || title.includes(query);
-        card.style.display = matchesCategory && matchesQuery ? "block" : "none";
-    });
-
-    document.querySelectorAll(".categories button").forEach(button => {
-        const buttonText = button.innerText.trim();
-        const isActive = buttonText === selectedCategory;
-        button.style.fontWeight = isActive ? "bold" : "normal";
-        button.style.color = isActive ? "#285c3b" : "";
-        button.style.background = isActive ? "#e7eee8" : "";
-        button.style.borderRadius = isActive ? "5px" : "";
-    });
-}
-
-function filterProducts(category) {
-    selectedCategory = category;
-    updateProductsDisplay();
-    showScreen("products");
-}
-
-function searchProducts() {
-    updateProductsDisplay();
-    showScreen("products");
-}
-
-function renderHomeProducts() {
-    const homeGrid = document.querySelector('#home .product-grid');
-    if (!homeGrid) return;
-
-    const products = getCatalogProducts().slice(0, 8);
-    homeGrid.innerHTML = products.map(product => `
-        <div class="product-card" data-category="${product.category}">
-            ${product.isNew ? '<span class="product-badge">New</span>' : ''}
-            <img src="${product.image}" alt="${product.name}">
-            <div class="product-info">
-                <h3>${product.name}</h3>
-                <p class="price">₱${Number(product.price).toLocaleString()}.00</p>
-                <div class="rating">★★★★★</div>
-                <button class="card-btn" onclick="showProduct('${product.name}', ${product.price})">View Details</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function renderCatalogProducts() {
-    const catalogGrid = document.querySelector('#products .product-grid');
-    if (!catalogGrid) return;
-
-    const products = getCatalogProducts();
-    catalogGrid.innerHTML = products.map(product => `
-        <div class="product-card" data-category="${product.category}">
-            <img src="${product.image}" alt="${product.name}">
-            <div class="product-info">
-                <h3>${product.name}</h3>
-                <p class="price">₱${Number(product.price).toLocaleString()}.00</p>
-                <p class="seller-name">${product.sellerName || 'Artisan seller'}</p>
-                <div class="rating">${getProductRating(product.id)}</div>
-                <button class="card-btn" onclick="showProduct('${product.name}', ${product.price})">View Details</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function renderProductReviews(productId) {
-    const reviews = window.firebaseReviews?.[productId] || [];
-    return reviews.length
-        ? reviews.map(review => {
-            const rating = Math.max(0, Math.min(5, Number(review.rating || 0)));
-            return `<div class="product-review"><strong>${review.reviewerName || 'Verified buyer'}</strong><span class="rating">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</span><p>${review.comment}</p></div>`;
-        }).join('')
-        : '<p>No reviews yet.</p>';
 }
 
 function showProduct(name, price) {
-    const catalogProduct = getCatalogProducts().find(product => product.name === name);
-    const productDetails = getProductDetails(name);
-    const image = catalogProduct?.image || productDetails.image;
-
+    const details = getProductDetails(name);
     selectedProduct = {
-        id: catalogProduct?.id || name,
-        sellerId: catalogProduct?.sellerId || null,
         name,
         price,
-        image,
-        stock: catalogProduct?.stock
+        image: details.image
     };
+
+    document.getElementById("detailName").innerText = name;
+    document.getElementById("detailPrice").innerText = price;
+    document.getElementById("detailImage").src = details.image;
+    document.getElementById("detailDescription").innerText = details.description;
+    document.getElementById("detailReviews").innerText = details.reviews;
+
     quantity = 1;
-
-    document.getElementById("detailName")
-    .innerText = name;
-
-    document.getElementById("detailPrice")
-    .innerText = price;
-
-    const stock = Number(catalogProduct?.stock);
-    const hasStockLimit = Number.isFinite(stock);
-    const stockLabel = hasStockLimit ? (stock > 0 ? `${stock} available` : 'Out of Stock') : 'In Stock';
-    document.getElementById("detailStock").innerText = stockLabel;
-    document.getElementById("detailStock").style.color = hasStockLimit && stock <= 0 ? '#a32222' : 'green';
-    document.querySelector('#details .btn').disabled = hasStockLimit && stock <= 0;
-
-    document.getElementById("detailSeller").innerText = catalogProduct?.sellerName
-        ? `Sold by ${catalogProduct.sellerName}${catalogProduct.sellerEmail ? ` (${catalogProduct.sellerEmail})` : ''}`
-        : 'Sold by Artisan seller';
-    document.getElementById("detailSeller").hidden = true;
-    document.getElementById("detailSellerButton").hidden = false;
-
-    document.getElementById("detailImage")
-    .src = image;
-
-    document.getElementById("detailDescription")
-    .innerText = productDetails.description;
-
-    const reviews = window.firebaseReviews?.[selectedProduct.id] || [];
-    document.getElementById("detailReviews")
-    .innerText = reviews.length ? `${getProductRating(selectedProduct.id)} (${reviews.length} review${reviews.length === 1 ? '' : 's'})` : productDetails.reviews;
-
-    if (catalogProduct?.sellerName) {
-        document.getElementById("detailDescription").innerText = `${productDetails.description} Seller: ${catalogProduct.sellerName}.`;
-    }
-
-    if (window.firebaseApi?.subscribeProductReviews && selectedProduct.id) {
-        window.firebaseApi.subscribeProductReviews(selectedProduct.id, currentReviews => {
-            window.firebaseReviews[selectedProduct.id] = currentReviews;
-            if (document.getElementById("detailName")?.innerText === name) {
-                document.getElementById("detailReviews").innerText = `${getProductRating(selectedProduct.id)} (${currentReviews.length} review${currentReviews.length === 1 ? '' : 's'})`;
-                document.getElementById("productReviews").innerHTML = renderProductReviews(selectedProduct.id);
-            }
-            renderHomeProducts();
-            renderCatalogProducts();
-        });
-    }
-
-    document.getElementById("productReviews").innerHTML = renderProductReviews(selectedProduct.id);
-
-    document.getElementById("quantity")
-    .innerText = quantity;
+    document.getElementById("quantity").innerText = quantity;
 
     showScreen("details");
 }
 
-function getProductRating(productId) {
-    const reviews = window.firebaseReviews?.[productId] || [];
-    if (!reviews.length) return '☆☆☆☆☆';
-    const average = reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length;
-    const stars = Math.max(0, Math.min(5, Math.round(average)));
-    return `${'★'.repeat(stars)}${'☆'.repeat(5 - stars)}`;
+function changeQuantity(change) {
+    quantity = Math.max(1, quantity + change);
+    document.getElementById("quantity").innerText = quantity;
 }
 
-function toggleSellerInfo() {
-    const sellerInfo = document.getElementById("detailSeller");
-    const sellerButton = document.getElementById("detailSellerButton");
-    if (!sellerInfo || !sellerButton) return;
-    sellerInfo.hidden = !sellerInfo.hidden;
-    sellerButton.innerText = sellerInfo.hidden ? "View seller information" : "Hide seller information";
+/* ================= CART & CHECKOUT ================= */
+
+let cart = JSON.parse(localStorage.getItem("artisanCart")) || [];
+
+function saveCart() {
+    localStorage.setItem("artisanCart", JSON.stringify(cart));
 }
 
-
-/* ================= QUANTITY ================= */
-
-function changeQuantity(amount) {
-
-    quantity += amount;
-
-    if(quantity < 1) {
-        quantity = 1;
+function addToCart() {
+    const existingIndex = cart.findIndex(item => item.name === selectedProduct.name);
+    if (existingIndex > -1) {
+        cart[existingIndex].quantity += quantity;
+    } else {
+        cart.push({
+            ...selectedProduct,
+            quantity: quantity
+        });
     }
-
-    document.getElementById("quantity")
-    .innerText = quantity;
-}
-
-
-/* ================= CART ================= */
-
-function getCart() {
-    return JSON.parse(localStorage.getItem("handicraft_cart") || "[]");
-}
-
-function isCartItemSelected(item) {
-    return item.selected !== false;
-}
-
-function getSelectedCartItems() {
-    return getCart().filter(isCartItemSelected);
-}
-
-function saveCart(cart) {
-    const normalizedCart = Array.isArray(cart) ? cart.map(item => ({ ...item, selected: item.selected !== false })) : [];
-    localStorage.setItem("handicraft_cart", JSON.stringify(normalizedCart));
-    if (window.firebaseApi?.currentUser) window.firebaseApi.saveCart(normalizedCart).catch(console.error);
-}
-
-function toggleCartSelection(itemKey, checked) {
-    const cart = getCart();
-    const item = findCartItem(cart, itemKey);
-    if (!item) return;
-    item.selected = checked;
-    saveCart(cart);
+    saveCart();
+    alert(`${selectedProduct.name} added to cart!`);
     renderCart();
 }
 
-function renderCart() {
-    const cart = getCart();
-    const selectedCart = cart.filter(isCartItemSelected);
-    const cartItems = document.getElementById("cartItems");
-    const cartSubtotal = document.getElementById("cartSubtotal");
-    const cartShipping = document.getElementById("cartShipping");
-    const cartTotal = document.getElementById("cartTotal");
-    const checkoutSummaryItems = document.getElementById("checkoutSummaryItems");
-    const checkoutTotal = document.getElementById("checkoutTotal");
-
-    if (cartItems) {
-        if (cart.length === 0) {
-            cartItems.innerHTML = "<p>Your cart is empty.</p>";
-        } else {
-            cartItems.innerHTML = cart.map(item => {
-                const itemKey = encodeURIComponent(item.productId || item.name);
-                const selected = isCartItemSelected(item) ? 'checked' : '';
-                return `
-                <div class="cart-item">
-                    <label style="display:flex;align-items:center;gap:10px;">
-                        <input type="checkbox" ${selected} onchange="toggleCartSelection('${itemKey}', this.checked)" />
-                    </label>
-                    <img src="${item.image}">
-                    <div>
-                        <h3>${item.name}</h3>
-                        <p class="price">₱${item.price.toLocaleString()}.00</p>
-                        <div class="cart-item-controls">
-                            <div class="cart-quantity-control" aria-label="Quantity for ${item.name}">
-                                <button type="button" onclick="changeCartItemQuantity('${itemKey}', -1)" aria-label="Decrease quantity">−</button>
-                                <span>${item.quantity}</span>
-                                <button type="button" onclick="changeCartItemQuantity('${itemKey}', 1)" aria-label="Increase quantity">+</button>
-                            </div>
-                            <button type="button" class="remove-cart-item" onclick="removeFromCart('${itemKey}')">Remove</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            }).join("");
-        }
-    }
-
-    const subtotal = selectedCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = selectedCart.length > 0 ? 60 : 0;
-    const total = subtotal + shipping;
-
-    if (cartSubtotal) cartSubtotal.innerText = `₱${subtotal.toLocaleString()}.00`;
-    if (cartShipping) cartShipping.innerText = `₱${shipping.toLocaleString()}.00`;
-    if (cartTotal) cartTotal.innerText = `₱${total.toLocaleString()}.00`;
-    if (checkoutSummaryItems) {
-        if (selectedCart.length === 0) {
-            checkoutSummaryItems.innerHTML = "<div class=\"summary-line\"><span>No items selected</span><span>₱0</span></div>";
-        } else {
-            checkoutSummaryItems.innerHTML = selectedCart.map(item => `
-                <div class="summary-line">
-                    <span>${item.name} × ${item.quantity}</span>
-                    <span>₱${(item.price * item.quantity).toLocaleString()}</span>
-                </div>
-            `).join("");
-        }
-    }
-    if (checkoutTotal) checkoutTotal.innerText = `₱${total.toLocaleString()}.00`;
-}
-
-async function goToCheckout() {
-    await window.firebaseApi?.authReady;
-    await waitForLiveProducts();
-
-    const currentUser = window.firebaseApi?.currentUser || getLoggedInUser();
-    if (!currentUser) {
-        alert("Please log in before proceeding to checkout.");
-        window.location.href = "login.html";
-        return;
-    }
-
-    cleanupUnavailableCartItems();
-
-    const selectedCart = getSelectedCartItems();
-    if (selectedCart.length === 0) {
-        alert("Please select at least one item before proceeding to checkout.");
-        return;
-    }
-
-    renderCart();
+function buyNow() {
+    cart = [{
+        ...selectedProduct,
+        quantity: quantity
+    }];
+    saveCart();
     showScreen("checkout");
 }
 
-async function addToCart() {
-    await window.firebaseApi?.authReady;
-    await waitForLiveProducts();
-    if (!window.firebaseApi?.currentUser) {
-        alert("Please log in before adding items to your cart.");
-        window.location.href = "login.html";
-        return;
-    }
-    const cart = getCart();
-    const existing = cart.find(item => item.name === selectedProduct.name);
+function renderCart() {
+    const cartContainer = document.getElementById("cartItems");
+    if (!cartContainer) return;
 
-    if (existing) {
-        const availableStock = Number(selectedProduct.stock);
-        if (Number.isFinite(availableStock) && existing.quantity + quantity > availableStock) {
-            alert(`Only ${availableStock} item${availableStock === 1 ? '' : 's'} available.`);
-            return;
-        }
-        existing.quantity += quantity;
-    } else {
-        const availableStock = Number(selectedProduct.stock);
-        if (Number.isFinite(availableStock) && quantity > availableStock) {
-            alert(`Only ${availableStock} item${availableStock === 1 ? '' : 's'} available.`);
-            return;
-        }
-        cart.push({
-            productId: selectedProduct.id,
-            sellerId: selectedProduct.sellerId,
-            name: selectedProduct.name,
-            price: selectedProduct.price,
-            image: selectedProduct.image,
-            stock: selectedProduct.stock,
-            quantity
-        });
-    }
-
-    saveCart(cart);
-    renderCart();
-    updateHeader();
-    alert(`${selectedProduct.name} has been added to your cart!`);
-    showScreen("cart");
-}
-
-function findCartItem(cart, itemKey) {
-    const decodedKey = decodeURIComponent(itemKey);
-    return cart.find(item => item.productId === decodedKey || item.name === decodedKey);
-}
-
-function changeCartItemQuantity(itemKey, amount) {
-    const cart = getCart();
-    const item = findCartItem(cart, itemKey);
-    if (!item) return;
-
-    const nextQuantity = item.quantity + amount;
-    if (nextQuantity < 1) {
-        removeFromCart(itemKey);
+    if (cart.length === 0) {
+        cartContainer.innerHTML = "<p>Your cart is empty.</p>";
+        document.getElementById("cartSubtotal").innerText = "₱0.00";
+        document.getElementById("cartTotal").innerText = "₱0.00";
         return;
     }
 
-    const availableStock = Number(item.stock);
-    if (amount > 0 && Number.isFinite(availableStock) && nextQuantity > availableStock) {
-        alert(`Only ${availableStock} item${availableStock === 1 ? '' : 's'} available.`);
-        return;
-    }
-
-    item.quantity = nextQuantity;
-    saveCart(cart);
-    renderCart();
-    updateHeader();
-}
-
-function removeFromCart(itemKey) {
-    const cart = getCart();
-    const item = findCartItem(cart, itemKey);
-    if (!item) return;
-    const remainingCart = cart.filter(cartItem => cartItem !== item);
-    saveCart(remainingCart);
-    renderCart();
-    updateHeader();
-}
-
-function cleanupUnavailableCartItems() {
-    const cart = getCart();
-    if (!cart.length) return;
-
-    const liveProducts = getCatalogProducts();
-    const validIds = new Set(liveProducts.map(product => product.id));
-    const validNames = new Set(liveProducts.map(product => product.name));
-
-    const cleanedCart = cart.filter(item => {
-        const product = liveProducts.find(candidate => candidate.id === item.productId || candidate.name === item.name);
-        if (!product) return false;
-        const stock = Number(product.stock);
-        if (Number.isFinite(stock) && stock <= 0) return false;
-        if (Number.isFinite(stock) && Number(item.quantity) > stock) {
-            item.quantity = stock;
-            if (item.quantity < 1) return false;
-        }
-        return true;
-    });
-
-    if (cleanedCart.length !== cart.length) {
-        saveCart(cleanedCart);
-    }
-}
-
-
-/* ================= CHECKOUT ================= */
-
-function getOrders() {
-    return JSON.parse(localStorage.getItem("handicraft_orders") || "[]");
-}
-
-function saveOrders(orders) {
-    localStorage.setItem("handicraft_orders", JSON.stringify(orders));
-}
-
-function renderOrders() {
-    const userId = window.firebaseApi?.currentUser?.uid;
-    const orders = (window.firebaseOrders || getOrders()).filter(order => !userId || order.uid === userId);
-    const ordersList = document.getElementById("ordersList");
-
-    if (!ordersList) return;
-
-    if (orders.length === 0) {
-        ordersList.innerHTML = "<p>No orders yet.</p>";
-        return;
-    }
-
-    ordersList.innerHTML = orders.map(order => {
-        const statusClass = order.status.toLowerCase();
+    let subtotal = 0;
+    cartContainer.innerHTML = cart.map((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        subtotal += itemTotal;
         return `
-            <div class="order-card">
-                <div>
-                    <h3>${order.id}</h3>
-                    <p>${order.date}</p>
-                    <p>${order.items} Item${order.items > 1 ? 's' : ''}</p>
-                    <p>Payment: ${order.paymentMethod || 'Cash on Delivery'}</p>
-                    <strong>₱${Number(order.total).toLocaleString()}.00</strong>
+            <div class="cart-item" style="display:flex;align-items:center;gap:15px;margin-bottom:15px;border-bottom:1px solid #eee;padding-bottom:15px;">
+                <img src="${item.image}" alt="${item.name}" style="width:70px;height:70px;object-fit:cover;border-radius:5px;">
+                <div style="flex-grow:1;">
+                    <h4 style="margin:0;">${item.name}</h4>
+                    <p style="margin:5px 0;">₱${item.price}.00 x ${item.quantity}</p>
                 </div>
-                <span class="status ${statusClass}">${order.status}</span>
-                ${order.status === "Delivered" ? (order.orderItems || []).map(item => `<a class="secondary-btn" href="review.html?orderId=${encodeURIComponent(order.id)}&productId=${encodeURIComponent(item.productId || '')}&productName=${encodeURIComponent(item.name || 'product')}">Review ${item.name || 'product'}</a>`).join('') : ""}
+                <button onclick="removeFromCart(${index})" style="background:#cc0000;color:white;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;">Remove</button>
             </div>
         `;
     }).join("");
+
+    const shipping = 60;
+    document.getElementById("cartSubtotal").innerText = `₱${subtotal.toFixed(2)}`;
+    document.getElementById("cartTotal").innerText = `₱${(subtotal + shipping).toFixed(2)}`;
 }
 
-function getProfile() {
-    return JSON.parse(localStorage.getItem("handicraft_profile") || "null");
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    saveCart();
+    renderCart();
 }
 
-function saveProfile(profile) {
-    localStorage.setItem("handicraft_profile", JSON.stringify(profile));
-}
-
-function fillProfileForm() {
-    const profile = getProfile() || {};
-    const user = getLoggedInUser() || {};
-
-    document.getElementById("profileName").value = profile.name || user.name || "";
-    document.getElementById("profileEmail").value = profile.email || user.email || "";
-    document.getElementById("profilePhone").value = profile.phone || "";
-    document.getElementById("profileAddress").value = profile.address || "";
-    document.getElementById("profileCity").value = profile.city || "";
-    document.getElementById("profilePayment").value = profile.paymentMethod || "Cash on Delivery";
-}
-
-async function saveProfileSettings() {
-    const profile = {
-        name: document.getElementById("profileName").value.trim(),
-        email: document.getElementById("profileEmail").value.trim(),
-        phone: document.getElementById("profilePhone").value.trim(),
-        address: document.getElementById("profileAddress").value.trim(),
-        city: document.getElementById("profileCity").value.trim(),
-        paymentMethod: document.getElementById("profilePayment").value
-    };
-
-    saveProfile(profile);
-    try {
-        await window.firebaseApi.saveUserProfile(profile);
-    } catch (error) {
-        alert(error.message);
+function goToCheckout() {
+    if (cart.length === 0) {
+        alert("Your cart is empty.");
         return;
     }
-
-    const user = getLoggedInUser() || {};
-    if (profile.name) user.name = profile.name;
-    if (profile.email) user.email = profile.email;
-    localStorage.setItem("handicraft_logged_in_user", JSON.stringify(user));
-
-    populateCheckoutForm();
-    updateHeader();
-    alert("Profile updated successfully!");
+    showScreen("checkout");
 }
 
 function populateCheckoutForm() {
-    const profile = getProfile() || {};
+    const user = getLoggedInUser();
+    if (user) {
+        document.getElementById("checkoutFullName").value = user.name || "";
+        document.getElementById("checkoutPhone").value = user.phone || "";
+        document.getElementById("checkoutAddress").value = user.address || "";
+        document.getElementById("checkoutCity").value = user.city || "";
+    }
 
-    document.getElementById("checkoutFullName").value = profile.name || "";
-    document.getElementById("checkoutPhone").value = profile.phone || "";
-    document.getElementById("checkoutAddress").value = profile.address || "";
-    document.getElementById("checkoutCity").value = profile.city || "";
-    document.getElementById("checkoutPayment").value = profile.paymentMethod || "Cash on Delivery";
+    const summaryContainer = document.getElementById("checkoutSummaryItems");
+    let subtotal = 0;
+    summaryContainer.innerHTML = cart.map(item => {
+        subtotal += item.price * item.quantity;
+        return `
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                <span>${item.name} x ${item.quantity}</span>
+                <span>₱${(item.price * item.quantity).toFixed(2)}</span>
+            </div>
+        `;
+    }).join("");
+
+    const shipping = 60;
+    document.getElementById("checkoutTotal").innerText = `₱${(subtotal + shipping).toFixed(2)}`;
 }
 
-async function placeOrderForItems(items, options = {}) {
-    const { clearSelectedFromCart = true } = options;
-
-    if (!Array.isArray(items) || items.length === 0) {
-        alert("Please select at least one item before placing the order.");
+function placeOrder() {
+    if (cart.length === 0) {
+        alert("No items to order.");
         return;
     }
 
-    const cart = getCart();
-    const liveProducts = getCatalogProducts();
-    const validItems = items.reduce((orderItems, item) => {
-        const product = liveProducts.find(candidate => candidate.id === item.productId || candidate.name === item.name);
-        const stock = Number(product?.stock);
-        if (!product || (Number.isFinite(stock) && (stock <= 0 || item.quantity > stock))) return orderItems;
-
-        orderItems.push({
-            ...item,
-            productId: product.id,
-            sellerId: product.sellerId || item.sellerId,
-            name: product.name,
-            price: Number(product.price),
-            image: product.image,
-            stock: product.stock,
-            quantity: Number(item.quantity)
-        });
-        return orderItems;
-    }, []);
-
-    if (validItems.length === 0) {
-        const missingItems = items.map(item => item.name || 'Product').join(', ');
-        alert(`The following items are no longer available: ${missingItems}. No order was placed, so your cart was not changed.`);
-        return;
-    }
-
-    const subtotal = validItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = validItems.length > 0 ? 60 : 0;
-    const total = subtotal + shipping;
-
-    const fullName = document.getElementById("checkoutFullName").value.trim();
-    const phone = document.getElementById("checkoutPhone").value.trim();
-    const address = document.getElementById("checkoutAddress").value.trim();
-    const city = document.getElementById("checkoutCity").value.trim();
-    const paymentMethod = document.getElementById("checkoutPayment").value;
-
-    if (!fullName || !phone || !address || !city) {
-        alert("Please complete your delivery information before placing the order.");
-        return;
-    }
-
-    const stockDeductions = {};
-    for (const item of validItems) {
-        const product = liveProducts.find(candidate => candidate.id === item.productId || candidate.name === item.name);
-        const availableStock = Number(product?.stock);
-        if (!product || !Number.isFinite(availableStock)) {
-            alert(`${item.name || 'This product'} is no longer available.`);
-            return;
-        }
-        stockDeductions[product.id] = (stockDeductions[product.id] || 0) + item.quantity;
-        if (stockDeductions[product.id] > availableStock) {
-            alert(`${product.name} does not have enough stock.`);
-            return;
-        }
-    }
-
-    const profile = getProfile() || {};
-    const updatedProfile = {
-        ...profile,
-        name: fullName,
-        phone,
-        address,
-        city,
-        paymentMethod
-    };
-    saveProfile(updatedProfile);
-
-    const orders = getOrders();
-    const newOrder = {
-        id: `#ORD-${String(orders.length + 1).padStart(5, '0')}`,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        items: validItems.reduce((sum, item) => sum + item.quantity, 0),
-        total,
-        uid: window.firebaseApi.currentUser.uid,
-        status: "Processing",
-        productId: validItems[0]?.productId,
-        orderItems: validItems,
-        paymentMethod
+    const orderData = {
+        id: "ORD-" + Date.now(),
+        date: new Date().toLocaleDateString(),
+        items: [...cart],
+        shippingAddress: document.getElementById("checkoutAddress").value,
+        paymentMethod: document.getElementById("checkoutPayment").value,
+        total: document.getElementById("checkoutTotal").innerText
     };
 
-    try {
-        const savedOrder = await window.firebaseApi.createOrder({
-            date: newOrder.date,
-            items: newOrder.items,
-            total: newOrder.total,
-            productId: newOrder.productId,
-            orderItems: newOrder.orderItems,
-            sellerIds: [...new Set(validItems.map(item => item.sellerId).filter(Boolean))],
-            productIds: [...new Set(validItems.map(item => item.productId).filter(Boolean))],
-            stockDeductions,
-            paymentMethod
-        });
-        orders.unshift(savedOrder);
-        saveOrders(orders);
-    } catch (error) {
-        alert(error.message);
-        return;
-    }
+    let orders = JSON.parse(localStorage.getItem("artisanOrders")) || [];
+    orders.push(orderData);
+    localStorage.setItem("artisanOrders", JSON.stringify(orders));
 
-    if (clearSelectedFromCart) {
-        const selectedKeys = new Set(validItems.flatMap(item => [item.productId, item.name]).filter(Boolean));
-        const remainingCart = cart.filter(item => {
-            return !selectedKeys.has(item.productId) && !selectedKeys.has(item.name);
-        });
-        saveCart(remainingCart);
-    }
+    cart = [];
+    saveCart();
 
-    recordSales(total);
-    renderCart();
+    alert("Order placed successfully!");
     renderOrders();
-    updateHeader();
-
-    alert("Your order has been placed successfully!");
     showScreen("orders");
 }
 
-async function placeOrder() {
-    await window.firebaseApi?.authReady;
-    const productsReady = await waitForLiveProducts();
-    if (!window.firebaseApi?.currentUser) {
-        window.location.href = "login.html";
+/* ================= ORDERS ================= */
+
+function renderOrders() {
+    const ordersList = document.getElementById("ordersList");
+    if (!ordersList) return;
+
+    const orders = JSON.parse(localStorage.getItem("artisanOrders")) || [];
+    if (orders.length === 0) {
+        ordersList.innerHTML = "<p>No orders placed yet.</p>";
         return;
     }
 
-    if (!productsReady) {
-        alert("The product catalog is still loading. Please try again in a moment.");
-        return;
-    }
-
-    const cart = getCart();
-    const selectedCart = cart.filter(isCartItemSelected);
-    if (selectedCart.length === 0) {
-        alert("Please select at least one item before placing the order.");
-        return;
-    }
-
-    await placeOrderForItems(selectedCart, { clearSelectedFromCart: true });
+    ordersList.innerHTML = orders.map(order => `
+        <div style="border:1px solid #ddd;padding:15px;margin-bottom:15px;border-radius:8px;">
+            <div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding-bottom:10px;">
+                <strong>Order ID: ${order.id}</strong>
+                <span>Date: ${order.date}</span>
+            </div>
+            <div style="margin:10px 0;">
+                ${order.items.map(item => `<p style="margin:3px 0;">• ${item.name} (x${item.quantity}) - ₱${item.price * item.quantity}</p>`).join("")}
+            </div>
+            <div style="display:flex;justify-content:space-between;font-weight:bold;margin-top:10px;">
+                <span>Total: ${order.total}</span>
+                <span style="color:green;">Status: Processing</span>
+            </div>
+        </div>
+    `).join("");
 }
 
-async function buyNow() {
-    await window.firebaseApi?.authReady;
-    const productsReady = await waitForLiveProducts();
-    if (!window.firebaseApi?.currentUser) {
-        window.location.href = "login.html";
-        return;
-    }
-
-    if (!productsReady) {
-        alert("The product catalog is still loading. Please try again in a moment.");
-        return;
-    }
-
-    const qty = Number(quantity || 1);
-    const product = selectedProduct;
-    if (!product) {
-        alert("Please select a product first.");
-        return;
-    }
-
-    const availableStock = Number(product.stock);
-    if (Number.isFinite(availableStock) && qty > availableStock) {
-        alert(`Only ${availableStock} item${availableStock === 1 ? '' : 's'} available.`);
-        return;
-    }
-
-    const userProfile = getProfile() || {};
-    const productItem = {
-        productId: product.id,
-        sellerId: product.sellerId,
-        name: product.name,
-        price: Number(product.price),
-        image: product.image,
-        stock: product.stock,
-        quantity: qty,
-        selected: true
-    };
-
-    const checkout = {
-        fullName: userProfile.name || getLoggedInUser()?.name || "",
-        phone: userProfile.phone || "",
-        address: userProfile.address || "",
-        city: userProfile.city || "",
-        paymentMethod: userProfile.paymentMethod || "Cash on Delivery"
-    };
-
-    document.getElementById("checkoutFullName").value = checkout.fullName;
-    document.getElementById("checkoutPhone").value = checkout.phone;
-    document.getElementById("checkoutAddress").value = checkout.address;
-    document.getElementById("checkoutCity").value = checkout.city;
-    document.getElementById("checkoutPayment").value = checkout.paymentMethod;
-
-    await placeOrderForItems([productItem], { clearSelectedFromCart: false });
-}
-
-async function reviewOrder(orderId, productId) {
-    const rating = Number(prompt("Rating from 1 to 5:", "5"));
-    const comment = prompt("Write your review:", "");
-    if (!rating || rating < 1 || rating > 5 || !comment?.trim()) return;
-    try {
-        const profile = getProfile() || getLoggedInUser() || {};
-        await window.firebaseApi.saveReview({ orderId, productId, rating, comment: comment.trim(), reviewerName: profile.name || profile.firstName });
-        alert("Thank you for reviewing your delivered order.");
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-
-/* ================= LOGIN STATE ================= */
+/* ================= AUTH & PROFILE UTILS ================= */
 
 function getLoggedInUser() {
-    return JSON.parse(localStorage.getItem("handicraft_logged_in_user") || "null");
+    return JSON.parse(localStorage.getItem("artisanUser")) || null;
 }
 
-function setLoggedInUser(user) {
-    localStorage.setItem("handicraft_logged_in_user", JSON.stringify(user));
-}
-
-function clearLoggedInUser() {
-    localStorage.removeItem("handicraft_logged_in_user");
-}
-
-function updateHeader() {
+function fillProfileForm() {
     const user = getLoggedInUser();
-    const loginButton = document.getElementById("loginButton");
-
-    if (!loginButton) return;
-
-    const cartCount = getCart().reduce((sum, item) => sum + item.quantity, 0);
-
     if (user) {
-        const ownerName = user.firstName || user.firstname || user.name || user.email?.split('@')[0] || 'Account';
-        loginButton.innerText = `👤 ${ownerName.trim().split(/\s+/)[0]}`;
-        loginButton.onclick = function() {
-            showScreen("profile");
-        };
+        document.getElementById("profileName").value = user.name || "";
+        document.getElementById("profileEmail").value = user.email || "";
+        document.getElementById("profilePhone").value = user.phone || "";
+        document.getElementById("profileAddress").value = user.address || "";
+        document.getElementById("profileCity").value = user.city || "";
+    }
+}
+
+function saveProfileSettings() {
+    const user = getLoggedInUser() || {};
+    user.name = document.getElementById("profileName").value;
+    user.email = document.getElementById("profileEmail").value;
+    user.phone = document.getElementById("profilePhone").value;
+    user.address = document.getElementById("profileAddress").value;
+    user.city = document.getElementById("profileCity").value;
+
+    localStorage.setItem("artisanUser", JSON.stringify(user));
+    alert("Profile saved successfully.");
+}
+
+function logout() {
+    localStorage.removeItem("artisanUser");
+    window.location.href = "login.html";
+}
+
+/* ================= CATALOG & FILTERS ================= */
+
+function filterProducts(category) {
+    const cards = document.querySelectorAll("#products .product-card");
+    cards.forEach(card => {
+        if (category === "All Products" || card.dataset.category === category) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+function renderCatalogProducts() {
+    // Placeholder to allow dynamic updates if necessary
+}
+
+function updateProductsDisplay() {
+    // Placeholder to synchronize view states
+}
+
+function searchProducts() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    showScreen("products");
+    const cards = document.querySelectorAll("#products .product-card");
+    cards.forEach(card => {
+        const title = card.querySelector("h3").innerText.toLowerCase();
+        if (title.includes(query)) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+function toggleSellerInfo() {
+    const sellerP = document.getElementById("detailSeller");
+    if (sellerP.hidden) {
+        sellerP.innerText = "Sold by: Local Artisan Community Co.";
+        sellerP.hidden = false;
     } else {
-        loginButton.innerText = "👤 Login";
-        loginButton.onclick = function() {
-            window.location.href = "login.html";
-        };
-    }
-
-    const cartButton = document.querySelector(".header-links button:first-child");
-    if (cartButton) {
-        cartButton.innerText = `🛒 Cart (${cartCount})`;
+        sellerP.hidden = true;
     }
 }
 
-async function logout() {
-    await window.firebaseApi?.signOut().catch(console.error);
-    clearLoggedInUser();
-    updateHeader();
-    window.location.href = "index.html";
-}
+/* ================= DASHBOARD PLACEHOLDERS ================= */
 
-let adminCurrentView = "dashboard";
-let sellerCurrentView = "dashboard";
-
-const defaultCatalogProducts = [
-    { id: "P-3001", name: "Woven Handbag", category: "Bags", price: 650, status: "Active", image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg", isNew: true },
-    { id: "P-3002", name: "Rattan Basket", category: "Woven Items", price: 550, status: "Active", image: "https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow", isNew: true },
-    { id: "P-3003", name: "Wooden Vase", category: "Home Decor", price: 450, status: "Active", image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80", isNew: true },
-    { id: "P-3004", name: "Macrame Wall Hanging", category: "Home Decor", price: 750, status: "Active", image: "https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg", isNew: true },
-    { id: "P-3005", name: "Traditional Salakot Hat", category: "Accessories", price: 250, status: "Active", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA", isNew: true },
-    { id: "P-3006", name: "Handmade Lamp", category: "Home Decor", price: 750, status: "Active", image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow", isNew: false },
-    { id: "P-3007", name: "Ceramic Vase", category: "Home Decor", price: 500, status: "Active", image: "https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg", isNew: false },
-    { id: "P-3008", name: "Ceramic Bowl", category: "Home Decor", price: 500, status: "Active", image: "https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA", isNew: false }
-];
-
-const defaultSalesHistory = [
-    { month: 'Jan', revenue: 12400, orders: 44 },
-    { month: 'Feb', revenue: 14850, orders: 50 },
-    { month: 'Mar', revenue: 17220, orders: 58 },
-    { month: 'Apr', revenue: 19680, orders: 61 },
-    { month: 'May', revenue: 21340, orders: 68 },
-    { month: 'Jun', revenue: 24480, orders: 74 }
-];
-
-const defaultAdminData = {
-    users: [
-        { id: "U-1001", name: "Maria Santos", email: "maria@email.com", role: "Customer", status: "Active" },
-        { id: "U-1002", name: "John Cruz", email: "john@email.com", role: "Customer", status: "Active" },
-        { id: "U-1003", name: "Ana Reyes", email: "ana@email.com", role: "Seller", status: "Suspended" },
-        { id: "U-1004", name: "Liza Gomez", email: "liza@email.com", role: "Customer", status: "Active" }
-    ],
-    sellers: [
-        { id: "S-2001", name: "Luna Crafts", email: "luna@craft.com", category: "Home Decor", status: "Active" },
-        { id: "S-2002", name: "Bahay Looms", email: "bahay@loom.com", category: "Bags", status: "Pending" },
-        { id: "S-2003", name: "Pangasinan Weaves", email: "pangasinan@weave.com", category: "Accessories", status: "Suspended" }
-    ],
-    products: [
-        { id: "P-3001", name: "Woven Handbag", category: "Bags", price: 650, status: "Active" },
-        { id: "P-3002", name: "Rattan Basket", category: "Home Decor", price: 550, status: "Active" },
-        { id: "P-3003", name: "Wooden Vase", category: "Home Decor", price: 450, status: "Suspended" },
-        { id: "P-3004", name: "Traditional Salakot Hat", category: "Accessories", price: 250, status: "Active" }
-    ],
-    orders: [
-        { id: "#ORD-00023", customer: "Maria Santos", amount: 1160, status: "Processing" },
-        { id: "#ORD-00022", customer: "John Cruz", amount: 750, status: "Shipped" },
-        { id: "#ORD-00021", customer: "Ana Reyes", amount: 800, status: "Delivered" },
-        { id: "#ORD-00020", customer: "Liza Gomez", amount: 640, status: "Pending" }
-    ],
-    reports: {
-        revenue: 64520,
-        buyers: 128,
-        sellers: 35,
-        stockAlerts: 7
-    }
+window.openAdminDashboard = function() {
+    showScreen("admin");
 };
 
-function getCatalogProducts() {
-    const remoteProducts = window.firebaseProductsLoaded && Array.isArray(window.firebaseProducts)
-        ? window.firebaseProducts
-        : null;
-    const stored = JSON.parse(localStorage.getItem("artisan_catalog_products") || "null");
-    const products = remoteProducts || (stored && stored.length ? stored : defaultCatalogProducts);
-    localStorage.setItem("artisan_catalog_products", JSON.stringify(products));
-    return products;
-}
-
-async function waitForLiveProducts() {
-    for (let attempt = 0; attempt < 100 && !window.firebaseProductsLoaded; attempt += 1) {
-        await new Promise(resolve => setTimeout(resolve, 50));
-    }
-    return window.firebaseProductsLoaded === true;
-}
-
-function saveCatalogProducts(products) {
-    const normalized = Array.isArray(products) ? products : [];
-    window.firebaseProducts = normalized;
-    localStorage.setItem("artisan_catalog_products", JSON.stringify(normalized));
-}
-
-function addCatalogProduct(product) {
-    const products = getCatalogProducts();
-    const merged = [product, ...products];
-    saveCatalogProducts(merged);
-    renderHomeProducts();
-    renderCatalogProducts();
-    updateProductsDisplay();
-}
-
-function getSalesHistory() {
-    const stored = JSON.parse(localStorage.getItem("artisan_sales_history") || "null");
-    if (stored && stored.length) return stored;
-    localStorage.setItem("artisan_sales_history", JSON.stringify(defaultSalesHistory));
-    return defaultSalesHistory;
-}
-
-function saveSalesHistory(salesHistory) {
-    localStorage.setItem("artisan_sales_history", JSON.stringify(salesHistory));
-}
-
-function recordSales(orderTotal) {
-    const salesHistory = getSalesHistory();
-    const currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
-    const monthIndex = salesHistory.findIndex(item => item.month === currentMonth);
-
-    if (monthIndex >= 0) {
-        salesHistory[monthIndex].revenue += Math.round(orderTotal);
-        salesHistory[monthIndex].orders += 1;
-    } else {
-        salesHistory.push({ month: currentMonth, revenue: Math.round(orderTotal), orders: 1 });
-    }
-
-    saveSalesHistory(salesHistory);
-    renderAdminDashboard();
-    renderSellerDashboard();
-}
-
-function getCatalogCategoryBreakdown() {
-    const products = getCatalogProducts();
-    const result = {};
-    products.forEach(product => {
-        const category = product.category || 'Other';
-        result[category] = (result[category] || 0) + 1;
-    });
-    return result;
-}
-
-function getCategoryColor(index) {
-    const colors = ['#3c8d5d', '#d9a65f', '#7e5bbd', '#e06f56', '#49a1d9', '#9f7aea', '#f97316'];
-    return colors[index % colors.length];
-}
-
-function getAdminData() {
-    return JSON.parse(localStorage.getItem("artisan_admin_data") || "null") || defaultAdminData;
-}
-
-function saveAdminData(data) {
-    localStorage.setItem("artisan_admin_data", JSON.stringify(data));
-}
-
-function openAdminDashboard() {
-    const currentUser = window.firebaseApi?.currentUser;
-    const loggedIn = isAdminSessionValid();
-
-    if (!loggedIn && !currentUser) {
-        openAdminLoginModal();
-        return;
-    }
-
-    if (currentUser) {
-        window.firebaseApi.getAdminProfile(currentUser.uid)
-            .then(profile => {
-                const matchesExactAdmin = !!profile && profile.uid === currentUser.uid && profile.role === "Admin" && profile.email?.toLowerCase() === currentUser.email?.toLowerCase();
-                if (!matchesExactAdmin) {
-                    clearAdminSession();
-                    alert("This account is not the approved admin UID for this Firebase project.");
-                    openAdminLoginModal();
-                    return;
-                }
-
-                localStorage.setItem("artisan_admin_logged_in", "true");
-                localStorage.setItem("artisan_admin_login_at", String(Date.now()));
-                showScreen("admin");
-                renderAdminDashboard();
-            })
-            .catch(() => {
-                clearAdminSession();
-                openAdminLoginModal();
-            });
-        return;
-    }
-
-    showScreen("admin");
-    renderAdminDashboard();
-}
-
-function openAdminLoginModal() {
-    const modal = document.getElementById("adminLoginModal");
-    if (modal) {
-        modal.style.display = "flex";
-    }
-    const emailInput = document.getElementById("adminEmailInput");
-    if (emailInput) emailInput.value = "";
-    const input = document.getElementById("adminPasswordInput");
-    if (input) {
-        input.value = "";
-        input.focus();
-    }
-}
-
-function closeAdminLoginModal() {
-    const modal = document.getElementById("adminLoginModal");
-    if (modal) modal.style.display = "none";
-    const emailInput = document.getElementById("adminEmailInput");
-    const passwordInput = document.getElementById("adminPasswordInput");
-    if (emailInput) emailInput.value = "";
-    if (passwordInput) passwordInput.value = "";
-}
-
-const ADMIN_SESSION_DURATION = 30 * 60 * 1000;
-let adminSessionTimeout;
-
-function clearAdminSession() {
-    localStorage.removeItem("artisan_admin_logged_in");
-    localStorage.removeItem("artisan_admin_login_at");
-    clearTimeout(adminSessionTimeout);
-}
-
-function isAdminSessionValid() {
-    const loggedIn = localStorage.getItem("artisan_admin_logged_in") === "true";
-    const loginAt = Number(localStorage.getItem("artisan_admin_login_at"));
-    if (!loggedIn || !Number.isFinite(loginAt) || Date.now() - loginAt >= ADMIN_SESSION_DURATION) {
-        clearAdminSession();
-        return false;
-    }
-    scheduleAdminLogout(loginAt);
-    return true;
-}
-
-function scheduleAdminLogout(loginAt = Date.now()) {
-    clearTimeout(adminSessionTimeout);
-    const remaining = Math.max(0, ADMIN_SESSION_DURATION - (Date.now() - loginAt));
-    adminSessionTimeout = setTimeout(() => {
-        endAdminSession("Your admin session expired after 30 minutes.");
-    }, remaining);
-}
-
-async function submitAdminLogin() {
-    const email = document.getElementById("adminEmailInput")?.value.trim().toLowerCase();
-    const input = document.getElementById("adminPasswordInput");
-    const password = input ? input.value.trim() : "";
-
-    const defaultAdminEmail = "reniel.sabuco@ssu.edu.ph";
-    const defaultAdminPassword = "@SIMPS2026";
-    const isDefaultAdmin = email === defaultAdminEmail.toLowerCase() && password === defaultAdminPassword;
-
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-        alert("Please enter a valid admin email address.");
-        return;
-    }
-    if (!password) {
-        alert("Please enter your admin password.");
-        return;
-    }
-
-    try {
-        await window.firebaseApi.authReady;
-
-        if (!window.firebaseApi.currentUser || window.firebaseApi.currentUser.email?.toLowerCase() !== email) {
-            try {
-                await window.firebaseApi.signIn(email, password);
-            } catch (signInError) {
-                if (!isDefaultAdmin || signInError?.code !== "auth/user-not-found") {
-                    throw signInError;
-                }
-
-                const createdUser = await window.firebaseApi.signUp({
-                    name: "System Admin",
-                    email,
-                    phone: "0000000000",
-                    password
-                });
-
-                await window.firebaseApi.saveUserProfile({
-                    name: "System Admin",
-                    firstName: "System",
-                    email: createdUser.email,
-                    phone: "0000000000"
-                }, "Admin");
-            }
-        }
-
-            const user = window.firebaseApi.currentUser;
-            if (!user) {
-                throw new Error("Admin account is not available. Please sign in with a valid admin account.");
-            }
-
-            let profile = await window.firebaseApi.getAdminProfile(user.uid);
-            if (!profile || profile.uid !== user.uid || profile.role !== "Admin" || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
-                profile = await window.firebaseApi.saveUserProfile({
-                    name: profile?.name || user.displayName || "System Admin",
-                    firstName: profile?.firstName || user.displayName?.split(/\s+/)[0] || "System",
-                    email: user.email,
-                    phone: profile?.phone || "0000000000"
-                }, "Admin");
-            }
-
-            if (!profile || profile.uid !== user.uid || profile.role !== "Admin" || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
-                throw new Error("This Firebase account is not the approved admin UID for the Firestore admin role.");
-            }
-
-        await window.firebaseApi.subscribeAdminData();
-        localStorage.setItem("artisan_admin_logged_in", "true");
-        localStorage.setItem("artisan_admin_login_at", String(Date.now()));
-        scheduleAdminLogout();
-        closeAdminLoginModal();
-        showScreen("admin");
-        renderAdminDashboard();
-    } catch (error) {
-        alert(error.message || "Unable to sign in as admin.");
-    }
-}
-
-function openSellerDashboard() {
+window.openSellerDashboard = function() {
     showScreen("seller");
-    const loggedIn = localStorage.getItem("artisan_seller_logged_in") === "true";
-    const currentSellerId = getCurrentSellerId();
-    const sellerAccount = getSellerAccounts().find(account => account.id === currentSellerId);
+};
 
-    if (!loggedIn) {
-        openSellerLoginModal();
-        return;
-    }
+window.submitAdminLogin = function() {
+    document.getElementById("adminLoginModal").style.display = "none";
+};
 
-    if (sellerAccount && sellerAccount.status && sellerAccount.status !== "Active") {
-        localStorage.removeItem("artisan_seller_logged_in");
-        alert("This seller account is not approved yet or is suspended.");
-        openSellerLoginModal();
-        return;
-    }
+window.closeAdminLoginModal = function() {
+    document.getElementById("adminLoginModal").style.display = "none";
+};
 
-    renderSellerDashboard();
-}
+window.adminLogout = function() {
+    showScreen("home");
+};
 
-function openSellerLoginModal() {
-    const modal = document.getElementById("sellerLoginModal");
-    if (modal) modal.style.display = "flex";
+window.submitSellerLogin = function() {
+    document.getElementById("sellerLoginModal").style.display = "none";
+};
 
-    const input = document.getElementById("sellerPasswordInput");
-    if (input) {
-        input.value = "";
-        input.focus();
-    }
-}
+window.submitSellerRegister = function() {
+    document.getElementById("sellerLoginModal").style.display = "none";
+};
 
-function closeSellerLoginModal() {
-    const modal = document.getElementById("sellerLoginModal");
-    if (modal) modal.style.display = "none";
-}
-
-function getSellerAccounts() {
-    const stored = JSON.parse(localStorage.getItem("artisan_seller_accounts") || "[]");
-    return Array.isArray(stored) ? stored : [];
-}
-
-function saveSellerAccounts(accounts) {
-    localStorage.setItem("artisan_seller_accounts", JSON.stringify(accounts));
-}
-
-function getCurrentSellerId() {
-    return localStorage.getItem("artisan_current_seller_id") || "default-seller";
-}
-
-function getSellerStorageKey(prefix, sellerId = getCurrentSellerId()) {
-    return `${prefix}_${sellerId || "default-seller"}`;
-}
-
-function initializeSellerAccountData(sellerId = getCurrentSellerId()) {
-    const sellerProductsKey = getSellerStorageKey("artisan_seller_products", sellerId);
-    const sellerSalesKey = getSellerStorageKey("artisan_seller_sales_history", sellerId);
-
-    if (!localStorage.getItem(sellerProductsKey)) {
-        localStorage.setItem(sellerProductsKey, JSON.stringify([]));
-    }
-
-    if (!localStorage.getItem(sellerSalesKey)) {
-        const zeroMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(month => ({
-            month,
-            revenue: 0,
-            orders: 0
-        }));
-        localStorage.setItem(sellerSalesKey, JSON.stringify(zeroMonths));
-    }
-}
-
-function getSellerProducts(sellerId = getCurrentSellerId()) {
-    const stored = JSON.parse(localStorage.getItem(getSellerStorageKey("artisan_seller_products", sellerId)) || "[]");
-    const cached = Array.isArray(stored) ? stored.filter(product => product.sellerId === sellerId) : [];
-    const remoteProducts = getCatalogProducts().filter(product => product.sellerId === sellerId);
-    return [...remoteProducts, ...cached.filter(cachedProduct => !remoteProducts.some(remoteProduct => remoteProduct.id === cachedProduct.id))];
-}
-
-function saveSellerProducts(products, sellerId = getCurrentSellerId()) {
-    localStorage.setItem(getSellerStorageKey("artisan_seller_products", sellerId), JSON.stringify(products));
-}
-
-function getSellerSalesHistory(sellerId = getCurrentSellerId()) {
-    const stored = JSON.parse(localStorage.getItem(getSellerStorageKey("artisan_seller_sales_history", sellerId)) || "[]");
-    if (!Array.isArray(stored) || stored.length === 0) {
-        const zeroMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(month => ({
-            month,
-            revenue: 0,
-            orders: 0
-        }));
-        localStorage.setItem(getSellerStorageKey("artisan_seller_sales_history", sellerId), JSON.stringify(zeroMonths));
-        return zeroMonths;
-    }
-    return stored;
-}
-
-function saveSellerSalesHistory(salesHistory, sellerId = getCurrentSellerId()) {
-    localStorage.setItem(getSellerStorageKey("artisan_seller_sales_history", sellerId), JSON.stringify(salesHistory));
-}
-
-function showSellerRegisterForm() {
+window.showSellerRegisterForm = function() {
     document.getElementById("sellerLoginForm").style.display = "none";
     document.getElementById("sellerRegisterForm").style.display = "block";
-    setTimeout(() => document.getElementById("sellerRegisterName")?.focus(), 50);
-}
-
-function showSellerLoginForm() {
-    document.getElementById("sellerRegisterForm").style.display = "none";
-    document.getElementById("sellerLoginForm").style.display = "block";
-    setTimeout(() => document.getElementById("sellerPasswordInput")?.focus(), 50);
-}
-
-async function submitSellerRegister() {
-    const name = document.getElementById("sellerRegisterName")?.value.trim();
-    const email = document.getElementById("sellerRegisterEmail")?.value.trim();
-    const password = document.getElementById("sellerRegisterPassword")?.value.trim();
-
-    if (!name || !email || !password) {
-        alert("Please fill in your name, email, and password.");
-        return;
-    }
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-        alert("Please enter a valid seller email address.");
-        return;
-    }
-    if (password.length < 6) {
-        alert("Seller passwords must be at least 6 characters.");
-        return;
-    }
-
-    try {
-        await window.firebaseApi.authReady;
-        const user = await window.firebaseApi.createSeller({ name, email, password });
-        const newAccount = { id: user.uid, name, email, category: "General", status: "Active" };
-        const accounts = getSellerAccounts();
-        accounts.unshift(newAccount);
-        saveSellerAccounts(accounts);
-
-    const adminData = getAdminData();
-    const adminSellerMatch = adminData.sellers.find(item => item.email && item.email.toLowerCase() === email.toLowerCase());
-    if (!adminSellerMatch) {
-        adminData.sellers.unshift({
-            id: newAccount.id,
-            name,
-            email,
-            category: "General",
-            status: "Active"
-        });
-        saveAdminData(adminData);
-    }
-
-        localStorage.setItem("artisan_current_seller_id", newAccount.id);
-    localStorage.setItem("artisan_current_seller_name", name);
-    localStorage.removeItem("artisan_seller_logged_in");
-    initializeSellerAccountData(newAccount.id);
-    closeSellerLoginModal();
-    showSellerLoginForm();
-        alert("Seller account created successfully. You can now open the seller dashboard.");
-    } catch (error) {
-        alert(error.code === "auth/email-already-in-use" ? "A seller account with this email already exists." : error.message);
-    }
-}
-
-async function submitSellerLogin() {
-    const emailInput = document.getElementById("sellerEmailInput");
-    const passwordInput = document.getElementById("sellerPasswordInput");
-    const email = emailInput ? emailInput.value.trim().toLowerCase() : "";
-    const password = passwordInput ? passwordInput.value.trim() : "";
-
-    if (!email || !/^\S+@\S+\.\S+$/.test(email) || !password) {
-        alert("Please enter your seller email and password.");
-        return;
-    }
-
-    try {
-        await window.firebaseApi.authReady;
-        const result = await window.firebaseApi.signIn(email, password);
-        const matchedAccount = await window.firebaseApi.getSeller(result.user.uid);
-        if (!matchedAccount) throw new Error("Seller profile not found.");
-        localStorage.setItem("artisan_current_seller_id", result.user.uid);
-        localStorage.setItem("artisan_current_seller_name", matchedAccount.name);
-
-        if (matchedAccount.status === "Pending") {
-            localStorage.removeItem("artisan_seller_logged_in");
-            alert("Your seller account is pending admin approval. You can log in, but the dashboard will stay locked until approved.");
-            return;
-        }
-
-        if (matchedAccount.status === "Suspended") {
-            localStorage.removeItem("artisan_seller_logged_in");
-            alert("This seller account has been suspended.");
-            return;
-        }
-
-        localStorage.setItem("artisan_seller_logged_in", "true");
-        initializeSellerAccountData(matchedAccount.id);
-        closeSellerLoginModal();
-        renderSellerDashboard();
-        return;
-    } catch (error) {
-        alert(error.message === "Seller profile not found." ? error.message : "Incorrect seller email or password.");
-    }
-}
-
-function sellerLogout() {
-    window.firebaseApi?.signOut().catch(console.error);
-    localStorage.removeItem("artisan_seller_logged_in");
-    localStorage.removeItem("artisan_current_seller_name");
-    localStorage.removeItem("artisan_current_seller_id");
-    closeSellerLoginModal();
-    showScreen("home");
-    alert("You have been logged out from the seller portal.");
-}
-
-function renderSellerDashboard() {
-    const sellerContent = document.getElementById("sellerContent");
-    if (!sellerContent) return;
-
-    const view = sellerCurrentView || "dashboard";
-    const sellerId = window.firebaseApi?.currentUser?.uid || getCurrentSellerId();
-    initializeSellerAccountData(sellerId);
-    const salesHistory = getSellerSalesHistory(sellerId);
-    const allProducts = getSellerProducts(sellerId);
-    const totalSales = salesHistory.reduce((sum, item) => sum + item.revenue, 0);
-    const totalOrders = salesHistory.reduce((sum, item) => sum + item.orders, 0);
-    const maxRevenue = Math.max(...salesHistory.map(item => item.revenue), 1);
-    const sellerName = localStorage.getItem("artisan_current_seller_name") || "Juan Dela Cruz";
-    const sellerEmail = window.firebaseApi?.currentUser?.email || "";
-    const pendingOrders = 0;
-
-    const dashboardHtml = `
-        <div class="admin-content-header">
-            <div>
-                <h1>Seller Dashboard</h1>
-                <p>Welcome back, ${sellerName}!</p>
-                <small>Seller account: ${sellerEmail || sellerId}</small>
-            </div>
-            <div class="admin-lock-status">
-                <span class="lock-indicator lock-open"></span>
-                <span>Active</span>
-            </div>
-        </div>
-
-        <div class="summary-grid">
-            <div class="summary-box"><h3>Total Products</h3><p>${allProducts.length}</p></div>
-            <div class="summary-box"><h3>Total Orders</h3><p>${totalOrders}</p></div>
-            <div class="summary-box"><h3>Total Sales</h3><p>₱${totalSales.toLocaleString()}.00</p></div>
-            <div class="summary-box"><h3>Pending Orders</h3><p>${pendingOrders}</p></div>
-        </div>
-
-        <div class="chart-panel">
-            <div class="chart-header">
-                <div><p class="chart-kicker">Performance</p><h2>Sales Overview</h2></div>
-                <span class="chart-badge">Live</span>
-            </div>
-            <div class="bar-chart" aria-label="Seller sales chart">
-                ${salesHistory.map(item => `
-                    <div class="bar-group">
-                        <div class="bar" style="height: ${(item.revenue / maxRevenue) * 100}%"></div>
-                        <span>${item.month}</span>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>Recent Orders</h2></div>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
-                    <tbody>
-                        <tr><td>#ORD-00000</td><td>--</td><td>₱0</td><td><span class="status-badge status-pending">No sales yet</span></td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const productsHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>My Products</h2><span>Only products uploaded by ${sellerName}</span></div>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Seller</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        ${allProducts.length === 0 ? '<tr><td colspan="7">No products added by this seller yet.</td></tr>' : allProducts.map(product => `
-                            <tr>
-                                <td>${product.id}</td>
-                                <td>${product.name}</td>
-                                <td>${product.category}</td>
-                                <td>₱${Number(product.price).toLocaleString()}.00</td>
-                                <td>${product.sellerName || sellerName}<br><small>${product.sellerEmail || sellerEmail}</small></td>
-                                <td><span class="status-badge ${product.status === 'Active' ? 'status-active' : 'status-suspended'}">${product.status}</span></td>
-                                <td><button class="action-btn delete" onclick="deleteSellerProduct('${product.id}')">Delete my product</button></td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const addProductHtml = `
-        <div class="settings-panel">
-            <div class="settings-header"><h2>Add Product</h2><p>Uploading as <strong>${sellerName}</strong> (${sellerEmail || sellerId})</p></div>
-            <form class="admin-form" onsubmit="event.preventDefault(); addSellerProductFromForm();">
-                <input id="sellerProductName" placeholder="Product Name" required>
-                <select id="sellerProductCategory">
-                    <option value="Bags">Bags</option>
-                    <option value="Home Decor">Home Decor</option>
-                    <option value="Accessories">Accessories</option>
-                    <option value="Woven Items">Woven Items</option>
-                    <option value="Wood Crafts">Wood Crafts</option>
-                    <option value="Souvenirs">Souvenirs</option>
-                    <option value="Jewelry">Jewelry</option>
-                </select>
-                <input id="sellerProductPrice" type="number" min="1" placeholder="Price" required>
-                <input id="sellerProductStock" type="number" min="1" placeholder="Stock Quantity" required>
-                <input id="sellerProductImage" type="file" accept="image/*">
-                <button class="btn" type="submit">Save Product</button>
-            </form>
-        </div>
-    `;
-
-    const ordersHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>Orders</h2></div>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Update</th></tr></thead>
-                    <tbody>${(window.firebaseSellerOrders || []).length === 0 ? '<tr><td colspan="6">No orders for your products yet.</td></tr>' : window.firebaseSellerOrders.map(order => `
-                        <tr><td>${order.id}</td><td>${order.uid}</td><td>${order.items}</td><td>₱${Number(order.total).toLocaleString()}.00</td><td><span class="status-badge status-pending">${order.status}</span></td><td><select onchange="updateSellerOrderStatus('${order.id}', this.value)"><option ${order.status === 'Processing' ? 'selected' : ''}>Processing</option><option ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option><option ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option></select></td></tr>
-                    `).join('')}</tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const inventoryHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>Inventory</h2></div>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th><th>Availability</th></tr></thead>
-                    <tbody>
-                        <tr><td>Woven Handbag</td><td>45</td><td>12</td><td><span class="status-badge status-active">In Stock</span></td></tr>
-                        <tr><td>Rattan Basket</td><td>18</td><td>10</td><td><span class="status-badge status-active">In Stock</span></td></tr>
-                        <tr><td>Wooden Vase</td><td>7</td><td>15</td><td><span class="status-badge status-suspended">Low Stock</span></td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const profileHtml = `
-        <div class="settings-panel">
-            <div class="settings-header"><h2>Seller Profile</h2></div>
-            <div class="settings-grid">
-                <label><span>Seller Name</span><input id="sellerProfileName" value="${sellerName}" /></label>
-                <label><span>Business Name</span><input id="sellerProfileBusiness" value="" /></label>
-                <label><span>Email</span><input id="sellerProfileEmail" value="${window.firebaseApi?.currentUser?.email || ''}" readonly /></label>
-                <label><span>Phone</span><input id="sellerProfilePhone" value="" /></label>
-            </div>
-            <div style="margin-top:20px;"><button class="btn" onclick="saveSellerProfileSettings()">Save Profile</button></div>
-        </div>
-    `;
-
-    const contentMap = {
-        dashboard: dashboardHtml,
-        products: productsHtml,
-        "add-product": addProductHtml,
-        orders: ordersHtml,
-        inventory: inventoryHtml,
-        profile: profileHtml
-    };
-
-    sellerContent.innerHTML = contentMap[view] || dashboardHtml;
-
-    document.querySelectorAll("[data-seller-view]").forEach(button => {
-        button.onclick = function () {
-            sellerCurrentView = this.dataset.sellerView;
-            renderSellerDashboard();
-        };
-    });
-}
-
-async function endAdminSession(message) {
-    clearAdminSession();
-    if (window.firebaseApi?.currentUser) {
-        await window.firebaseApi.signOut().catch(console.error);
-    }
-    clearLoggedInUser();
-    updateHeader();
-    showScreen("home");
-    if (message) alert(message);
-}
-
-function adminLogout() {
-    endAdminSession("You have been logged out from the admin dashboard.");
-}
-
-function renderAdminDashboard() {
-    const adminContent = document.getElementById("adminContent");
-    if (!adminContent) return;
-
-    const liveData = window.firebaseAdminData;
-    if (liveData?.loading) {
-        adminContent.innerHTML = '<div class="admin-panel"><h2>Loading live admin data...</h2><p>Connecting to Users, Products, Orders, Reviews, and Reports.</p></div>';
-        return;
-    }
-    const liveOrders = liveData?.orders || [];
-    const deliveredOrders = liveOrders.filter(order => order.status === "Delivered");
-    const liveSalesHistory = deliveredOrders.reduce((history, order) => {
-        const month = order.createdAt?.toDate?.().toLocaleString('en-US', { month: 'short' }) || order.date?.split(' ')[0] || 'Current';
-        const entry = history.find(item => item.month === month);
-        if (entry) {
-            entry.revenue += Number(order.total || 0);
-            entry.orders += 1;
-        } else {
-            history.push({ month, revenue: Number(order.total || 0), orders: 1 });
-        }
-        return history;
-    }, []);
-    const fallbackData = getAdminData();
-    const data = liveData ? {
-        users: liveData.users.filter(user => user.role !== 'Admin'),
-        admins: liveData.admins || [],
-        sellers: liveData.sellers,
-        products: liveData.products.filter(product => !product.deleted),
-        orders: liveOrders.map(order => ({
-            ...order,
-            customer: order.customer || order.uid,
-            amount: order.total || 0
-        })),
-        reports: {
-            ...fallbackData.reports,
-            buyers: liveData.users.filter(user => user.role !== 'Seller' && user.role !== 'Admin').length,
-            sellers: liveData.sellers.length,
-            reviews: liveData.reviews.length,
-            contactMessages: liveData.contactMessages.length,
-            stockAlerts: liveData.products.filter(product => Number.isFinite(Number(product.stock)) && Number(product.stock) <= 5 && !product.deleted).length
-        }
-    } : fallbackData;
-    const syncLabel = liveData ? `Live Firestore sync${liveData.lastSyncedAt ? ` · ${liveData.lastSyncedAt.toLocaleTimeString()}` : ''}` : 'Local preview data';
-    const syncBadge = `<span class="chart-badge">${syncLabel}</span>`;
-    const view = adminCurrentView || "dashboard";
-    const combinedSellers = Array.from(new Map(
-        [...data.sellers, ...getSellerAccounts().map(account => ({
-            id: account.id,
-            name: account.name,
-            email: account.email,
-            category: account.category || "General",
-            status: account.status || "Pending"
-        }))].map(seller => [`${seller.email || seller.id}`.toLowerCase(), seller])).values()
-    );
-
-    const salesHistory = liveData ? liveSalesHistory : getSalesHistory();
-    const totalRevenue = liveData
-        ? deliveredOrders.reduce((sum, order) => sum + Number(order.total || 0), 0)
-        : salesHistory.reduce((sum, item) => sum + item.revenue, 0);
-    const salesData = salesHistory.map(item => item.revenue);
-    const maxRevenue = Math.max(...salesData, 1);
-    const categoryProducts = liveData ? data.products : getCatalogProducts();
-    const categoryBreakdown = categoryProducts.reduce((result, product) => {
-        const category = product.category || 'Other';
-        result[category] = (result[category] || 0) + 1;
-        return result;
-    }, {});
-    const categoryLabels = Object.keys(categoryBreakdown);
-    const categoryValues = Object.values(categoryBreakdown);
-    const categoryTotal = categoryValues.reduce((sum, value) => sum + value, 0) || 1;
-    const pieGradient = categoryValues.length ? (
-        categoryValues.reduce((acc, val, index) => {
-            const percent = (val / categoryTotal) * 100;
-            const start = acc.last || 0;
-            const end = start + percent;
-            acc.colors.push(`${getCategoryColor(index)} ${start}% ${end}%`);
-            acc.last = end;
-            return acc;
-        }, { colors: [], last: 0 }).colors.join(', ')
-    ) : 'rgba(120,120,120,0.2)';
-
-    const dashboardHtml = `
-        <div class="admin-content-header">
-            <div>
-                <h1>Admin Dashboard</h1>
-                <p>System overview</p>
-            </div>
-            <div class="admin-lock-status">
-                <span class="lock-indicator lock-open" id="lockIndicator"></span>
-                <span id="lockLabel">Unlocked</span>
-                <button class="lock-button" id="adminLockButton" onclick="toggleAdminLock()">Lock Dashboard</button>
-            </div>
-        </div>
-
-        <div class="summary-grid">
-            <div class="summary-box"><h3>Total Users</h3><p>${data.users.length}</p></div>
-            <div class="summary-box"><h3>Administrators</h3><p>${data.admins?.length || 0}</p></div>
-            <div class="summary-box"><h3>Total Sellers</h3><p>${data.sellers.length}</p></div>
-            <div class="summary-box"><h3>Total Products</h3><p>${liveData ? data.products.length : getCatalogProducts().length}</p></div>
-            <div class="summary-box"><h3>Delivered Sales</h3><p>₱${totalRevenue.toLocaleString()}.00</p></div>
-            <div class="summary-box"><h3>Reviews</h3><p>${data.reports.reviews ?? 0}</p></div>
-            <div class="summary-box"><h3>Messages</h3><p>${data.reports.contactMessages ?? 0}</p></div>
-        </div>
-
-        <div class="admin-metrics-grid">
-            <div class="metric-card">
-                <div class="metric-heading"><span>Category Mix</span><strong>Live</strong></div>
-                <div class="donut-wrap"><div class="donut-chart donut-one" style="background: conic-gradient(${pieGradient})" aria-label="Product categories pie chart"></div></div>
-                <ul class="legend-list">
-                    ${categoryLabels.map((label, index) => `
-                        <li><span class="dot" style="background:${getCategoryColor(index)}"></span>${label} ${Math.round((categoryBreakdown[label] / categoryTotal) * 100)}%</li>
-                    `).join('')}
-                </ul>
-            </div>
-            <div class="metric-card">
-                <div class="metric-heading"><span>Customer Types</span><strong>Live</strong></div>
-                <div class="donut-wrap"><div class="donut-chart donut-two" style="background: conic-gradient(#3c8d5d 0 46%, #d9a65f 46% 80%, #49a1d9 80% 100%)" aria-label="Customer segments pie chart"></div></div>
-                <ul class="legend-list">
-                    <li><span class="dot dot-green"></span>Repeat Buyers 46%</li>
-                    <li><span class="dot dot-gold"></span>New Buyers 34%</li>
-                    <li><span class="dot dot-sky"></span>Wholesale 20%</li>
-                </ul>
-            </div>
-            <div class="metric-card">
-                <div class="metric-heading"><span>Sales Channels</span><strong>By Source</strong></div>
-                <div class="donut-wrap"><div class="donut-chart donut-three" style="background: conic-gradient(#3c8d5d 0 54%, #d9a65f 54% 82%, #7e5bbd 82% 100%)" aria-label="Sales channels pie chart"></div></div>
-                <ul class="legend-list">
-                    <li><span class="dot dot-green"></span>Website 54%</li>
-                    <li><span class="dot dot-gold"></span>Marketplace 28%</li>
-                    <li><span class="dot dot-purple"></span>Direct 18%</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="chart-panel">
-            <div class="chart-header">
-                <div><p class="chart-kicker">Performance</p><h2>Sales Overview</h2></div>
-                <span class="chart-badge">Live</span>
-            </div>
-            <div class="bar-chart" aria-label="Bar chart of sales performance">
-                ${salesHistory.map(item => `
-                    <div class="bar-group">
-                        <div class="bar" style="height: ${(item.revenue / maxRevenue) * 100}%"></div>
-                        <span>${item.month}</span>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-
-    const usersHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header">
-                <h2>👥 Users ${syncBadge}</h2>
-                <button class="secondary-btn" onclick="addUserFromForm()">Add User</button>
-            </div>
-            <form class="admin-form" onsubmit="event.preventDefault(); addUserFromForm();">
-                <input id="userName" placeholder="Name" required>
-                <input id="userEmail" type="email" placeholder="Email" required>
-                <select id="userRole">
-                    <option>Customer</option>
-                    <option>Seller</option>
-                </select>
-                <select id="userStatus">
-                    <option>Active</option>
-                    <option>Suspended</option>
-                    <option>Pending</option>
-                </select>
-                <button class="btn" type="submit">Save</button>
-            </form>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        ${data.users.length ? data.users.map(user => `
-                            <tr>
-                                <td>${user.id}</td>
-                                <td>${user.name}</td>
-                                <td>${user.email}</td>
-                                <td>${user.role}</td>
-                                <td><span class="status-badge ${user.status === 'Active' ? 'status-active' : user.status === 'Suspended' ? 'status-suspended' : 'status-pending'}">${user.status}</span></td>
-                                <td>
-                                    <button class="action-btn ${user.status === 'Suspended' ? 'restore' : 'suspend'}" onclick="toggleUserStatus('${user.id}')">${user.status === 'Suspended' ? 'Restore' : 'Suspend'}</button>
-                                    <button class="action-btn delete" onclick="deleteUser('${user.id}')">Delete</button>
-                                </td>
-                            </tr>
-                        `).join("") : '<tr><td colspan="6">No users found in Firestore.</td></tr>'}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const sellersHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header">
-                <h2>Seller Management ${syncBadge}</h2>
-                <button class="secondary-btn" onclick="addSellerFromForm()">Add Seller</button>
-            </div>
-            <form class="admin-form" onsubmit="event.preventDefault(); addSellerFromForm();">
-                <input id="sellerName" placeholder="Seller Name" required>
-                <input id="sellerEmail" type="email" placeholder="Seller Email" required>
-                <input id="sellerCategory" placeholder="Category" required>
-                <select id="sellerStatus">
-                    <option>Active</option>
-                    <option>Pending</option>
-                    <option>Suspended</option>
-                </select>
-                <button class="btn" type="submit">Save</button>
-            </form>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Category</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        ${combinedSellers.length ? combinedSellers.map(seller => `
-                            <tr>
-                                <td>${seller.id}</td>
-                                <td>${seller.name}</td>
-                                <td>${seller.email}</td>
-                                <td>${seller.category}</td>
-                                <td><span class="status-badge ${seller.status === 'Active' ? 'status-active' : seller.status === 'Suspended' ? 'status-suspended' : 'status-pending'}">${seller.status}</span></td>
-                                <td>
-                                    <button class="action-btn ${seller.status === 'Pending' ? 'restore' : seller.status === 'Suspended' ? 'restore' : 'suspend'}" onclick="toggleSellerStatus('${seller.id}')">${seller.status === 'Pending' ? 'Approve' : seller.status === 'Suspended' ? 'Restore' : 'Suspend'}</button>
-                                    <button class="action-btn delete" onclick="deleteSeller('${seller.id}')">Delete</button>
-                                </td>
-                            </tr>
-                        `).join("") : '<tr><td colspan="6">No sellers found in Firestore.</td></tr>'}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const productsHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header">
-                <h2>🛍️ Products ${syncBadge}</h2>
-                <button class="secondary-btn" onclick="addProductFromForm()">Add Product</button>
-            </div>
-            <form class="admin-form" onsubmit="event.preventDefault(); addProductFromForm();">
-                <input id="productName" placeholder="Product Name" required>
-                <input id="productCategory" placeholder="Category" required>
-                <input id="productPrice" type="number" min="1" placeholder="Price" required>
-                <select id="productStatus">
-                    <option>Active</option>
-                    <option>Suspended</option>
-                    <option>Pending</option>
-                </select>
-                <button class="btn" type="submit">Save</button>
-            </form>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        ${data.products.length ? data.products.map(product => `
-                            <tr>
-                                <td>${product.id}</td>
-                                <td>${product.name}</td>
-                                <td>${product.category}</td>
-                                <td>₱${Number(product.price).toLocaleString()}.00</td>
-                                <td><span class="status-badge ${product.status === 'Active' ? 'status-active' : product.status === 'Suspended' ? 'status-suspended' : 'status-pending'}">${product.status}</span></td>
-                                <td>
-                                    <button class="action-btn ${product.status === 'Suspended' ? 'restore' : 'suspend'}" onclick="toggleProductStatus('${product.id}')">${product.status === 'Suspended' ? 'Restore' : 'Suspend'}</button>
-                                    <button class="action-btn delete" onclick="deleteProduct('${product.id}')">Delete</button>
-                                </td>
-                            </tr>
-                        `).join("") : '<tr><td colspan="6">No products found in Firestore.</td></tr>'}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const ordersHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>📦 Orders ${syncBadge}</h2></div>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
-                    <tbody>
-                        ${data.orders.length ? data.orders.map(order => `
-                            <tr>
-                                <td>${order.id}</td>
-                                <td>${order.customer}</td>
-                                <td>₱${Number(order.amount).toLocaleString()}.00</td>
-                                <td><span class="status-badge ${order.status === 'Delivered' ? 'status-active' : order.status === 'Processing' ? 'status-pending' : 'status-suspended'}">${order.status}</span></td>
-                            </tr>
-                        `).join("") : '<tr><td colspan="4">No orders found in Firestore.</td></tr>'}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const reportsHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>📊 Reports ${syncBadge}</h2></div>
-            <div class="reports-list">
-                <div class="report-box">
-                    <h3>Revenue Summary</h3>
-                    <ul>
-                        <li><span>Delivered Sales</span><strong>₱${totalRevenue.toLocaleString()}.00</strong></li>
-                        <li><span>New Buyers</span><strong>${data.reports.buyers}</strong></li>
-                        <li><span>Active Sellers</span><strong>${data.reports.sellers}</strong></li>
-                        <li><span>Reviews</span><strong>${data.reports.reviews ?? 0}</strong></li>
-                        <li><span>Contact Messages</span><strong>${data.reports.contactMessages ?? 0}</strong></li>
-                    </ul>
-                </div>
-                <div class="report-box">
-                    <h3>Operational Alerts</h3>
-                    <ul>
-                        <li><span>Low Stock Items</span><strong>${data.reports.stockAlerts}</strong></li>
-                        <li><span>Pending Reviews</span><strong>14</strong></li>
-                        <li><span>Disputes</span><strong>3</strong></li>
-                    </ul>
-                </div>
-            </div>
-            ${liveData ? `
-            <div class="admin-panel" style="margin-top:20px;"><div class="admin-panel-header"><h2>Recent Reviews</h2></div><div class="table-box"><table class="admin-table"><thead><tr><th>Reviewer</th><th>Product</th><th>Rating</th><th>Comment</th></tr></thead><tbody>${liveData.reviews.slice(-10).reverse().map(review => `<tr><td>${review.reviewerName || review.uid}</td><td>${review.productId}</td><td>${review.rating}/5</td><td>${review.comment}</td></tr>`).join('') || '<tr><td colspan="4">No reviews yet.</td></tr>'}</tbody></table></div></div>
-            <div class="admin-panel" style="margin-top:20px;"><div class="admin-panel-header"><h2>Contact Messages</h2></div><div class="table-box"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Message</th></tr></thead><tbody>${liveData.contactMessages.slice(-10).reverse().map(message => `<tr><td>${message.name || message.uid || 'Guest'}</td><td>${message.email || '-'}</td><td>${message.message || ''}</td></tr>`).join('') || '<tr><td colspan="3">No contact messages yet.</td></tr>'}</tbody></table></div></div>
-            ` : ''}
-        </div>
-    `;
-
-    const settingsHtml = `
-        <div class="settings-panel">
-            <div class="settings-header">
-                <h2>Admin Settings</h2>
-                <button class="secondary-btn" onclick="saveAdminSettings()">Save Settings</button>
-            </div>
-            <div class="settings-grid">
-                <label>
-                    <span>Auto-approve sellers</span>
-                    <select id="settingAutoApprove">
-                        <option>Enabled</option>
-                        <option>Manual Review</option>
-                        <option>Disabled</option>
-                    </select>
-                </label>
-                <label>
-                    <span>Inventory alerts</span>
-                    <select id="settingInventoryAlerts">
-                        <option>Enabled</option>
-                        <option>Quiet Mode</option>
-                    </select>
-                </label>
-                <label>
-                    <span>Maintenance mode</span>
-                    <select id="settingMaintenance">
-                        <option>Off</option>
-                        <option>On</option>
-                    </select>
-                </label>
-                <label>
-                    <span>Default payout period</span>
-                    <select id="settingPayout">
-                        <option>Weekly</option>
-                        <option selected>Bi-Weekly</option>
-                        <option>Monthly</option>
-                    </select>
-                </label>
-            </div>
-        </div>
-    `;
-
-    const contentMap = {
-        dashboard: dashboardHtml,
-        users: usersHtml,
-        sellers: sellersHtml,
-        products: productsHtml,
-        orders: ordersHtml,
-        reports: reportsHtml,
-        settings: settingsHtml
-    };
-
-    adminContent.innerHTML = contentMap[view] || dashboardHtml;
-    bindAdminSidebar();
-    loadAdminSettings();
-    loadAdminLockState();
-}
-
-function bindAdminSidebar() {
-    const buttons = document.querySelectorAll("[data-admin-view]");
-    buttons.forEach(button => {
-        button.onclick = function () {
-            adminCurrentView = this.dataset.adminView;
-            renderAdminDashboard();
-        };
-    });
-}
-
-function toggleAdminLock() {
-    const isLocked = localStorage.getItem("artisan_admin_locked") === "true";
-    const nextState = !isLocked;
-    localStorage.setItem("artisan_admin_locked", String(nextState));
-    loadAdminLockState();
-    alert(nextState ? "Admin dashboard locked." : "Admin dashboard unlocked.");
-}
-
-function loadAdminLockState() {
-    const indicator = document.getElementById("lockIndicator");
-    const label = document.getElementById("lockLabel");
-    const button = document.getElementById("adminLockButton");
-
-    if (!indicator || !label || !button) return;
-
-    const isLocked = localStorage.getItem("artisan_admin_locked") === "true";
-    if (isLocked) {
-        indicator.className = "lock-indicator lock-closed";
-        label.innerText = "Locked";
-        button.innerText = "Unlock Dashboard";
-    } else {
-        indicator.className = "lock-indicator lock-open";
-        label.innerText = "Unlocked";
-        button.innerText = "Lock Dashboard";
-    }
-}
-
-function saveAdminSettings() {
-    const settings = {
-        autoApprove: document.getElementById("settingAutoApprove")?.value || "Enabled",
-        inventoryAlerts: document.getElementById("settingInventoryAlerts")?.value || "Enabled",
-        maintenance: document.getElementById("settingMaintenance")?.value || "Off",
-        payout: document.getElementById("settingPayout")?.value || "Bi-Weekly"
-    };
-    localStorage.setItem("artisan_admin_settings", JSON.stringify(settings));
-    alert("Admin settings saved successfully.");
-}
-
-function loadAdminSettings() {
-    const settings = JSON.parse(localStorage.getItem("artisan_admin_settings") || "{}");
-    if (!settings) return;
-    if (document.getElementById("settingAutoApprove") && settings.autoApprove) document.getElementById("settingAutoApprove").value = settings.autoApprove;
-    if (document.getElementById("settingInventoryAlerts") && settings.inventoryAlerts) document.getElementById("settingInventoryAlerts").value = settings.inventoryAlerts;
-    if (document.getElementById("settingMaintenance") && settings.maintenance) document.getElementById("settingMaintenance").value = settings.maintenance;
-    if (document.getElementById("settingPayout") && settings.payout) document.getElementById("settingPayout").value = settings.payout;
-}
-
-async function addUserFromForm() {
-    const name = document.getElementById("userName")?.value.trim();
-    const email = document.getElementById("userEmail")?.value.trim();
-    const role = document.getElementById("userRole")?.value;
-    const status = document.getElementById("userStatus")?.value;
-    if (!name || !email) return;
-
-    const id = `profile-${crypto.randomUUID()}`;
-    try {
-        await window.firebaseApi.adminWrite('users', id, { uid: id, name, firstName: name.split(/\s+/)[0], email, role, status });
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function toggleUserStatus(userId) {
-    const user = window.firebaseAdminData?.users.find(item => item.id === userId);
-    if (!user) return;
-    try {
-        await window.firebaseApi.adminWrite('users', userId, { status: user.status === "Suspended" ? "Active" : "Suspended" });
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function deleteUser(userId) {
-    if (!confirm('Delete this user profile from Firestore?')) return;
-    try {
-        await window.firebaseApi.adminDelete('users', userId);
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function addSellerFromForm() {
-    const name = document.getElementById("sellerName")?.value.trim();
-    const email = document.getElementById("sellerEmail")?.value.trim();
-    const category = document.getElementById("sellerCategory")?.value.trim();
-    const status = document.getElementById("sellerStatus")?.value;
-    if (!name || !email || !category) return;
-
-    const id = `seller-${crypto.randomUUID()}`;
-    try {
-        await window.firebaseApi.adminWrite('sellers', id, { uid: id, name, email, category, status });
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function toggleSellerStatus(sellerId) {
-    const seller = window.firebaseAdminData?.sellers.find(item => item.id === sellerId);
-    if (!seller) return;
-
-    if (seller.status === "Pending") {
-        seller.status = "Active";
-    } else {
-        seller.status = seller.status === "Suspended" ? "Active" : "Suspended";
-    }
-
-    try {
-        await window.firebaseApi.adminWrite('sellers', sellerId, { status: seller.status });
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function deleteSeller(sellerId) {
-    if (!confirm('Delete this seller profile from Firestore?')) return;
-    try {
-        await window.firebaseApi.adminDelete('sellers', sellerId);
-        const sellerProducts = getCatalogProducts().filter(product => product.sellerId === sellerId);
-        for (const product of sellerProducts) {
-            try {
-                await window.firebaseApi.adminDelete('products', product.id);
-            } catch (error) {
-                console.warn('Failed to delete seller product during seller removal:', error);
-            }
-        }
-        saveCatalogProducts(getCatalogProducts().filter(product => product.sellerId !== sellerId));
-        renderHomeProducts();
-        renderCatalogProducts();
-        renderAdminDashboard();
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-function readFileAsDataUrl(file) {
-    return new Promise((resolve, reject) => {
-        if (!file) return resolve("");
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result || "");
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-async function addSellerProductFromForm() {
-    const name = document.getElementById("sellerProductName")?.value.trim();
-    const category = document.getElementById("sellerProductCategory")?.value.trim();
-    const price = Number(document.getElementById("sellerProductPrice")?.value || 0);
-    const stock = Number(document.getElementById("sellerProductStock")?.value || 0);
-    const imageFile = document.getElementById("sellerProductImage")?.files?.[0];
-
-    if (!name || !category || !price || !stock) {
-        alert("Please complete all product fields.");
-        return;
-    }
-
-    try {
-        await window.firebaseApi?.authReady;
-        const sellerId = window.firebaseApi.currentUser?.uid;
-        if (!sellerId) throw new Error("Please log in as a seller before uploading a product.");
-        const sellerProducts = getSellerProducts(sellerId);
-        const globalProducts = getCatalogProducts();
-        const nextId = `P-${String(sellerProducts.length + 301).padStart(4, "0")}`;
-        const imageUrl = imageFile
-            ? await window.firebaseApi.uploadProductImage(imageFile)
-            : "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80";
-        const product = {
-            id: nextId,
-            name,
-            category,
-            price,
-            status: "Active",
-            image: imageUrl,
-            isNew: true,
-            stock,
-            sellerId,
-            sellerName: localStorage.getItem("artisan_current_seller_name") || "Artisan seller",
-            sellerEmail: window.firebaseApi.currentUser?.email || ""
-        };
-
-        const savedProduct = await window.firebaseApi.saveProduct(product);
-        product.id = savedProduct.id;
-        sellerProducts.unshift(product);
-        saveSellerProducts(sellerProducts, sellerId);
-
-        const mergedProducts = [product, ...globalProducts.filter(item => item.id !== product.id)];
-        saveCatalogProducts(mergedProducts);
-
-        renderHomeProducts();
-        renderCatalogProducts();
-        updateProductsDisplay();
-        renderSellerDashboard();
-        alert("Product added successfully and published to the storefront.");
-    } catch (error) {
-        alert(error.message || "Unable to upload the product.");
-    }
-}
-
-async function deleteSellerProduct(productId) {
-    await window.firebaseApi?.authReady;
-    const currentUser = window.firebaseApi?.currentUser;
-    const currentUserId = currentUser?.uid;
-    const product = getCatalogProducts().find(item => item.id === productId);
-
-    if (!currentUserId || !product) {
-        alert("This product is no longer available.");
-        return;
-    }
-
-    let isAdmin = false;
-    try {
-        const profile = await window.firebaseApi.getAdminProfile(currentUserId);
-        isAdmin = profile?.uid === currentUserId
-            && profile.role === "Admin"
-            && profile.email?.toLowerCase() === currentUser.email?.toLowerCase();
-    } catch (error) {
-        isAdmin = false;
-    }
-
-    if (!isAdmin && product.sellerId !== currentUserId) {
-        alert("You can only delete products uploaded by your seller account.");
-        return;
-    }
-
-    if (!confirm(`Delete "${product.name}" uploaded by ${product.sellerName || 'this seller'}?`)) return;
-    try {
-        await window.firebaseApi.deleteProduct(productId);
-        saveSellerProducts(getSellerProducts(currentUserId).filter(item => item.id !== productId), currentUserId);
-        saveCatalogProducts(getCatalogProducts().filter(item => item.id !== productId));
-        renderHomeProducts();
-        renderCatalogProducts();
-        updateProductsDisplay();
-        renderSellerDashboard();
-        renderAdminDashboard();
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function updateSellerOrderStatus(orderId, status) {
-    try {
-        await window.firebaseApi.updateOrderStatus(orderId, status);
-    } catch (error) {
-        alert(error.message);
-        renderSellerDashboard();
-    }
-}
-
-async function saveSellerProfileSettings() {
-    try {
-        await window.firebaseApi.saveSellerProfile({
-            name: document.getElementById("sellerProfileName").value.trim(),
-            businessName: document.getElementById("sellerProfileBusiness").value.trim(),
-            phone: document.getElementById("sellerProfilePhone").value.trim(),
-            status: "Active"
-        });
-        localStorage.setItem("artisan_current_seller_name", document.getElementById("sellerProfileName").value.trim());
-        alert("Seller profile updated successfully.");
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function addProductFromForm() {
-    const name = document.getElementById("productName")?.value.trim();
-    const category = document.getElementById("productCategory")?.value.trim();
-    const price = Number(document.getElementById("productPrice")?.value || 0);
-    const status = document.getElementById("productStatus")?.value;
-    if (!name || !category || !price) return;
-
-    const id = `admin-product-${crypto.randomUUID()}`;
-    try {
-        await window.firebaseApi.adminWrite('products', id, {
-            name, category, price, status, sellerId: window.firebaseApi.currentUser.uid,
-            sellerName: 'Admin catalog', sellerEmail: window.firebaseApi.currentUser.email || '', isNew: true
-        });
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function toggleProductStatus(productId) {
-    const product = window.firebaseAdminData?.products.find(item => item.id === productId);
-    if (!product) return;
-    try {
-        await window.firebaseApi.adminWrite('products', productId, { status: product.status === "Suspended" ? "Active" : "Suspended" });
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function deleteProduct(productId) {
-    if (!confirm('Delete this product from Firestore?')) return;
-    try {
-        await window.firebaseApi.adminDelete('products', productId);
-        saveCatalogProducts(getCatalogProducts().filter(product => product.id !== productId));
-        renderHomeProducts();
-        renderCatalogProducts();
-        updateProductsDisplay();
-        renderAdminDashboard();
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-window.onload = function() {
-    cleanupUnavailableCartItems();
-    renderHomeProducts();
-    renderCatalogProducts();
-    updateProductsDisplay();
-    updateHeader();
-    renderCart();
-    renderOrders();
-    renderAdminDashboard();
-    renderSellerDashboard();
-    loadAdminSettings();
-    if (isAdminSessionValid()) {
-        renderAdminDashboard();
-    } else {
-        closeAdminLoginModal();
-    }
-    if (localStorage.getItem("artisan_seller_logged_in") === "true") {
-        renderSellerDashboard();
-    } else {
-        closeSellerLoginModal();
-    }
-    if (new URLSearchParams(window.location.search).get("admin") === "1") {
-        openAdminDashboard();
-    }
 };
 
-// Expose functions to global scope for onclick handlers
+window.showSellerLoginForm = function() {
+    document.getElementById("sellerRegisterForm").style.display = "none";
+    document.getElementById("sellerLoginForm").style.display = "block";
+};
+
+window.closeSellerLoginModal = function() {
+    document.getElementById("sellerLoginModal").style.display = "none";
+};
+
+window.sellerLogout = function() {
+    showScreen("home");
+};
+
+// Global Exposure for Inline Event Handlers
 window.showScreen = showScreen;
-window.searchProducts = searchProducts;
-window.getProductDetails = getProductDetails;
 window.showProduct = showProduct;
-window.toggleSellerInfo = toggleSellerInfo;
 window.changeQuantity = changeQuantity;
-window.getCart = getCart;
-window.saveCart = saveCart;
-window.renderCart = renderCart;
 window.addToCart = addToCart;
-window.goToCheckout = goToCheckout;
-window.changeCartItemQuantity = changeCartItemQuantity;
-window.removeFromCart = removeFromCart;
-window.getOrders = getOrders;
-window.saveOrders = saveOrders;
-window.renderOrders = renderOrders;
-window.getProfile = getProfile;
-window.saveProfile = saveProfile;
-window.fillProfileForm = fillProfileForm;
-window.saveProfileSettings = saveProfileSettings;
-window.populateCheckoutForm = populateCheckoutForm;
-window.placeOrder = placeOrder;
 window.buyNow = buyNow;
-window.reviewOrder = reviewOrder;
-window.getLoggedInUser = getLoggedInUser;
-window.setLoggedInUser = setLoggedInUser;
-window.clearLoggedInUser = clearLoggedInUser;
-window.updateHeader = updateHeader;
-window.logout = logout;
+window.removeFromCart = removeFromCart;
+window.goToCheckout = goToCheckout;
+window.placeOrder = placeOrder;
 window.filterProducts = filterProducts;
-window.updateProductsDisplay = updateProductsDisplay;
-window.renderHomeProducts = renderHomeProducts;
-window.renderCatalogProducts = renderCatalogProducts;
-window.openAdminDashboard = openAdminDashboard;
-window.openAdminLoginModal = openAdminLoginModal;
-window.closeAdminLoginModal = closeAdminLoginModal;
-window.submitAdminLogin = submitAdminLogin;
-window.toggleAdminLock = toggleAdminLock;
-window.renderAdminDashboard = renderAdminDashboard;
-window.addUserFromForm = addUserFromForm;
-window.toggleUserStatus = toggleUserStatus;
-window.deleteUser = deleteUser;
-window.addSellerFromForm = addSellerFromForm;
-window.toggleSellerStatus = toggleSellerStatus;
-window.deleteSeller = deleteSeller;
-window.addProductFromForm = addProductFromForm;
-window.toggleProductStatus = toggleProductStatus;
-window.deleteProduct = deleteProduct;
-window.saveAdminSettings = saveAdminSettings;
-window.openSellerDashboard = openSellerDashboard;
-window.openSellerLoginModal = openSellerLoginModal;
-window.closeSellerLoginModal = closeSellerLoginModal;
-window.showSellerLoginForm = showSellerLoginForm;
-window.showSellerRegisterForm = showSellerRegisterForm;
-window.submitSellerRegister = submitSellerRegister;
-window.submitSellerLogin = submitSellerLogin;
-window.sellerLogout = sellerLogout;
-window.renderSellerDashboard = renderSellerDashboard;
-window.addSellerProductFromForm = addSellerProductFromForm;
-window.deleteSellerProduct = deleteSellerProduct;
-window.updateSellerOrderStatus = updateSellerOrderStatus;
-window.saveSellerProfileSettings = saveSellerProfileSettings;
-window.getCatalogProducts = getCatalogProducts;
-window.saveCatalogProducts = saveCatalogProducts;
-window.addCatalogProduct = addCatalogProduct;
-window.getCatalogCategoryBreakdown = getCatalogCategoryBreakdown;
-window.getCategoryColor = getCategoryColor;
-window.getAdminData = getAdminData;
-window.saveAdminData = saveAdminData;
-window.getSalesHistory = getSalesHistory;
-window.saveSalesHistory = saveSalesHistory;
-window.recordSales = recordSales;
+window.searchProducts = searchProducts;
+window.toggleSellerInfo = toggleSellerInfo;
+window.saveProfileSettings = saveProfileSettings;
+window.logout = logout;
+
+// Initial Setup
+renderCart();
+renderOrders();
+
 })();
 </script>
 </body>
