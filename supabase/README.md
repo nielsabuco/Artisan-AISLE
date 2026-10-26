@@ -16,7 +16,7 @@ Firebase Hosting stays on the Spark plan. Supabase Edge Functions provide the se
 4. Create a local, git-ignored `.env.supabase` file containing:
 
    ```dotenv
-   APP_BASE_URL=https://artisan-79f5d.web.app
+   APP_BASE_URL=https://YOUR_VERCEL_PRODUCTION_DOMAIN
    FIREBASE_PROJECT_ID=artisan-79f5d
    FIREBASE_WEB_API_KEY=YOUR_FIREBASE_WEB_API_KEY
    PAYMONGO_SECRET_KEY=YOUR_PAYMONGO_TEST_SECRET
@@ -27,7 +27,7 @@ Firebase Hosting stays on the Spark plan. Supabase Edge Functions provide the se
 
    ```powershell
    @'
-   APP_BASE_URL=https://artisan-79f5d.web.app
+   APP_BASE_URL=https://YOUR_VERCEL_PRODUCTION_DOMAIN
    FIREBASE_PROJECT_ID=artisan-79f5d
    FIREBASE_WEB_API_KEY=YOUR_FIREBASE_WEB_API_KEY
    PAYMONGO_SECRET_KEY=YOUR_PAYMONGO_TEST_SECRET
@@ -46,7 +46,14 @@ Firebase Hosting stays on the Spark plan. Supabase Edge Functions provide the se
    npx supabase secrets set --env-file .env.supabase
    ```
 
-   Add `.env.supabase` to `.gitignore` if it is not already ignored.
+   `APP_BASE_URL` must be the exact HTTPS origin serving the site (for example `https://artisan-aisle-9mnco6935-niel11.vercel.app`), with no trailing slash. It controls browser CORS and PayMongo return URLs. If Vercel assigns a new deployment hostname, update this Supabase secret and redeploy `order-api`:
+
+   ```powershell
+   npx supabase secrets set APP_BASE_URL=https://YOUR_VERCEL_PRODUCTION_DOMAIN
+   npx supabase functions deploy order-api --no-verify-jwt
+   ```
+
+The `supabase/config.toml` file sets explicit `.js` entrypoints for all three functions. Deploying those JavaScript entrypoints requires Supabase CLI 1.215.0 or newer.
 
 ## Deploy
 

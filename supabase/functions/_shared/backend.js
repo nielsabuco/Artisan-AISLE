@@ -20,7 +20,7 @@ export const corsHeaders = origin => {
     const allowed = new Set([configured, "http://localhost:5173", "http://127.0.0.1:5173"]);
     return {
         "Access-Control-Allow-Origin": allowed.has(origin) ? origin : configured,
-        "Access-Control-Allow-Headers": "authorization, apikey, content-type",
+        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Vary": "Origin"
     };
