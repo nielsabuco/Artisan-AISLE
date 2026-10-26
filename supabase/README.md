@@ -73,8 +73,8 @@ Add the public website domain under Firebase Authentication → Settings → Aut
 ## Payment setup
 
 1. Sign in with the administrator account and open **Profile → Admin Dashboard → Settings**.
-2. Enter and save the GCash and/or Maya recipient account name and number. Checkout shows the selected destination to the customer.
-3. Customers transfer the order total, enter the transaction reference, upload a JPG, PNG, or WebP receipt photo (up to 5 MB), and place the order.
+2. The supplied account names and numbers are prefilled. The supplied InstaPay QR is shown for GCash; upload a wallet-generated QR under either method if you need to change it or add a Maya QR. Save the settings after changing account details or QR images.
+3. Checkout displays the selected wallet's recipient name, number, and QR when available. Customers transfer the order total, enter the transaction reference, upload a JPG, PNG, or WebP receipt photo (up to 5 MB), and place the order.
 4. In **Admin Dashboard → Orders**, view the private proof image and verify the actual transaction in the wallet before selecting **Confirm payment**. A reference number or image alone does not verify funds.
 
 Never ask customers for wallet PINs, passwords, or one-time codes. The proof bucket is private; do not add public read policies or use the public `product-images` bucket for receipts.

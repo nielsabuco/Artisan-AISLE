@@ -129,6 +129,24 @@ const uploadProductImage = async file => {
     return supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl;
 };
 
+const uploadPaymentQr = async file => {
+    const user = await requireUser();
+    const profile = await api.getAdminProfile(user.uid);
+    if (profile?.role !== 'Admin') throw new Error('Administrator access is required to upload payment QR codes.');
+    if (!supabase) throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.');
+    if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size < 1 || file.size > 5 * 1024 * 1024) {
+        throw new Error('Choose a JPG, PNG, or WebP QR image no larger than 5 MB.');
+    }
+    const extension = file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1];
+    const path = `payment-qr/${crypto.randomUUID()}.${extension}`;
+    const { error } = await supabase.storage.from('product-images').upload(path, file, {
+        contentType: file.type,
+        upsert: false
+    });
+    if (error) throw error;
+    return supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+};
+
 const api = {
     authReady,
     get currentUser() { return firebaseAuth.currentUser; },
@@ -153,6 +171,7 @@ const api = {
     getUserProfile: async uid => (await getDoc(doc(firestore, 'users', uid))).data(),
     saveUserProfile,
     uploadProductImage,
+    uploadPaymentQr,
     createSeller: async ({ name, email, password }) => {
         const result = await createUserWithEmailAndPassword(firebaseAuth, email, password);
         await saveSellerProfile({ name, status: 'Active', category: 'General' });

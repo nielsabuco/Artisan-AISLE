@@ -373,6 +373,7 @@
                 <h3 id="paymentRecipientTitle"></h3>
                 <p id="paymentRecipientName"></p>
                 <p id="paymentRecipientNumber"></p>
+                <img id="paymentRecipientQr" alt="" hidden style="display:block;width:220px;max-width:100%;height:auto;margin:12px auto;border:1px solid #ddd;border-radius:8px;padding:8px;background:#fff;">
                 <p>Transfer the order total, then enter the transaction reference number below. Payment is confirmed after review.</p>
             </div>
 
@@ -887,8 +888,9 @@ async function syncPaymentInstructions() {
         const settings = await window.firebaseApi.getPaymentSettings();
         if (document.getElementById("checkoutPayment").value !== method) return;
         const prefix = method === "GCash" ? "gcash" : "maya";
-        const name = settings?.[`${prefix}RecipientName`]?.trim();
-        const number = settings?.[`${prefix}Number`]?.trim();
+        const name = settings?.[`${prefix}RecipientName`]?.trim() || defaultPaymentSettings[`${prefix}RecipientName`];
+        const number = settings?.[`${prefix}Number`]?.trim() || defaultPaymentSettings[`${prefix}Number`];
+        const qrUrl = settings?.[`${prefix}QrUrl`]?.trim() || defaultPaymentSettings[`${prefix}QrUrl`];
         if (!name || !number) {
             help.textContent = `${method} payment is not configured yet. Please choose another payment method or contact the store.`;
             return;
@@ -896,6 +898,11 @@ async function syncPaymentInstructions() {
         document.getElementById("paymentRecipientTitle").textContent = `Send payment using ${method}`;
         document.getElementById("paymentRecipientName").textContent = `Account name: ${name}`;
         document.getElementById("paymentRecipientNumber").textContent = `Account number: ${number}`;
+        const qrImage = document.getElementById("paymentRecipientQr");
+        qrImage.hidden = !qrUrl;
+        qrImage.alt = qrUrl ? `${method} payment QR code` : "";
+        if (qrUrl) qrImage.src = qrUrl;
+        else qrImage.removeAttribute("src");
         help.textContent = "Pay the order total to this account and enter your transaction reference number.";
     } catch (error) {
         console.error("Unable to load payment instructions:", error);
@@ -1252,11 +1259,14 @@ function renderAdminDashboard() {
 }
 
 const emptyPaymentSettings = {
-    gcashRecipientName: "",
-    gcashNumber: "",
-    mayaRecipientName: "",
-    mayaNumber: ""
+    gcashRecipientName: "RENIEL MARBEBE SABUCO",
+    gcashNumber: "09914908966",
+    gcashQrUrl: "/payment-qr/gcash-instapay.jpg",
+    mayaRecipientName: "RENIEL MARBEBE SABUCO",
+    mayaNumber: "09853551524",
+    mayaQrUrl: ""
 };
+const defaultPaymentSettings = { ...emptyPaymentSettings };
 let paymentSettings = null;
 let paymentSettingsLoaded = false;
 let loadingPaymentSettings = false;
@@ -1286,21 +1296,46 @@ async function loadAdminPaymentSettings() {
 }
 
 function renderAdminPaymentSettings(container) {
-    const values = paymentSettings || emptyPaymentSettings;
+    const storedValues = Object.fromEntries(Object.entries(paymentSettings || {}).filter(([, value]) => value !== "" && value != null));
+    const values = { ...emptyPaymentSettings, ...storedValues };
     container.innerHTML = `
         <div class="form-group"><label for="gcashRecipientName">GCash account name</label><input id="gcashRecipientName" maxlength="100" value="${escapeHtml(values.gcashRecipientName)}"></div>
         <div class="form-group"><label for="gcashNumber">GCash number</label><input id="gcashNumber" type="tel" maxlength="32" value="${escapeHtml(values.gcashNumber)}"></div>
+        <div class="form-group"><label for="gcashQrUpload">GCash QR image</label><input id="gcashQrUpload" type="file" accept="image/jpeg,image/png,image/webp"><input id="gcashQrUrl" type="hidden" value="${escapeHtml(values.gcashQrUrl)}"><img id="gcashQrPreview" src="${escapeHtml(values.gcashQrUrl)}" alt="GCash payment QR preview" style="display:block;width:180px;max-width:100%;height:auto;margin-top:8px;border:1px solid #ddd;padding:6px;background:#fff;"></div>
         <div class="form-group"><label for="mayaRecipientName">Maya account name</label><input id="mayaRecipientName" maxlength="100" value="${escapeHtml(values.mayaRecipientName)}"></div>
         <div class="form-group"><label for="mayaNumber">Maya number</label><input id="mayaNumber" type="tel" maxlength="32" value="${escapeHtml(values.mayaNumber)}"></div>
-        <button class="btn" type="button" onclick="savePaymentSettings()">Save payment details</button>`;
+        <div class="form-group"><label for="mayaQrUpload">Maya QR image (optional)</label><input id="mayaQrUpload" type="file" accept="image/jpeg,image/png,image/webp"><input id="mayaQrUrl" type="hidden" value="${escapeHtml(values.mayaQrUrl)}"><img id="mayaQrPreview" src="${escapeHtml(values.mayaQrUrl)}" alt="Maya payment QR preview" ${values.mayaQrUrl ? "" : "hidden"} style="display:block;width:180px;max-width:100%;height:auto;margin-top:8px;border:1px solid #ddd;padding:6px;background:#fff;"></div>
+        <button class="btn" type="button" onclick="savePaymentSettings()">Save payment details and QR codes</button>`;
+    for (const method of ["gcash", "maya"]) {
+        document.getElementById(`${method}QrUpload`).addEventListener("change", event => uploadPaymentQr(method, event.target.files[0]));
+    }
+}
+
+async function uploadPaymentQr(method, file) {
+    if (!file) return;
+    const preview = document.getElementById(`${method}QrPreview`);
+    try {
+        const url = await window.firebaseApi.uploadPaymentQr(file);
+        document.getElementById(`${method}QrUrl`).value = url;
+        preview.src = url;
+        preview.hidden = false;
+        alert(`${method === "gcash" ? "GCash" : "Maya"} QR uploaded. Save the payment settings to publish it.`);
+    } catch (error) {
+        console.error("Unable to upload payment QR:", error);
+        alert(error.message || "Unable to upload payment QR.");
+    } finally {
+        document.getElementById(`${method}QrUpload`).value = "";
+    }
 }
 
 async function savePaymentSettings() {
     const values = {
         gcashRecipientName: document.getElementById("gcashRecipientName").value.trim(),
         gcashNumber: document.getElementById("gcashNumber").value.trim(),
+        gcashQrUrl: document.getElementById("gcashQrUrl").value.trim(),
         mayaRecipientName: document.getElementById("mayaRecipientName").value.trim(),
-        mayaNumber: document.getElementById("mayaNumber").value.trim()
+        mayaNumber: document.getElementById("mayaNumber").value.trim(),
+        mayaQrUrl: document.getElementById("mayaQrUrl").value.trim()
     };
     if ((values.gcashRecipientName && !values.gcashNumber) || (!values.gcashRecipientName && values.gcashNumber)
         || (values.mayaRecipientName && !values.mayaNumber) || (!values.mayaRecipientName && values.mayaNumber)) {

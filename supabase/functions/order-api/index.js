@@ -17,6 +17,12 @@ const proofMimeTypes = {
     "image/png": "png",
     "image/webp": "webp"
 };
+const defaultPaymentRecipients = {
+    gcashRecipientName: "RENIEL MARBEBE SABUCO",
+    gcashNumber: "09914908966",
+    mayaRecipientName: "RENIEL MARBEBE SABUCO",
+    mayaNumber: "09853551524"
+};
 const staticProducts = {
     "Woven Handbag": 650,
     "Rattan Basket": 550,
@@ -272,12 +278,15 @@ async function requireConfiguredPaymentMethod(method) {
         settings = decodeFields((await firestoreRequest("settings/paymentMethods")).fields);
     } catch (error) {
         if (error instanceof ApiError && error.status === 404) {
-            throw new ApiError(409, "The store has not configured its payment account yet.");
+            settings = defaultPaymentRecipients;
+        } else {
+            throw error;
         }
-        throw error;
     }
     const prefix = method === "GCash" ? "gcash" : "maya";
-    if (!String(settings[`${prefix}RecipientName`] || "").trim() || !String(settings[`${prefix}Number`] || "").trim()) {
+    const name = String(settings[`${prefix}RecipientName`] || defaultPaymentRecipients[`${prefix}RecipientName`]).trim();
+    const number = String(settings[`${prefix}Number`] || defaultPaymentRecipients[`${prefix}Number`]).trim();
+    if (!name || !number) {
         throw new ApiError(409, `${method} is not configured for payment yet. Choose another payment method or contact the store.`);
     }
 }
