@@ -664,6 +664,46 @@ nav a:hover,
   border-radius: 0 12px 12px 0;
 }
 
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.dashboard-actions button.active {
+  background: #285c3b;
+  color: white;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 18px 0;
+}
+
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table-wrap th,
+.table-wrap td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e8dfd2;
+  vertical-align: top;
+}
+
+.table-wrap th {
+  background: #f7f3eb;
+  color: #285c3b;
+}
+
+.table-wrap td {
+  overflow-wrap: anywhere;
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

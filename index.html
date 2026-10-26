@@ -32,8 +32,7 @@
 
 <nav>
     <button class="nav-btn active" data-screen="home" onclick="showScreen('home')">HOME</button>
-    <button class="nav-btn" data-screen="products" onclick="showScreen('products')">PRODUCTS</button>
-    <button class="nav-btn" data-screen="admin" onclick="openAdminDashboard()">ADMIN</button>
+    <button class="nav-btn" onclick="window.location.href='products.html'">PRODUCTS</button>
     <button class="nav-btn" data-screen="seller" onclick="openSellerDashboard()">SELLER</button>
     <button class="nav-btn" data-screen="categories" onclick="window.location.href='categories.html'">CATEGORIES</button>
     <button class="nav-btn" data-screen="artisans" onclick="window.location.href='artisans.html'">ARTISANS</button>
@@ -59,7 +58,7 @@
             </p>
 
             <button class="btn"
-                onclick="showScreen('products')">
+                onclick="window.location.href='products.html'">
                 SHOP NOW
             </button>
 
@@ -193,134 +192,6 @@
 
 <!-- ================= PRODUCTS ================= -->
 
-<section id="products" class="screen">
-
-    <h1 class="section-title">
-        All Products
-    </h1>
-
-    <div class="product-layout">
-
-        <aside class="categories">
-
-            <h3>Categories</h3>
-
-            <button onclick="filterProducts('All Products')">All Products</button>
-            <button onclick="filterProducts('Bags')">Bags</button>
-            <button onclick="filterProducts('Home Decor')">Home Decor</button>
-            <button onclick="filterProducts('Accessories')">Accessories</button>
-            <button onclick="filterProducts('Woven Items')">Woven Items</button>
-            <button onclick="filterProducts('Wood Crafts')">Wood Crafts</button>
-            <button onclick="filterProducts('Souvenirs')">Souvenirs</button>
-            <button onclick="filterProducts('Jewelry')">Jewelry</button>
-
-        </aside>
-
-
-        <div class="product-grid">
-
-            <div class="product-card" data-category="Bags">
-                <img src="https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg">
-                <div class="product-info">
-                    <h3>Woven Handbag</h3>
-                    <p class="price">₱650.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Woven Handbag',650)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Woven Items">
-                <img src="https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow">
-                <div class="product-info">
-                    <h3>Rattan Basket</h3>
-                    <p class="price">₱550.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Rattan Basket',550)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Accessories">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA">
-                <div class="product-info">
-                    <h3>Traditional Salakot Hat</h3>
-                    <p class="price">₱250.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Traditional Salakot Hat',250)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Home Decor">
-                <img src="https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow">
-                <div class="product-info">
-                    <h3>Handmade Lamp</h3>
-                    <p class="price">₱750.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Handmade Lamp',750)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Home Decor">
-                <img src="https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg">
-                <div class="product-info">
-                    <h3>Ceramic Vase</h3>
-                    <p class="price">₱500.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Ceramic Vase',500)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Home Decor">
-                <img src="https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA">
-                <div class="product-info">
-                    <h3>Ceramic Bowl</h3>
-                    <p class="price">₱500.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Ceramic Bowl',500)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Home Decor">
-                <img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80">
-                <div class="product-info">
-                    <h3>Wooden Vase</h3>
-                    <p class="price">₱450.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Wooden Vase',450)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Home Decor">
-                <img src="https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg">
-                <div class="product-info">
-                    <h3>Macrame Wall Hanging</h3>
-                    <p class="price">₱750.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Macrame Wall Hanging',750)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-</section>
-
-
 <!-- ================= PRODUCT DETAILS ================= -->
 
 <section id="details" class="screen">
@@ -408,6 +279,7 @@
         My Cart
     </h1>
 
+    <p id="cartNotice" role="status" hidden></p>
     <div class="cart-container">
 
         <div class="cart-items">
@@ -464,42 +336,43 @@
             <div class="form-group">
                 <label>Full Name</label>
                 <input id="checkoutFullName" type="text"
-                placeholder="Enter your full name">
+                placeholder="Enter your full name" required autocomplete="name">
             </div>
 
             <div class="form-group">
                 <label>Phone Number</label>
-                <input id="checkoutPhone" type="text"
-                placeholder="09XXXXXXXXX">
+                <input id="checkoutPhone" type="tel"
+                placeholder="09XXXXXXXXX" required autocomplete="tel" pattern="(?:\+?63|0)9\d{9}" title="Enter a valid Philippine mobile number, such as 09171234567.">
             </div>
 
             <div class="form-group">
                 <label>Address</label>
                 <input id="checkoutAddress" type="text"
-                placeholder="Enter your address">
+                placeholder="Enter your address" required autocomplete="street-address">
             </div>
 
             <div class="form-group">
                 <label>City / Municipality</label>
                 <input id="checkoutCity" type="text"
-                placeholder="Enter municipality">
+                placeholder="Enter municipality" required autocomplete="address-level2">
             </div>
 
             <div class="form-group">
                 <label>Payment Method</label>
 
                 <select id="checkoutPayment">
-                    <option>Cash on Delivery</option>
-                    <option>GCash</option>
-                    <option>Maya</option>
-                    <option>Credit / Debit Card</option>
+                    <option value="Cash on Delivery">Cash on Delivery</option>
+                    <option value="GCash">GCash</option>
+                    <option value="Maya">Maya</option>
+                    <option value="Credit / Debit Card">Credit / Debit Card</option>
                 </select>
+                <small id="paymentHelp" role="status">Online payments open PayMongo's secure hosted checkout page.</small>
 
             </div>
 
             <button class="btn"
             style="width:100%;"
-            onclick="placeOrder()">
+            id="placeOrderButton" onclick="placeOrder()">
                 Place Order
             </button>
 
@@ -536,6 +409,7 @@
         My Orders
     </h1>
 
+    <p id="paymentReturnNotice" role="status" hidden></p>
     <div id="ordersList"></div>
 
 </section>
@@ -577,15 +451,16 @@
         <div class="form-group">
             <label>Preferred Payment Method</label>
             <select id="profilePayment">
-                <option>Cash on Delivery</option>
-                <option>GCash</option>
-                <option>Maya</option>
-                <option>Credit / Debit Card</option>
+                <option value="Cash on Delivery">Cash on Delivery</option>
+                <option value="GCash">GCash</option>
+                <option value="Maya">Maya</option>
+                <option value="Credit / Debit Card">Credit / Debit Card</option>
             </select>
         </div>
 
         <div class="profile-actions">
             <button class="btn" onclick="saveProfileSettings()">Save Profile</button>
+            <button id="adminDashboardLink" class="secondary-btn" style="display:none;" type="button" onclick="openAdminDashboard()">Admin Dashboard</button>
             <button class="btn" style="background:#8a6100;" onclick="logout()">Logout</button>
         </div>
     </div>
@@ -741,9 +616,10 @@ function showScreen(screenID) {
         populateCheckoutForm();
     } else if (screenID === "profile") {
         fillProfileForm();
-    } else if (screenID === "products") {
-        renderCatalogProducts();
-        updateProductsDisplay();
+    } else if (screenID === "cart") {
+        renderCart();
+    } else if (screenID === "orders") {
+        renderOrders();
     }
 
     window.scrollTo({
@@ -758,7 +634,9 @@ function showScreen(screenID) {
 let selectedProduct = {
     name: "Woven Handbag",
     price: 650,
-    image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg"
+    image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg",
+    productId: null,
+    sellerId: null
 };
 let quantity = 1;
 
@@ -813,17 +691,21 @@ function getProductDetails(name) {
     };
 }
 
-function showProduct(name, price) {
+function showProduct(name, price, productId = null) {
     const details = getProductDetails(name);
+    const remoteProduct = (window.firebaseProducts || []).find(product => product.id === productId);
     selectedProduct = {
         name,
-        price,
-        image: details.image
+        price: Number(remoteProduct?.price ?? price),
+        image: remoteProduct?.image || remoteProduct?.imageUrl || details.image,
+        productId,
+        sellerId: remoteProduct?.sellerId || null,
+        stock: remoteProduct?.stock
     };
 
     document.getElementById("detailName").innerText = name;
-    document.getElementById("detailPrice").innerText = price;
-    document.getElementById("detailImage").src = details.image;
+    document.getElementById("detailPrice").innerText = selectedProduct.price;
+    document.getElementById("detailImage").src = selectedProduct.image;
     document.getElementById("detailDescription").innerText = details.description;
     document.getElementById("detailReviews").innerText = details.reviews;
 
@@ -840,7 +722,17 @@ function changeQuantity(change) {
 
 /* ================= CART & CHECKOUT ================= */
 
-let cart = JSON.parse(localStorage.getItem("artisanCart")) || [];
+function readStoredArray(key) {
+    try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(value) ? value : [];
+    } catch (error) {
+        console.error(`Unable to read ${key} from browser storage:`, error);
+        return [];
+    }
+}
+
+let cart = readStoredArray("artisanCart");
 
 function saveCart() {
     localStorage.setItem("artisanCart", JSON.stringify(cart));
@@ -877,6 +769,7 @@ function renderCart() {
     if (cart.length === 0) {
         cartContainer.innerHTML = "<p>Your cart is empty.</p>";
         document.getElementById("cartSubtotal").innerText = "₱0.00";
+        document.getElementById("cartShipping").innerText = "₱0.00";
         document.getElementById("cartTotal").innerText = "₱0.00";
         return;
     }
@@ -887,10 +780,10 @@ function renderCart() {
         subtotal += itemTotal;
         return `
             <div class="cart-item" style="display:flex;align-items:center;gap:15px;margin-bottom:15px;border-bottom:1px solid #eee;padding-bottom:15px;">
-                <img src="${item.image}" alt="${item.name}" style="width:70px;height:70px;object-fit:cover;border-radius:5px;">
+                <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" style="width:70px;height:70px;object-fit:cover;border-radius:5px;">
                 <div style="flex-grow:1;">
-                    <h4 style="margin:0;">${item.name}</h4>
-                    <p style="margin:5px 0;">₱${item.price}.00 x ${item.quantity}</p>
+                    <h4 style="margin:0;">${escapeHtml(item.name)}</h4>
+                    <p style="margin:5px 0;">₱${Number(item.price).toFixed(2)} x ${item.quantity}</p>
                 </div>
                 <button onclick="removeFromCart(${index})" style="background:#cc0000;color:white;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;">Remove</button>
             </div>
@@ -899,6 +792,7 @@ function renderCart() {
 
     const shipping = 60;
     document.getElementById("cartSubtotal").innerText = `₱${subtotal.toFixed(2)}`;
+    document.getElementById("cartShipping").innerText = `₱${shipping.toFixed(2)}`;
     document.getElementById("cartTotal").innerText = `₱${(subtotal + shipping).toFixed(2)}`;
 }
 
@@ -917,7 +811,7 @@ function goToCheckout() {
 }
 
 function populateCheckoutForm() {
-    const user = getLoggedInUser();
+    const user = getLoggedInUser() || {};
     if (user) {
         document.getElementById("checkoutFullName").value = user.name || "";
         document.getElementById("checkoutPhone").value = user.phone || "";
@@ -926,46 +820,122 @@ function populateCheckoutForm() {
     }
 
     const summaryContainer = document.getElementById("checkoutSummaryItems");
+    if (!cart.length) {
+        summaryContainer.innerHTML = "<p>Your cart is empty. Add products before checking out.</p>";
+        document.getElementById("checkoutTotal").innerText = "₱0.00";
+        return;
+    }
     let subtotal = 0;
     summaryContainer.innerHTML = cart.map(item => {
         subtotal += item.price * item.quantity;
         return `
             <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                <span>${item.name} x ${item.quantity}</span>
+                <span>${escapeHtml(item.name)} x ${item.quantity}</span>
                 <span>₱${(item.price * item.quantity).toFixed(2)}</span>
             </div>
         `;
     }).join("");
 
     const shipping = 60;
+    document.getElementById("checkoutShipping").innerText = `₱${shipping.toFixed(2)}`;
     document.getElementById("checkoutTotal").innerText = `₱${(subtotal + shipping).toFixed(2)}`;
 }
 
-function placeOrder() {
+async function placeOrder() {
     if (cart.length === 0) {
         alert("No items to order.");
         return;
     }
+    if (cart.some(item => !item.name
+        || !Number.isFinite(Number(item.price))
+        || Number(item.price) <= 0
+        || !Number.isInteger(Number(item.quantity))
+        || Number(item.quantity) <= 0)) {
+        alert("Your cart contains an invalid product or quantity. Remove it and add the product again.");
+        return;
+    }
 
-    const orderData = {
-        id: "ORD-" + Date.now(),
-        date: new Date().toLocaleDateString(),
-        items: [...cart],
-        shippingAddress: document.getElementById("checkoutAddress").value,
-        paymentMethod: document.getElementById("checkoutPayment").value,
-        total: document.getElementById("checkoutTotal").innerText
-    };
+    const fullName = document.getElementById("checkoutFullName").value.trim();
+    const phone = document.getElementById("checkoutPhone").value.trim();
+    const address = document.getElementById("checkoutAddress").value.trim();
+    const city = document.getElementById("checkoutCity").value.trim();
+    const paymentMethod = document.getElementById("checkoutPayment").value;
+    const phoneIsValid = /^(?:\+?63|0)9\d{9}$/.test(phone.replace(/[\s-]/g, ""));
+    if (!fullName || !address || !city || !phoneIsValid) {
+        alert("Enter your full name, a valid Philippine mobile number, and complete shipping address.");
+        return;
+    }
 
-    let orders = JSON.parse(localStorage.getItem("artisanOrders")) || [];
-    orders.push(orderData);
-    localStorage.setItem("artisanOrders", JSON.stringify(orders));
+    if (!window.firebaseApi?.currentUser) {
+        alert("Please sign in again before placing your order.");
+        window.location.href = "login.html";
+        return;
+    }
 
-    cart = [];
-    saveCart();
+    const button = document.getElementById("placeOrderButton");
+    button.disabled = true;
+    try {
+        const items = cart.map(item => ({
+            name: item.name,
+            price: Number(item.price),
+            quantity: Number(item.quantity),
+            image: item.image || "",
+            productId: item.productId || null,
+            sellerId: item.sellerId || null
+        }));
+        const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const productIds = [...new Set(items.map(item => item.productId).filter(Boolean))];
+        const sellerIds = [...new Set(items.map(item => item.sellerId).filter(Boolean))];
+        const stockDeductions = items.reduce((deductions, item) => {
+            if (item.productId && Number.isInteger(item.quantity) && item.quantity > 0) {
+                deductions[item.productId] = (deductions[item.productId] || 0) + item.quantity;
+            }
+            return deductions;
+        }, {});
 
-    alert("Order placed successfully!");
-    renderOrders();
-    showScreen("orders");
+        if (paymentMethod !== "Cash on Delivery") {
+            const checkout = await window.firebaseApi.createPayMongoCheckout({
+                buyerName: fullName,
+                phone,
+                shippingAddress: address,
+                shippingCity: city,
+                paymentMethod,
+                items
+            });
+            cart = [];
+            saveCart();
+            window.location.href = checkout.checkoutUrl;
+            return;
+        }
+
+        await window.firebaseApi.createOrder({
+            buyerName: fullName,
+            buyerEmail: window.firebaseApi.currentUser.email || "",
+            phone,
+            shippingAddress: address,
+            shippingCity: city,
+            paymentMethod,
+            paymentStatus: "Due on delivery",
+            subtotal,
+            shipping: 60,
+            total: subtotal + 60,
+            items,
+            productIds,
+            sellerIds,
+            stockDeductions
+        });
+
+        cart = [];
+        saveCart();
+        renderCart();
+        alert("Order placed successfully.");
+        showScreen("orders");
+    } catch (error) {
+        console.error("Unable to place order:", error);
+        alert(error.message || "Unable to place your order. Please try again.");
+    } finally {
+        button.disabled = false;
+    }
 }
 
 /* ================= ORDERS ================= */
@@ -974,7 +944,7 @@ function renderOrders() {
     const ordersList = document.getElementById("ordersList");
     if (!ordersList) return;
 
-    const orders = JSON.parse(localStorage.getItem("artisanOrders")) || [];
+    const orders = window.firebaseOrders || [];
     if (orders.length === 0) {
         ordersList.innerHTML = "<p>No orders placed yet.</p>";
         return;
@@ -983,149 +953,494 @@ function renderOrders() {
     ordersList.innerHTML = orders.map(order => `
         <div style="border:1px solid #ddd;padding:15px;margin-bottom:15px;border-radius:8px;">
             <div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding-bottom:10px;">
-                <strong>Order ID: ${order.id}</strong>
-                <span>Date: ${order.date}</span>
+                <strong>Order ID: ${escapeHtml(order.id)}</strong>
+                <span>Date: ${escapeHtml(formatOrderDate(order.createdAt || order.date))}</span>
             </div>
             <div style="margin:10px 0;">
-                ${order.items.map(item => `<p style="margin:3px 0;">• ${item.name} (x${item.quantity}) - ₱${item.price * item.quantity}</p>`).join("")}
+                ${(order.items || []).map(item => `<p style="margin:3px 0;">• ${escapeHtml(item.name)} (x${item.quantity}) - ₱${(Number(item.price) * Number(item.quantity)).toFixed(2)}</p>`).join("")}
             </div>
             <div style="display:flex;justify-content:space-between;font-weight:bold;margin-top:10px;">
-                <span>Total: ${order.total}</span>
-                <span style="color:green;">Status: Processing</span>
+                <span>Total: ₱${Number(order.total || 0).toFixed(2)}</span>
+                <span style="color:green;">Status: ${escapeHtml(order.status || "Processing")}</span>
             </div>
+            <p>Payment: ${escapeHtml(order.paymentMethod || "Not recorded")} — ${escapeHtml(order.paymentStatus || "Status unavailable")}</p>
         </div>
     `).join("");
 }
 
 /* ================= AUTH & PROFILE UTILS ================= */
 
-function getLoggedInUser() {
-    return JSON.parse(localStorage.getItem("artisanUser")) || null;
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[character]);
 }
 
-function fillProfileForm() {
-    const user = getLoggedInUser();
-    if (user) {
-        document.getElementById("profileName").value = user.name || "";
-        document.getElementById("profileEmail").value = user.email || "";
-        document.getElementById("profilePhone").value = user.phone || "";
-        document.getElementById("profileAddress").value = user.address || "";
-        document.getElementById("profileCity").value = user.city || "";
+function readStoredProfile() {
+    for (const key of ["artisanUser", "handicraft_profile", "handicraft_logged_in_user"]) {
+        try {
+            const profile = JSON.parse(localStorage.getItem(key) || "null");
+            if (profile && typeof profile === "object") return profile;
+        } catch (error) {
+            console.error(`Unable to read ${key} from browser storage:`, error);
+        }
+    }
+    return null;
+}
+
+function getLoggedInUser() {
+    return readStoredProfile();
+}
+
+function formatOrderDate(value) {
+    let date = value;
+    if (value && typeof value.toDate === "function") date = value.toDate();
+    else if (value?.seconds) date = new Date(value.seconds * 1000);
+    else date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleDateString();
+}
+
+function orderAmount(order) {
+    const amount = typeof order.total === "number" ? order.total : Number(String(order.total || "").replace(/[^\d.-]/g, ""));
+    return Number.isFinite(amount) ? amount : 0;
+}
+
+async function fillProfileForm() {
+    const localProfile = getLoggedInUser() || {};
+    let user = localProfile;
+    const currentUser = window.firebaseApi?.currentUser;
+    if (currentUser) {
+        try {
+            user = await window.firebaseApi.getUserProfile(currentUser.uid) || localProfile;
+        } catch (error) {
+            console.error("Unable to load profile:", error);
+        }
+    }
+    document.getElementById("profileName").value = user.name || user.firstName || "";
+    document.getElementById("profileEmail").value = user.email || currentUser?.email || "";
+    document.getElementById("profilePhone").value = user.phone || "";
+    document.getElementById("profileAddress").value = user.address || "";
+    document.getElementById("profileCity").value = user.city || "";
+    document.getElementById("profilePayment").value = user.paymentMethod || "Cash on Delivery";
+    document.getElementById("adminDashboardLink").style.display = user.role === "Admin" ? "" : "none";
+}
+
+async function saveProfileSettings() {
+    const user = getLoggedInUser() || {};
+    Object.assign(user, {
+        name: document.getElementById("profileName").value.trim(),
+        email: document.getElementById("profileEmail").value.trim(),
+        phone: document.getElementById("profilePhone").value.trim(),
+        address: document.getElementById("profileAddress").value.trim(),
+        city: document.getElementById("profileCity").value.trim(),
+        paymentMethod: document.getElementById("profilePayment").value
+    });
+
+    try {
+        if (window.firebaseApi?.currentUser) {
+            const current = await window.firebaseApi.getUserProfile(window.firebaseApi.currentUser.uid);
+            await window.firebaseApi.saveUserProfile(user, current?.role || "Customer");
+            user.uid = window.firebaseApi.currentUser.uid;
+        } else {
+            throw new Error("Please sign in before saving your profile.");
+        }
+        localStorage.setItem("artisanUser", JSON.stringify(user));
+        localStorage.setItem("handicraft_profile", JSON.stringify(user));
+        localStorage.setItem("handicraft_logged_in_user", JSON.stringify(user));
+        alert("Profile saved successfully.");
+    } catch (error) {
+        console.error("Unable to save profile:", error);
+        alert(error.message || "Unable to save your profile.");
     }
 }
 
-function saveProfileSettings() {
-    const user = getLoggedInUser() || {};
-    user.name = document.getElementById("profileName").value;
-    user.email = document.getElementById("profileEmail").value;
-    user.phone = document.getElementById("profilePhone").value;
-    user.address = document.getElementById("profileAddress").value;
-    user.city = document.getElementById("profileCity").value;
-
-    localStorage.setItem("artisanUser", JSON.stringify(user));
-    alert("Profile saved successfully.");
-}
-
-function logout() {
-    localStorage.removeItem("artisanUser");
-    window.location.href = "login.html";
-}
-
-/* ================= CATALOG & FILTERS ================= */
-
-function filterProducts(category) {
-    const cards = document.querySelectorAll("#products .product-card");
-    cards.forEach(card => {
-        if (category === "All Products" || card.dataset.category === category) {
-            card.style.display = "block";
-        } else {
-            card.style.display = "none";
+async function logout() {
+    try {
+        await window.firebaseApi?.signOut();
+        for (const key of ["artisanUser", "handicraft_profile", "handicraft_logged_in_user"]) {
+            localStorage.removeItem(key);
         }
-    });
-}
-
-function renderCatalogProducts() {
-    // Placeholder to allow dynamic updates if necessary
-}
-
-function updateProductsDisplay() {
-    // Placeholder to synchronize view states
+        window.location.href = "login.html";
+    } catch (error) {
+        console.error("Unable to sign out:", error);
+        alert(error.message || "Unable to sign out.");
+    }
 }
 
 function searchProducts() {
-    const query = document.getElementById("searchInput").value.toLowerCase();
-    showScreen("products");
-    const cards = document.querySelectorAll("#products .product-card");
-    cards.forEach(card => {
-        const title = card.querySelector("h3").innerText.toLowerCase();
-        if (title.includes(query)) {
-            card.style.display = "block";
-        } else {
-            card.style.display = "none";
-        }
-    });
+    const query = document.getElementById("searchInput").value.trim();
+    window.location.href = `products.html${query ? `?search=${encodeURIComponent(query)}` : ""}`;
 }
 
 function toggleSellerInfo() {
     const sellerP = document.getElementById("detailSeller");
     if (sellerP.hidden) {
-        sellerP.innerText = "Sold by: Local Artisan Community Co.";
+        sellerP.innerText = `Sold by: ${selectedProduct.sellerId || "Local Artisan Community Co."}`;
         sellerP.hidden = false;
     } else {
         sellerP.hidden = true;
     }
 }
 
-/* ================= DASHBOARD PLACEHOLDERS ================= */
+function updateHeader() {
+    const loginButton = document.getElementById("loginButton");
+    const currentUser = window.firebaseApi?.currentUser;
+    if (!loginButton || !currentUser) return;
+    loginButton.textContent = `👤 ${currentUser.displayName || currentUser.email?.split("@")[0] || "Account"}`;
+    loginButton.onclick = () => showScreen("profile");
+}
 
-window.openAdminDashboard = function() {
-    showScreen("admin");
-};
+/* ================= EXPORTS & SALES REPORTS ================= */
 
-window.openSellerDashboard = function() {
-    showScreen("seller");
-};
+function downloadFile(filename, content, type) {
+    const url = URL.createObjectURL(new Blob([content], { type }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+}
 
-window.submitAdminLogin = function() {
+function exportJson(filename, data) {
+    downloadFile(filename, JSON.stringify(data, null, 2), "application/json");
+}
+
+function exportCsv(filename, records) {
+    const columns = [...new Set(records.flatMap(record => Object.keys(record || {})))];
+    const cell = value => {
+        const text = value && typeof value === "object" ? JSON.stringify(value) : String(value ?? "");
+        const safeText = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+        return `"${safeText.replace(/"/g, '""')}"`;
+    };
+    const rows = [columns.map(cell).join(","), ...records.map(record =>
+        columns.map(column => cell(record?.[column])).join(",")
+    )];
+    downloadFile(filename, rows.join("\r\n"), "text/csv;charset=utf-8");
+}
+
+function salesByMonth(orders) {
+    const months = new Map();
+    orders.forEach(order => {
+        const timestamp = order.createdAt || order.date;
+        const date = timestamp?.toDate ? timestamp.toDate()
+            : timestamp?.seconds ? new Date(timestamp.seconds * 1000)
+                : new Date(timestamp);
+        if (Number.isNaN(date.getTime())) return;
+        const month = date.toISOString().slice(0, 7);
+        const summary = months.get(month) || { month, orderCount: 0, sales: 0 };
+        summary.orderCount += 1;
+        summary.sales += orderAmount(order);
+        months.set(month, summary);
+    });
+    return [...months.values()].sort((left, right) => right.month.localeCompare(left.month));
+}
+
+function renderSalesReport(orders) {
+    const monthly = salesByMonth(orders);
+    const overall = orders.reduce((total, order) => total + orderAmount(order), 0);
+    return `
+        <h2>Sales report</h2>
+        <div class="stats">
+            <div class="stat-card"><h3>Overall order value</h3><p>₱${overall.toFixed(2)}</p></div>
+            <div class="stat-card"><h3>Total orders</h3><p>${orders.length}</p></div>
+        </div>
+        <div class="dashboard-actions">
+            <button class="btn" onclick="exportSalesCsv()">Export monthly sales CSV</button>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Month</th><th>Orders</th><th>Order value</th></tr></thead>
+        <tbody>${monthly.map(month => `<tr><td>${escapeHtml(month.month)}</td><td>${month.orderCount}</td><td>₱${month.sales.toFixed(2)}</td></tr>`).join("") || "<tr><td colspan='3'>No sales recorded yet.</td></tr>"}</tbody></table></div>`;
+}
+
+let activeAdminView = "dashboard";
+let activeSellerView = "dashboard";
+
+function renderAdminDashboard() {
+    const container = document.getElementById("adminContent");
+    const data = window.firebaseAdminData;
+    if (!container) return;
+    if (!data || data.loading) {
+        container.innerHTML = "<h2>Admin dashboard</h2><p>Loading Firebase data…</p>";
+        return;
+    }
+
+    const orders = data.orders || [];
+    const overall = orders.reduce((sum, order) => sum + orderAmount(order), 0);
+    const views = {
+        dashboard: `<h2>Admin dashboard</h2>
+            <div class="stats">
+                <div class="stat-card"><h3>Overall order value</h3><p>₱${overall.toFixed(2)}</p></div>
+                <div class="stat-card"><h3>Orders</h3><p>${orders.length}</p></div>
+                <div class="stat-card"><h3>Customers</h3><p>${(data.users || []).length}</p></div>
+                <div class="stat-card"><h3>Sellers</h3><p>${(data.sellers || []).length}</p></div>
+            </div><div class="dashboard-actions">
+                <button class="btn" onclick="exportAdminData()">Export all data (JSON)</button>
+                <button class="secondary-btn" onclick="exportSalesCsv()">Export sales (CSV)</button>
+            </div>${renderSalesReport(orders)}`,
+        reports: renderSalesReport(orders),
+        users: `<h2>Users</h2><button class="btn" onclick="exportAdminCollection('users')">Export users CSV</button>${renderDataTable(data.users, ["name", "email", "phone", "city", "role"])}`,
+        sellers: `<h2>Sellers</h2><button class="btn" onclick="exportAdminCollection('sellers')">Export sellers CSV</button>${renderDataTable(data.sellers, ["name", "email", "category", "status"])}`,
+        products: `<h2>Products</h2><button class="btn" onclick="exportAdminCollection('products')">Export products CSV</button>${renderDataTable(data.products, ["name", "category", "price", "stock", "sellerId", "status"])}`,
+        orders: `<h2>Orders</h2><button class="btn" onclick="exportAdminCollection('orders')">Export orders CSV</button>${renderDataTable(orders, ["id", "buyerName", "buyerEmail", "paymentMethod", "paymentStatus", "total", "status"])}`,
+        settings: `<h2>Data exports</h2><p>Export application records available to your administrator account.</p><div class="dashboard-actions">${["users", "sellers", "products", "orders", "reviews", "contactMessages"].map(name => `<button class="secondary-btn" onclick="exportAdminCollection('${name}')">Export ${escapeHtml(name)} CSV</button>`).join("")}<button class="btn" onclick="exportAdminData()">Export complete data (JSON)</button></div>`
+    };
+    container.innerHTML = `${dashboardNavigation("admin", activeAdminView)}${views[activeAdminView] || views.dashboard}`;
+}
+
+function renderDataTable(records, columns) {
+    return `<div class="table-wrap"><table><thead><tr>${columns.map(column => `<th>${escapeHtml(column)}</th>`).join("")}</tr></thead>
+        <tbody>${(records || []).map(record => `<tr>${columns.map(column => `<td>${escapeHtml(record[column] && typeof record[column] === "object" ? JSON.stringify(record[column]) : record[column] ?? "")}</td>`).join("")}</tr>`).join("") || `<tr><td colspan="${columns.length}">No records found.</td></tr>`}</tbody></table></div>`;
+}
+
+function dashboardNavigation(role, activeView) {
+    const views = role === "admin"
+        ? ["dashboard", "users", "sellers", "products", "orders", "reports", "settings"]
+        : ["dashboard", "products", "orders", "inventory", "reports", "profile"];
+    return `<div class="dashboard-actions">${views.map(view => `<button class="secondary-btn${view === activeView ? " active" : ""}" onclick="setDashboardView('${role}','${view}')">${escapeHtml(view[0].toUpperCase() + view.slice(1))}</button>`).join("")}</div>`;
+}
+
+function renderSellerDashboard() {
+    const container = document.getElementById("sellerContent");
+    if (!container) return;
+    const seller = window.firebaseSellerProfile;
+    const user = window.firebaseApi?.currentUser;
+    if (!seller || !user) {
+        container.innerHTML = "<h2>Seller dashboard</h2><p>Sign in with an active seller account to view seller data.</p>";
+        return;
+    }
+
+    const products = (window.firebaseProducts || []).filter(product => product.sellerId === user.uid);
+    const orders = (window.firebaseSellerOrders || []).filter(order => order.sellerIds?.includes(user.uid));
+    const productIds = new Set(products.map(product => product.id));
+    const sellerOrderValues = orders.map(order => ({
+        ...order,
+        total: (order.items || [])
+        .filter(item => item.sellerId === user.uid || productIds.has(item.productId))
+        .reduce((lineTotal, item) => lineTotal + Number(item.price || 0) * Number(item.quantity || 0), 0)
+    }));
+    const sellerSales = sellerOrderValues.reduce((sum, order) => sum + orderAmount(order), 0);
+    const views = {
+        dashboard: `<h2>Seller dashboard</h2><div class="stats">
+            <div class="stat-card"><h3>Your product sales</h3><p>₱${sellerSales.toFixed(2)}</p></div>
+            <div class="stat-card"><h3>Orders with your products</h3><p>${orders.length}</p></div>
+            <div class="stat-card"><h3>Active products</h3><p>${products.length}</p></div>
+        </div><div class="dashboard-actions">
+            <button class="btn" onclick="exportSellerData()">Export seller data (JSON)</button>
+            <button class="secondary-btn" onclick="exportSellerOrders()">Export orders (CSV)</button>
+        </div>${renderSalesReport(sellerOrderValues)}`,
+        products: `<h2>My products</h2>${renderDataTable(products, ["name", "category", "price", "stock", "status"])}`,
+        inventory: `<h2>Inventory</h2>${renderDataTable(products, ["name", "stock", "status"])}`,
+        orders: `<h2>Orders</h2>${renderDataTable(orders, ["id", "buyerName", "buyerEmail", "phone", "shippingAddress", "shippingCity", "paymentMethod", "total", "status"])}`,
+        reports: renderSalesReport(sellerOrderValues),
+        profile: `<h2>Seller profile</h2>${renderDataTable([seller], ["name", "email", "category", "status", "phone", "address"])}`
+    };
+    container.innerHTML = `${dashboardNavigation("seller", activeSellerView)}${views[activeSellerView] || views.dashboard}`;
+}
+
+function setDashboardView(role, view) {
+    if (role === "admin") {
+        activeAdminView = view;
+        renderAdminDashboard();
+    } else {
+        activeSellerView = view;
+        renderSellerDashboard();
+    }
+}
+
+function exportSalesCsv() {
+    const adminDashboardVisible = document.getElementById("admin")?.classList.contains("active");
+    const orders = adminDashboardVisible
+        ? window.firebaseAdminData?.orders || []
+        : (window.firebaseSellerOrders || []).filter(order => order.sellerIds?.includes(window.firebaseApi?.currentUser?.uid))
+            .map(order => {
+                const products = new Set((window.firebaseProducts || [])
+                    .filter(product => product.sellerId === window.firebaseApi?.currentUser?.uid)
+                    .map(product => product.id));
+                return {
+                    ...order,
+                    total: (order.items || [])
+                        .filter(item => item.sellerId === window.firebaseApi?.currentUser?.uid || products.has(item.productId))
+                        .reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0)
+                };
+            });
+    exportCsv("artisan-aisle-monthly-sales.csv", salesByMonth(orders));
+}
+
+function exportAdminCollection(name) {
+    const data = window.firebaseAdminData?.[name];
+    if (!Array.isArray(data)) {
+        alert("This data is not available for export.");
+        return;
+    }
+    exportCsv(`artisan-aisle-${name}.csv`, data);
+}
+
+function exportAdminData() {
+    const data = window.firebaseAdminData;
+    if (!data || data.loading) {
+        alert("Wait for the administrator data to finish loading, then try again.");
+        return;
+    }
+    const { loading, loadedCollections, lastSyncedAt, ...records } = data;
+    exportJson("artisan-aisle-admin-data.json", records);
+}
+
+function exportSellerOrders() {
+    const userId = window.firebaseApi?.currentUser?.uid;
+    const orders = (window.firebaseSellerOrders || []).filter(order => order.sellerIds?.includes(userId));
+    exportCsv("artisan-aisle-seller-orders.csv", orders);
+}
+
+function exportSellerData() {
+    const userId = window.firebaseApi?.currentUser?.uid;
+    if (!userId || !window.firebaseSellerProfile) {
+        alert("Sign in as a seller before exporting seller data.");
+        return;
+    }
+    const products = (window.firebaseProducts || []).filter(product => product.sellerId === userId);
+    const orders = (window.firebaseSellerOrders || []).filter(order => order.sellerIds?.includes(userId));
+    exportJson("artisan-aisle-seller-data.json", { profile: window.firebaseSellerProfile, products, orders });
+}
+
+async function openAdminDashboard() {
+    try {
+        await window.firebaseApi.authReady;
+        const user = window.firebaseApi.currentUser;
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
+        const profile = await window.firebaseApi.getAdminProfile(user.uid);
+        if (profile?.role !== "Admin" || profile.uid !== user.uid) {
+            alert("Administrator access is required.");
+            return;
+        }
+        showScreen("admin");
+        await window.firebaseApi.subscribeAdminData();
+        renderAdminDashboard();
+    } catch (error) {
+        console.error("Unable to open admin dashboard:", error);
+        alert(error.message || "Unable to load administrator data.");
+    }
+}
+
+async function openSellerDashboard() {
+    try {
+        await window.firebaseApi.authReady;
+        const user = window.firebaseApi.currentUser;
+        if (!user) {
+            document.getElementById("sellerLoginModal").style.display = "flex";
+            return;
+        }
+        const profile = await window.firebaseApi.getSeller(user.uid);
+        if (!profile) {
+            document.getElementById("sellerLoginModal").style.display = "flex";
+            return;
+        }
+        window.firebaseSellerProfile = profile;
+        showScreen("seller");
+        renderSellerDashboard();
+    } catch (error) {
+        console.error("Unable to open seller dashboard:", error);
+        alert(error.message || "Unable to load seller data.");
+    }
+}
+
+async function submitAdminLogin() {
+    try {
+        await window.firebaseApi.authReady;
+        await window.firebaseApi.signIn(
+            document.getElementById("adminEmailInput").value.trim(),
+            document.getElementById("adminPasswordInput").value
+        );
+        await openAdminDashboard();
+        document.getElementById("adminLoginModal").style.display = "none";
+    } catch (error) {
+        console.error("Administrator sign-in failed:", error);
+        alert(error.message || "Unable to sign in as administrator.");
+    }
+}
+
+function closeAdminLoginModal() {
     document.getElementById("adminLoginModal").style.display = "none";
-};
+}
 
-window.closeAdminLoginModal = function() {
-    document.getElementById("adminLoginModal").style.display = "none";
-};
+async function adminLogout() {
+    await logout();
+}
 
-window.adminLogout = function() {
-    showScreen("home");
-};
+async function submitSellerLogin() {
+    try {
+        await window.firebaseApi.authReady;
+        const result = await window.firebaseApi.signIn(
+            document.getElementById("sellerEmailInput").value.trim(),
+            document.getElementById("sellerPasswordInput").value
+        );
+        const profile = await window.firebaseApi.getSeller(result.user.uid);
+        if (!profile) throw new Error("This account is not registered as a seller.");
+        window.firebaseSellerProfile = profile;
+        document.getElementById("sellerLoginModal").style.display = "none";
+        showScreen("seller");
+        renderSellerDashboard();
+    } catch (error) {
+        console.error("Seller sign-in failed:", error);
+        alert(error.message || "Unable to sign in as seller.");
+    }
+}
 
-window.submitSellerLogin = function() {
-    document.getElementById("sellerLoginModal").style.display = "none";
-};
+async function submitSellerRegister() {
+    try {
+        const name = document.getElementById("sellerRegisterName").value.trim();
+        const email = document.getElementById("sellerRegisterEmail").value.trim();
+        const password = document.getElementById("sellerRegisterPassword").value;
+        if (!name || !email || password.length < 6) {
+            alert("Enter your name, a valid email, and a password with at least 6 characters.");
+            return;
+        }
+        const user = await window.firebaseApi.createSeller({ name, email, password });
+        window.firebaseSellerProfile = await window.firebaseApi.getSeller(user.uid);
+        document.getElementById("sellerLoginModal").style.display = "none";
+        showScreen("seller");
+        renderSellerDashboard();
+    } catch (error) {
+        console.error("Seller registration failed:", error);
+        alert(error.message || "Unable to create your seller account.");
+    }
+}
 
-window.submitSellerRegister = function() {
-    document.getElementById("sellerLoginModal").style.display = "none";
-};
-
-window.showSellerRegisterForm = function() {
+function showSellerRegisterForm() {
     document.getElementById("sellerLoginForm").style.display = "none";
     document.getElementById("sellerRegisterForm").style.display = "block";
-};
+}
 
-window.showSellerLoginForm = function() {
+function showSellerLoginForm() {
     document.getElementById("sellerRegisterForm").style.display = "none";
     document.getElementById("sellerLoginForm").style.display = "block";
-};
+}
 
-window.closeSellerLoginModal = function() {
+function closeSellerLoginModal() {
     document.getElementById("sellerLoginModal").style.display = "none";
-};
+}
 
-window.sellerLogout = function() {
-    showScreen("home");
-};
+async function sellerLogout() {
+    await logout();
+}
+
+window.renderAdminDashboard = renderAdminDashboard;
+window.renderSellerDashboard = renderSellerDashboard;
 
 // Global Exposure for Inline Event Handlers
 window.showScreen = showScreen;
+window.openAdminDashboard = openAdminDashboard;
+window.openSellerDashboard = openSellerDashboard;
+window.submitAdminLogin = submitAdminLogin;
+window.closeAdminLoginModal = closeAdminLoginModal;
+window.adminLogout = adminLogout;
+window.submitSellerLogin = submitSellerLogin;
+window.submitSellerRegister = submitSellerRegister;
+window.showSellerRegisterForm = showSellerRegisterForm;
+window.showSellerLoginForm = showSellerLoginForm;
+window.closeSellerLoginModal = closeSellerLoginModal;
+window.sellerLogout = sellerLogout;
 window.showProduct = showProduct;
 window.changeQuantity = changeQuantity;
 window.addToCart = addToCart;
@@ -1133,15 +1448,83 @@ window.buyNow = buyNow;
 window.removeFromCart = removeFromCart;
 window.goToCheckout = goToCheckout;
 window.placeOrder = placeOrder;
-window.filterProducts = filterProducts;
 window.searchProducts = searchProducts;
 window.toggleSellerInfo = toggleSellerInfo;
 window.saveProfileSettings = saveProfileSettings;
 window.logout = logout;
+window.updateHeader = updateHeader;
+window.setDashboardView = setDashboardView;
+window.exportAdminData = exportAdminData;
+window.exportAdminCollection = exportAdminCollection;
+window.exportSellerData = exportSellerData;
+window.exportSellerOrders = exportSellerOrders;
+window.exportSalesCsv = exportSalesCsv;
+
+document.querySelectorAll("[data-admin-view]").forEach(button => {
+    button.addEventListener("click", () => setDashboardView("admin", button.dataset.adminView));
+});
+document.querySelectorAll("[data-seller-view]").forEach(button => {
+    button.addEventListener("click", () => setDashboardView("seller", button.dataset.sellerView));
+});
 
 // Initial Setup
 renderCart();
 renderOrders();
+window.firebaseApi.authReady.then(async () => {
+    updateHeader();
+    const params = new URLSearchParams(window.location.search);
+    const paymentNotice = document.getElementById("paymentReturnNotice");
+    if (params.get("payment") === "success") {
+        paymentNotice.textContent = "PayMongo returned you to ArtisanAisle. Your order will show as paid after the server verifies the payment.";
+        paymentNotice.hidden = false;
+        showScreen("orders");
+    } else if (params.get("payment") === "cancelled") {
+        const orderId = params.get("orderId");
+        if (orderId) {
+            try {
+                const result = await window.firebaseApi.cancelPayMongoCheckout(orderId);
+                if (result.cancelled) {
+                    cart = result.items || [];
+                    saveCart();
+                    renderCart();
+                    const cartNotice = document.getElementById("cartNotice");
+                    cartNotice.textContent = "Checkout was cancelled. Your reserved stock was released and your cart is ready to try again.";
+                    cartNotice.hidden = false;
+                    showScreen("cart");
+                } else {
+                    paymentNotice.textContent = "This checkout could not be cancelled. Check your order status before trying again.";
+                    showScreen("orders");
+                }
+            } catch (error) {
+                console.error("Unable to cancel PayMongo checkout:", error);
+                paymentNotice.textContent = error.message || "Unable to confirm cancellation. Check your order status before trying again.";
+                showScreen("orders");
+            }
+        }
+        paymentNotice.hidden = false;
+    }
+    const productName = params.get("product");
+    if (productName) {
+        const price = Number(params.get("price"));
+        const productId = params.get("productId");
+        if (Number.isFinite(price)) {
+            const product = productId ? window.firebaseApi.getProduct(productId) : Promise.resolve(null);
+            product.then(remoteProduct => {
+                if (remoteProduct) {
+                    window.firebaseProducts = [...(window.firebaseProducts || []).filter(item => item.id !== remoteProduct.id), remoteProduct];
+                }
+                showProduct(productName, price, productId);
+            }).catch(error => {
+                console.error("Unable to load product details:", error);
+                showProduct(productName, price, productId);
+            });
+        }
+    } else if (["cart", "orders"].includes(params.get("screen"))) {
+        showScreen(params.get("screen"));
+    }
+}).catch(error => {
+    console.error("Unable to initialize the signed-in session:", error);
+});
 
 })();
 </script>

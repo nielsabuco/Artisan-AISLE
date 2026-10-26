@@ -10,7 +10,18 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
-      allow write: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create: if isAdmin() || (
+        signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.role == 'Customer'
+      );
+      allow update: if isAdmin() || (
+        signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == resource.data.role
+      );
       match /private/{document} {
         allow read, write: if signedIn() && request.auth.uid == uid;
       }
@@ -42,11 +53,15 @@ service cloud.firestore {
     }
 
     match /orders/{orderId} {
-      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow create: if false;
       allow read: if isAdmin() || (signedIn() && (resource.data.uid == request.auth.uid || resource.data.sellerIds.hasAny([request.auth.uid])));
       allow update: if signedIn()
         && (
-          (resource.data.uid == request.auth.uid && request.resource.data.uid == resource.data.uid)
+          (
+            resource.data.uid == request.auth.uid
+            && request.resource.data.uid == resource.data.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['buyerName', 'phone', 'shippingAddress', 'shippingCity', 'updatedAt'])
+          )
           || (
             resource.data.sellerIds.hasAny([request.auth.uid])
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])

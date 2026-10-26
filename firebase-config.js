@@ -10,6 +10,7 @@ window.FIREBASE_CONFIG = {
 import { initializeApp } from 'firebase/app';
 import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import { createClient } from '@supabase/supabase-js';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import {
   createUserWithEmailAndPassword,
   getAuth,
@@ -32,13 +33,13 @@ import {
     getDoc,
     deleteDoc,
     query,
-    where,
-    runTransaction
+    where
 } from 'firebase/firestore';
 
 const firebaseApp = initializeApp(window.FIREBASE_CONFIG);
 const firestore = getFirestore(firebaseApp);
 const firebaseAuth = getAuth(firebaseApp);
+const firebaseFunctions = getFunctions(firebaseApp, 'asia-southeast1');
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
@@ -140,6 +141,10 @@ const api = {
         return result.user;
     },
     getSeller: async uid => (await getDoc(doc(firestore, 'sellers', uid))).data(),
+    getProduct: async productId => {
+        const product = await getDoc(doc(firestore, 'products', productId));
+        return product.exists() ? { id: product.id, ...product.data() } : null;
+    },
     getOrder: async orderId => (await getDoc(doc(firestore, 'orders', orderId))).data(),
     getAdminProfile: async uid => (await getDoc(doc(firestore, 'users', uid))).data(),
     adminWrite: async (collectionName, recordId, data) => {
@@ -237,33 +242,19 @@ const api = {
         await deleteDoc(reference);
     },
     createOrder: async order => {
-        const user = await requireUser();
-        const reference = doc(records('orders'));
-        const orderData = { ...order, uid: user.uid, status: 'Processing', createdAt: serverTimestamp() };
-        await runTransaction(firestore, async transaction => {
-            const products = [];
-            for (const [productId, quantity] of Object.entries(order.stockDeductions || {})) {
-                const productReference = doc(firestore, 'products', productId);
-                const productSnapshot = await transaction.get(productReference);
-                if (!productSnapshot.exists()) throw new Error('A product in your cart is no longer available.');
-                const product = productSnapshot.data();
-                if (Number.isFinite(Number(product.stock)) && Number(product.stock) < quantity) {
-                    throw new Error(`${product.name || 'A product'} does not have enough stock.`);
-                }
-                products.push({ reference: productReference, product, quantity });
-            }
-            transaction.set(reference, orderData);
-            products.forEach(({ reference: productReference, product, quantity }) => {
-                const remainingStock = Number(product.stock) - quantity;
-                transaction.update(productReference, {
-                    stock: remainingStock,
-                    status: remainingStock <= 0 ? 'Out of Stock' : product.status,
-                    lastStockOrderId: reference.id,
-                    updatedAt: serverTimestamp()
-                });
-            });
-        });
-        return { id: reference.id, ...order, uid: user.uid, status: 'Processing' };
+        await requireUser();
+        const createCashOrder = httpsCallable(firebaseFunctions, 'createCashOnDeliveryOrder');
+        return (await createCashOrder(order)).data;
+    },
+    createPayMongoCheckout: async checkout => {
+        await requireUser();
+        const createCheckout = httpsCallable(firebaseFunctions, 'createPayMongoCheckout');
+        return (await createCheckout(checkout)).data;
+    },
+    cancelPayMongoCheckout: async orderId => {
+        await requireUser();
+        const cancelCheckout = httpsCallable(firebaseFunctions, 'cancelPayMongoCheckout');
+        return (await cancelCheckout({ orderId })).data;
     },
     updateOrderStatus: async (orderId, status) => {
         const user = await requireUser();
@@ -290,11 +281,9 @@ onSnapshot(records('products'), snapshot => {
     const products = remoteProducts;
     window.firebaseProductsLoaded = true;
     window.firebaseProducts = products;
-    if (typeof saveCatalogProducts === 'function') saveCatalogProducts(products);
-    if (typeof renderHomeProducts === 'function') renderHomeProducts();
-    if (typeof renderCatalogProducts === 'function') renderCatalogProducts();
-    if (typeof updateProductsDisplay === 'function') updateProductsDisplay();
+    window.dispatchEvent(new CustomEvent('artisan-products-updated', { detail: products }));
     if (typeof renderAdminDashboard === 'function') renderAdminDashboard();
+    if (typeof renderSellerDashboard === 'function') renderSellerDashboard();
 }, error => console.error('Products listener failed:', error));
 
 window.firebaseReviews = {};
