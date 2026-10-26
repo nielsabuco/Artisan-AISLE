@@ -364,9 +364,22 @@
                     <option value="Cash on Delivery">Cash on Delivery</option>
                     <option value="GCash">GCash</option>
                     <option value="Maya">Maya</option>
-                    <option value="Credit / Debit Card">Credit / Debit Card</option>
                 </select>
-                <small id="paymentHelp" role="status">Online payments open PayMongo's secure hosted checkout page.</small>
+                <small id="paymentHelp" role="status">Choose a payment method to see payment instructions.</small>
+
+            </div>
+
+            <div id="paymentRecipientDetails" class="form-group" hidden>
+                <h3 id="paymentRecipientTitle"></h3>
+                <p id="paymentRecipientName"></p>
+                <p id="paymentRecipientNumber"></p>
+                <p>Transfer the order total, then enter the transaction reference number below. Payment is confirmed after review.</p>
+            </div>
+
+            <div id="paymentReferenceGroup" class="form-group" hidden>
+                <label for="checkoutPaymentReference">Payment reference number</label>
+                <input id="checkoutPaymentReference" type="text" maxlength="80" autocomplete="off" placeholder="Enter the reference from your GCash or Maya receipt">
+                <small>Do not enter your wallet PIN, password, or one-time code.</small>
 
             </div>
 
@@ -819,6 +832,8 @@ function populateCheckoutForm() {
         document.getElementById("checkoutCity").value = user.city || "";
     }
 
+    syncPaymentInstructions();
+
     const summaryContainer = document.getElementById("checkoutSummaryItems");
     if (!cart.length) {
         summaryContainer.innerHTML = "<p>Your cart is empty. Add products before checking out.</p>";
@@ -841,6 +856,44 @@ function populateCheckoutForm() {
     document.getElementById("checkoutTotal").innerText = `₱${(subtotal + shipping).toFixed(2)}`;
 }
 
+async function syncPaymentInstructions() {
+    const method = document.getElementById("checkoutPayment").value;
+    const referenceGroup = document.getElementById("paymentReferenceGroup");
+    const recipientDetails = document.getElementById("paymentRecipientDetails");
+    const referenceInput = document.getElementById("checkoutPaymentReference");
+    const help = document.getElementById("paymentHelp");
+    const isWalletPayment = method === "GCash" || method === "Maya";
+    referenceGroup.hidden = !isWalletPayment;
+    recipientDetails.hidden = !isWalletPayment;
+    referenceInput.required = isWalletPayment;
+    if (!isWalletPayment) {
+        help.textContent = "Cash is collected when your order is delivered.";
+        return;
+    }
+    help.textContent = "Loading payment instructions…";
+    document.getElementById("paymentRecipientTitle").textContent = "";
+    document.getElementById("paymentRecipientName").textContent = "";
+    document.getElementById("paymentRecipientNumber").textContent = "";
+    try {
+        const settings = await window.firebaseApi.getPaymentSettings();
+        if (document.getElementById("checkoutPayment").value !== method) return;
+        const prefix = method === "GCash" ? "gcash" : "maya";
+        const name = settings?.[`${prefix}RecipientName`]?.trim();
+        const number = settings?.[`${prefix}Number`]?.trim();
+        if (!name || !number) {
+            help.textContent = `${method} payment is not configured yet. Please choose another payment method or contact the store.`;
+            return;
+        }
+        document.getElementById("paymentRecipientTitle").textContent = `Send payment using ${method}`;
+        document.getElementById("paymentRecipientName").textContent = `Account name: ${name}`;
+        document.getElementById("paymentRecipientNumber").textContent = `Account number: ${number}`;
+        help.textContent = "Pay the order total to this account and enter your transaction reference number.";
+    } catch (error) {
+        console.error("Unable to load payment instructions:", error);
+        help.textContent = "Payment instructions are temporarily unavailable. Please try again later.";
+    }
+}
+
 async function placeOrder() {
     if (cart.length === 0) {
         alert("No items to order.");
@@ -860,9 +913,14 @@ async function placeOrder() {
     const address = document.getElementById("checkoutAddress").value.trim();
     const city = document.getElementById("checkoutCity").value.trim();
     const paymentMethod = document.getElementById("checkoutPayment").value;
+    const paymentReference = document.getElementById("checkoutPaymentReference").value.trim();
     const phoneIsValid = /^(?:\+?63|0)9\d{9}$/.test(phone.replace(/[\s-]/g, ""));
     if (!fullName || !address || !city || !phoneIsValid) {
         alert("Enter your full name, a valid Philippine mobile number, and complete shipping address.");
+        return;
+    }
+    if (paymentMethod !== "Cash on Delivery" && !/^[A-Za-z0-9][A-Za-z0-9 ._/#-]{3,79}$/.test(paymentReference)) {
+        alert("Enter a valid GCash or Maya transaction reference number.");
         return;
     }
 
@@ -893,21 +951,6 @@ async function placeOrder() {
             return deductions;
         }, {});
 
-        if (paymentMethod !== "Cash on Delivery") {
-            const checkout = await window.firebaseApi.createPayMongoCheckout({
-                buyerName: fullName,
-                phone,
-                shippingAddress: address,
-                shippingCity: city,
-                paymentMethod,
-                items
-            });
-            cart = [];
-            saveCart();
-            window.location.href = checkout.checkoutUrl;
-            return;
-        }
-
         await window.firebaseApi.createOrder({
             buyerName: fullName,
             buyerEmail: window.firebaseApi.currentUser.email || "",
@@ -915,7 +958,7 @@ async function placeOrder() {
             shippingAddress: address,
             shippingCity: city,
             paymentMethod,
-            paymentStatus: "Due on delivery",
+            paymentReference: paymentMethod === "Cash on Delivery" ? "" : paymentReference,
             subtotal,
             shipping: 60,
             total: subtotal + 60,
@@ -928,7 +971,9 @@ async function placeOrder() {
         cart = [];
         saveCart();
         renderCart();
-        alert("Order placed successfully.");
+        alert(paymentMethod === "Cash on Delivery"
+            ? "Order placed successfully."
+            : "Order placed. Your payment reference is awaiting admin verification.");
         showScreen("orders");
     } catch (error) {
         console.error("Unable to place order:", error);
@@ -964,6 +1009,7 @@ function renderOrders() {
                 <span style="color:green;">Status: ${escapeHtml(order.status || "Processing")}</span>
             </div>
             <p>Payment: ${escapeHtml(order.paymentMethod || "Not recorded")} — ${escapeHtml(order.paymentStatus || "Status unavailable")}</p>
+            ${order.paymentReference ? `<p>Reference number: ${escapeHtml(order.paymentReference)}</p>` : ""}
         </div>
     `).join("");
 }
@@ -1180,10 +1226,96 @@ function renderAdminDashboard() {
         users: `<h2>Users</h2><button class="btn" onclick="exportAdminCollection('users')">Export users CSV</button>${renderDataTable(data.users, ["name", "email", "phone", "city", "role"])}`,
         sellers: `<h2>Sellers</h2><button class="btn" onclick="exportAdminCollection('sellers')">Export sellers CSV</button>${renderDataTable(data.sellers, ["name", "email", "category", "status"])}`,
         products: `<h2>Products</h2><button class="btn" onclick="exportAdminCollection('products')">Export products CSV</button>${renderDataTable(data.products, ["name", "category", "price", "stock", "sellerId", "status"])}`,
-        orders: `<h2>Orders</h2><button class="btn" onclick="exportAdminCollection('orders')">Export orders CSV</button>${renderDataTable(orders, ["id", "buyerName", "buyerEmail", "paymentMethod", "paymentStatus", "total", "status"])}`,
-        settings: `<h2>Data exports</h2><p>Export application records available to your administrator account.</p><div class="dashboard-actions">${["users", "sellers", "products", "orders", "reviews", "contactMessages"].map(name => `<button class="secondary-btn" onclick="exportAdminCollection('${name}')">Export ${escapeHtml(name)} CSV</button>`).join("")}<button class="btn" onclick="exportAdminData()">Export complete data (JSON)</button></div>`
+        orders: `<h2>Orders</h2><button class="btn" onclick="exportAdminCollection('orders')">Export orders CSV</button>${renderAdminOrders(orders)}`,
+        settings: `<h2>Payment details</h2><p>Set the GCash and Maya recipient account details customers should pay. These details are visible to customers during checkout.</p><div id="adminPaymentSettings"><p>Loading payment settings…</p></div><h2>Data exports</h2><p>Export application records available to your administrator account.</p><div class="dashboard-actions">${["users", "sellers", "products", "orders", "reviews", "contactMessages"].map(name => `<button class="secondary-btn" onclick="exportAdminCollection('${name}')">Export ${escapeHtml(name)} CSV</button>`).join("")}<button class="btn" onclick="exportAdminData()">Export complete data (JSON)</button></div>`
     };
     container.innerHTML = `${dashboardNavigation("admin", activeAdminView)}${views[activeAdminView] || views.dashboard}`;
+    if (activeAdminView === "settings") loadAdminPaymentSettings();
+}
+
+const emptyPaymentSettings = {
+    gcashRecipientName: "",
+    gcashNumber: "",
+    mayaRecipientName: "",
+    mayaNumber: ""
+};
+let paymentSettings = null;
+let paymentSettingsLoaded = false;
+let loadingPaymentSettings = false;
+
+async function loadAdminPaymentSettings() {
+    const container = document.getElementById("adminPaymentSettings");
+    if (!container || loadingPaymentSettings) return;
+    if (paymentSettingsLoaded) {
+        renderAdminPaymentSettings(container);
+        return;
+    }
+    loadingPaymentSettings = true;
+    try {
+        paymentSettings = await window.firebaseApi.getPaymentSettings() || { ...emptyPaymentSettings };
+        paymentSettingsLoaded = true;
+    } catch (error) {
+        console.error("Unable to load payment settings:", error);
+        const currentContainer = document.getElementById("adminPaymentSettings");
+        if (currentContainer) currentContainer.innerHTML = `<p role="alert">${escapeHtml(error.message || "Unable to load payment settings.")}</p>`;
+    } finally {
+        loadingPaymentSettings = false;
+    }
+    if (paymentSettingsLoaded) {
+        const currentContainer = document.getElementById("adminPaymentSettings");
+        if (currentContainer) renderAdminPaymentSettings(currentContainer);
+    }
+}
+
+function renderAdminPaymentSettings(container) {
+    const values = paymentSettings || emptyPaymentSettings;
+    container.innerHTML = `
+        <div class="form-group"><label for="gcashRecipientName">GCash account name</label><input id="gcashRecipientName" maxlength="100" value="${escapeHtml(values.gcashRecipientName)}"></div>
+        <div class="form-group"><label for="gcashNumber">GCash number</label><input id="gcashNumber" type="tel" maxlength="32" value="${escapeHtml(values.gcashNumber)}"></div>
+        <div class="form-group"><label for="mayaRecipientName">Maya account name</label><input id="mayaRecipientName" maxlength="100" value="${escapeHtml(values.mayaRecipientName)}"></div>
+        <div class="form-group"><label for="mayaNumber">Maya number</label><input id="mayaNumber" type="tel" maxlength="32" value="${escapeHtml(values.mayaNumber)}"></div>
+        <button class="btn" type="button" onclick="savePaymentSettings()">Save payment details</button>`;
+}
+
+async function savePaymentSettings() {
+    const values = {
+        gcashRecipientName: document.getElementById("gcashRecipientName").value.trim(),
+        gcashNumber: document.getElementById("gcashNumber").value.trim(),
+        mayaRecipientName: document.getElementById("mayaRecipientName").value.trim(),
+        mayaNumber: document.getElementById("mayaNumber").value.trim()
+    };
+    if ((values.gcashRecipientName && !values.gcashNumber) || (!values.gcashRecipientName && values.gcashNumber)
+        || (values.mayaRecipientName && !values.mayaNumber) || (!values.mayaRecipientName && values.mayaNumber)) {
+        alert("Enter both the account name and number for each payment method you configure.");
+        return;
+    }
+    try {
+        await window.firebaseApi.adminWrite("settings", "paymentMethods", values);
+        paymentSettings = values;
+        paymentSettingsLoaded = true;
+        alert("Payment recipient details saved.");
+    } catch (error) {
+        console.error("Unable to save payment settings:", error);
+        alert(error.message || "Unable to save payment settings.");
+    }
+}
+
+function renderAdminOrders(orders) {
+    const columns = ["id", "buyerName", "buyerEmail", "paymentMethod", "paymentReference", "paymentStatus", "total", "status"];
+    return `<div class="table-wrap"><table><thead><tr>${columns.map(column => `<th>${escapeHtml(column)}</th>`).join("")}<th>Action</th></tr></thead>
+        <tbody>${orders.map(order => `<tr>${columns.map(column => `<td>${escapeHtml(order[column] && typeof order[column] === "object" ? JSON.stringify(order[column]) : order[column] ?? "")}</td>`).join("")}
+        <td>${order.paymentStatus === "Awaiting payment verification" ? `<button class="secondary-btn" type="button" onclick="confirmPayment('${escapeHtml(order.id)}')">Confirm payment</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="${columns.length + 1}">No records found.</td></tr>`}</tbody></table></div>`;
+}
+
+async function confirmPayment(orderId) {
+    if (!confirm("Confirm that this GCash/Maya reference matches the payment received?")) return;
+    try {
+        await window.firebaseApi.confirmPayment(orderId);
+        alert("Payment confirmed.");
+    } catch (error) {
+        console.error("Unable to confirm payment:", error);
+        alert(error.message || "Unable to confirm this payment.");
+    }
 }
 
 function renderDataTable(records, columns) {
@@ -1229,7 +1361,7 @@ function renderSellerDashboard() {
         </div>${renderSalesReport(sellerOrderValues)}`,
         products: `<h2>My products</h2>${renderDataTable(products, ["name", "category", "price", "stock", "status"])}`,
         inventory: `<h2>Inventory</h2>${renderDataTable(products, ["name", "stock", "status"])}`,
-        orders: `<h2>Orders</h2>${renderDataTable(orders, ["id", "buyerName", "buyerEmail", "phone", "shippingAddress", "shippingCity", "paymentMethod", "total", "status"])}`,
+        orders: `<h2>Orders</h2>${renderDataTable(orders, ["id", "buyerName", "buyerEmail", "phone", "shippingAddress", "shippingCity", "paymentMethod", "paymentStatus", "total", "status"])}`,
         reports: renderSalesReport(sellerOrderValues),
         profile: `<h2>Seller profile</h2>${renderDataTable([seller], ["name", "email", "category", "status", "phone", "address"])}`
     };
@@ -1459,7 +1591,10 @@ window.exportAdminCollection = exportAdminCollection;
 window.exportSellerData = exportSellerData;
 window.exportSellerOrders = exportSellerOrders;
 window.exportSalesCsv = exportSalesCsv;
+window.savePaymentSettings = savePaymentSettings;
+window.confirmPayment = confirmPayment;
 
+document.getElementById("checkoutPayment").addEventListener("change", syncPaymentInstructions);
 document.querySelectorAll("[data-admin-view]").forEach(button => {
     button.addEventListener("click", () => setDashboardView("admin", button.dataset.adminView));
 });

@@ -163,6 +163,10 @@ const api = {
         const product = await getDoc(doc(firestore, 'products', productId));
         return product.exists() ? { id: product.id, ...product.data() } : null;
     },
+    getPaymentSettings: async () => {
+        const settings = await getDoc(doc(firestore, 'settings', 'paymentMethods'));
+        return settings.exists() ? settings.data() : null;
+    },
     getOrder: async orderId => (await getDoc(doc(firestore, 'orders', orderId))).data(),
     getAdminProfile: async uid => (await getDoc(doc(firestore, 'users', uid))).data(),
     adminWrite: async (collectionName, recordId, data) => {
@@ -259,12 +263,8 @@ const api = {
 
         await deleteDoc(reference);
     },
-    createOrder: async order => {
-        return invokeOrderApi({ action: 'create-cod', order });
-    },
-    createPayMongoCheckout: async checkout => {
-        return invokeOrderApi({ action: 'create-checkout', checkout });
-    },
+    createOrder: async order => invokeOrderApi({ action: 'create-order', order }),
+    confirmPayment: async orderId => invokeOrderApi({ action: 'confirm-payment', orderId }),
     cancelPayMongoCheckout: async orderId => {
         return invokeOrderApi({ action: 'cancel-checkout', orderId });
     },

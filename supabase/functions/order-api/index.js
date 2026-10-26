@@ -11,11 +11,6 @@ import {
     verifyFirebaseUser
 } from "../_shared/backend.js";
 
-const paymentMethods = {
-    GCash: "gcash",
-    Maya: "paymaya",
-    "Credit / Debit Card": "card"
-};
 const staticProducts = {
     "Woven Handbag": 650,
     "Rattan Basket": 550,
@@ -66,7 +61,7 @@ function stockWrite(productDocument, orderId, deduction) {
 }
 
 async function reserveOrder(user, input, payment) {
-    const checkout = payment.isOnline ? input.checkout : input.order;
+    const checkout = input.order;
     const buyerName = String(checkout?.buyerName || "").trim();
     const phone = String(checkout?.phone || "").trim();
     const shippingAddress = String(checkout?.shippingAddress || "").trim();
@@ -152,6 +147,7 @@ async function reserveOrder(user, input, payment) {
             paymentMethod: payment.method,
             paymentProvider: payment.provider,
             paymentStatus: payment.paymentStatus,
+            paymentReference: String(checkout.paymentReference || "").trim(),
             status: payment.status,
             subtotal: subtotalInCentavos / 100,
             shipping: shippingInCentavos / 100,
@@ -177,6 +173,65 @@ async function reserveOrder(user, input, payment) {
     });
 
     return { orderId, order: storedOrder };
+}
+
+async function requireConfiguredPaymentMethod(method) {
+    let settings;
+    try {
+        settings = decodeFields((await firestoreRequest("settings/paymentMethods")).fields);
+    } catch (error) {
+        if (error instanceof ApiError && error.status === 404) {
+            throw new ApiError(409, "The store has not configured its payment account yet.");
+        }
+        throw error;
+    }
+    const prefix = method === "GCash" ? "gcash" : "maya";
+    if (!String(settings[`${prefix}RecipientName`] || "").trim() || !String(settings[`${prefix}Number`] || "").trim()) {
+        throw new ApiError(409, `${method} is not configured for payment yet. Choose another payment method or contact the store.`);
+    }
+}
+
+async function confirmManualPayment(user, orderId) {
+    if (!/^[A-Fa-f0-9]{32}$/.test(String(orderId || ""))) throw new ApiError(400, "The order ID is invalid.");
+    const profileDocument = await firestoreRequest(`users/${user.uid}`);
+    const profile = decodeFields(profileDocument.fields);
+    if (profile.uid !== user.uid
+        || profile.role !== "Admin"
+        || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
+        throw new ApiError(403, "Only the approved administrator can confirm payments.");
+    }
+    let confirmed = false;
+    await firestoreTransaction([`orders/${orderId}`], documents => {
+        const snapshot = documents.get(firestoreDocument(`orders/${orderId}`));
+        if (!snapshot) throw new ApiError(404, "This order could not be found.");
+        const order = decodeFields(snapshot.fields);
+        if (order.paymentStatus === "Paid") {
+            confirmed = true;
+            return [];
+        }
+        if (!["GCash", "Maya"].includes(order.paymentMethod)
+            || order.paymentStatus !== "Awaiting payment verification"
+            || order.status !== "Awaiting Payment Verification"
+            || !order.paymentReference) {
+            throw new ApiError(409, "This order is not waiting for manual payment verification.");
+        }
+        confirmed = true;
+        return [{
+            update: {
+                name: snapshot.name,
+                fields: {
+                    paymentStatus: encodeFirestore("Paid"),
+                    status: encodeFirestore("Processing"),
+                    paymentVerifiedBy: encodeFirestore(user.uid),
+                    paymentVerifiedAt: encodeFirestore(new Date()),
+                    updatedAt: encodeFirestore(new Date())
+                }
+            },
+            updateMask: { fieldPaths: ["paymentStatus", "status", "paymentVerifiedBy", "paymentVerifiedAt", "updatedAt"] },
+            currentDocument: { updateTime: snapshot.updateTime }
+        }];
+    });
+    return { confirmed };
 }
 
 export async function releaseReservation(orderId, paymentStatus, orderStatus) {
@@ -246,84 +301,6 @@ export async function releaseReservation(orderId, paymentStatus, orderStatus) {
     return result;
 }
 
-async function createOnlineCheckout(user, requestData) {
-    const method = paymentMethods[requestData.checkout?.paymentMethod];
-    if (!method) throw new ApiError(400, "Choose GCash, Maya, or card.");
-    const { orderId, order } = await reserveOrder(user, requestData, {
-        isOnline: true,
-        method: requestData.checkout.paymentMethod,
-        provider: "PayMongo",
-        paymentStatus: "Creating checkout session",
-        status: "Awaiting Payment"
-    });
-
-    let sessionId;
-    try {
-        const lineItems = order.items.map(item => ({
-            name: item.name,
-            amount: money(item.price),
-            currency: "PHP",
-            quantity: item.quantity
-        }));
-        lineItems.push({ name: "Shipping", amount: 6000, currency: "PHP", quantity: 1 });
-        const baseUrl = (Deno.env.get("APP_BASE_URL") || "https://artisan-79f5d.web.app").replace(/\/+$/, "");
-        const session = await paymongoRequest("checkout_sessions", "POST", {
-            data: {
-                attributes: {
-                    line_items: lineItems,
-                    payment_method_types: [method],
-                    success_url: `${baseUrl}/index.html?screen=orders&payment=success`,
-                    cancel_url: `${baseUrl}/index.html?screen=orders&payment=cancelled&orderId=${encodeURIComponent(orderId)}`,
-                    reference_number: orderId,
-                    pass_on_fees: false,
-                    send_email_receipt: true,
-                    metadata: { orderId, userId: user.uid }
-                }
-            }
-        });
-        sessionId = session?.data?.id;
-        const checkoutUrl = session?.data?.attributes?.checkout_url;
-        if (!sessionId || !checkoutUrl || new URL(checkoutUrl).hostname !== "checkout.paymongo.com") {
-            throw new Error("PayMongo returned an invalid hosted checkout URL.");
-        }
-        await firestoreTransaction([`orders/${orderId}`], documents => {
-            const stored = documents.get(firestoreDocument(`orders/${orderId}`));
-            if (!stored) throw new ApiError(404, "The order could not be saved.");
-            const order = decodeFields(stored.fields);
-            if (order.paymentStatus !== "Creating checkout session") {
-                throw new ApiError(409, "This checkout is no longer available.");
-            }
-            return [{
-                update: {
-                    name: stored.name,
-                    fields: {
-                        paymongoSessionId: encodeFirestore(sessionId),
-                        paymentStatus: encodeFirestore("Awaiting payment"),
-                        updatedAt: encodeFirestore(new Date())
-                    }
-                },
-                updateMask: { fieldPaths: ["paymongoSessionId", "paymentStatus", "updatedAt"] },
-                currentDocument: { updateTime: stored.updateTime }
-            }];
-        });
-        return { orderId, checkoutUrl };
-    } catch (error) {
-        if (sessionId) {
-            try {
-                await paymongoRequest(`checkout_sessions/${encodeURIComponent(sessionId)}/expire`, "POST", {});
-            } catch (expireError) {
-                console.warn("Unable to expire checkout after a setup failure.", expireError);
-            }
-        }
-        try {
-            await releaseReservation(orderId, "Checkout failed", "Payment Setup Failed");
-        } catch (releaseError) {
-            console.error("Unable to release product stock after checkout failed.", releaseError);
-        }
-        throw error;
-    }
-}
-
 async function cancelCheckout(user, orderId) {
     if (!/^[A-Fa-f0-9]{32}$/.test(String(orderId || ""))) throw new ApiError(400, "The order ID is invalid.");
     const orderDocumentSnapshot = await firestoreRequest(`orders/${orderId}`);
@@ -356,6 +333,35 @@ if (import.meta.main) Deno.serve(async request => {
         const user = await verifyFirebaseUser(request);
         const body = await request.json();
         switch (body.action) {
+            case "create-order": {
+                const method = body.order?.paymentMethod;
+                if (!["Cash on Delivery", "GCash", "Maya"].includes(method)) {
+                    throw new ApiError(400, "Choose Cash on Delivery, GCash, or Maya.");
+                }
+                if (method === "Cash on Delivery") {
+                    const result = await reserveOrder(user, body, {
+                        method,
+                        provider: "Cash on Delivery",
+                        paymentStatus: "Due on delivery",
+                        status: "Processing"
+                    });
+                    return jsonResponse({ orderId: result.orderId }, 200, headers);
+                }
+                const reference = String(body.order?.paymentReference || "").trim();
+                if (!/^[A-Za-z0-9][A-Za-z0-9 ._/#-]{3,79}$/.test(reference)) {
+                    throw new ApiError(400, "Enter a valid GCash or Maya transaction reference number.");
+                }
+                await requireConfiguredPaymentMethod(method);
+                const result = await reserveOrder(user, body, {
+                    method,
+                    provider: "Manual",
+                    paymentStatus: "Awaiting payment verification",
+                    status: "Awaiting Payment Verification"
+                });
+                return jsonResponse({ orderId: result.orderId }, 200, headers);
+            }
+            case "confirm-payment":
+                return jsonResponse(await confirmManualPayment(user, body.orderId), 200, headers);
             case "create-cod": {
                 const result = await reserveOrder(user, body, {
                     method: "Cash on Delivery",
@@ -365,8 +371,6 @@ if (import.meta.main) Deno.serve(async request => {
                 });
                 return jsonResponse({ orderId: result.orderId }, 200, headers);
             }
-            case "create-checkout":
-                return jsonResponse(await createOnlineCheckout(user, body), 200, headers);
             case "cancel-checkout":
                 return jsonResponse(await cancelCheckout(user, body.orderId), 200, headers);
             default:
