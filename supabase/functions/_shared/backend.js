@@ -170,8 +170,6 @@ async function firestoreRpc(method, body) {
     return payloadText ? JSON.parse(payloadText) : {};
 }
 
-export const firestoreRunQuery = structuredQuery => firestoreRpc("runQuery", { structuredQuery });
-
 export async function firestoreTransaction(paths, buildWrites) {
     const transaction = (await firestoreRpc("beginTransaction", { options: { readWrite: {} } })).transaction;
     if (!transaction) throw new ApiError(502, "Unable to start a secure order transaction.");
@@ -211,23 +209,4 @@ export async function verifyFirebaseUser(request) {
     const user = result.users?.[0];
     if (!response.ok || !user?.localId) throw new ApiError(401, "Your session has expired. Please sign in again.");
     return { uid: user.localId, email: user.email || "", token };
-}
-
-export async function paymongoRequest(path, method = "GET", body) {
-    const secret = Deno.env.get("PAYMONGO_SECRET_KEY");
-    if (!secret) throw new ApiError(503, "PayMongo is not configured for this Supabase project.");
-    const response = await fetch(`https://api.paymongo.com/v2/${path}`, {
-        method,
-        headers: {
-            Authorization: `Basic ${btoa(`${secret}:`)}`,
-            "Content-Type": "application/json"
-        },
-        ...(body ? { body: JSON.stringify(body) } : {})
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
-        console.error("PayMongo API request failed.", { status: response.status, errors: payload.errors });
-        throw new ApiError(502, "PayMongo could not process this checkout request.");
-    }
-    return payload;
 }

@@ -1,11 +1,3 @@
 [functions.order-api]
 verify_jwt = false
 entrypoint = "./functions/order-api/index.js"
-
-[functions.paymongo-webhook]
-verify_jwt = false
-entrypoint = "./functions/paymongo-webhook/index.js"
-
-[functions.expire-pending-orders]
-verify_jwt = false
-entrypoint = "./functions/expire-pending-orders/index.js"

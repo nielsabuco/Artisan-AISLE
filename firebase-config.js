@@ -172,16 +172,16 @@ const api = {
     adminWrite: async (collectionName, recordId, data) => {
         const user = await requireUser();
         const profile = await api.getAdminProfile(user.uid);
-        if (!profile || profile.uid !== user.uid || profile.role !== 'Admin' || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
-            throw new Error('Admin access is required for the exact Firebase UID assigned to this admin account.');
+        if (!profile || profile.role !== 'Admin') {
+            throw new Error('Administrator access is required for this account.');
         }
         await setDoc(doc(firestore, collectionName, recordId), { ...data, updatedAt: serverTimestamp() }, { merge: true });
     },
     adminDelete: async (collectionName, recordId) => {
         const user = await requireUser();
         const profile = await api.getAdminProfile(user.uid);
-        if (!profile || profile.uid !== user.uid || profile.role !== 'Admin' || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
-            throw new Error('Admin access is required for the exact Firebase UID assigned to this admin account.');
+        if (!profile || profile.role !== 'Admin') {
+            throw new Error('Administrator access is required for this account.');
         }
         await deleteDoc(doc(firestore, collectionName, recordId));
     },
@@ -189,8 +189,8 @@ const api = {
         const user = firebaseAuth.currentUser;
         if (!user) throw new Error('Please sign in as an admin first.');
         const profile = await api.getAdminProfile(user.uid);
-        if (!profile || profile.uid !== user.uid || profile.role !== 'Admin' || profile.email?.toLowerCase() !== user.email?.toLowerCase()) {
-            throw new Error('This account is not the approved admin UID for the Firestore admin role.');
+        if (!profile || profile.role !== 'Admin') {
+            throw new Error('This Firebase account is not marked as an administrator.');
         }
         if (window.firebaseAdminUnsubscribe) window.firebaseAdminUnsubscribe();
 
@@ -252,9 +252,7 @@ const api = {
         if (!product.exists()) throw new Error('This product no longer exists in Firestore.');
 
         const profile = await api.getAdminProfile(user.uid);
-        const isExactAdmin = profile?.uid === user.uid
-            && profile.role === 'Admin'
-            && profile.email?.toLowerCase() === user.email?.toLowerCase();
+        const isExactAdmin = profile?.role === 'Admin';
         const isOwner = product.data().sellerId === user.uid;
 
         if (!isExactAdmin && !isOwner) {
@@ -263,11 +261,16 @@ const api = {
 
         await deleteDoc(reference);
     },
-    createOrder: async order => invokeOrderApi({ action: 'create-order', order }),
-    confirmPayment: async orderId => invokeOrderApi({ action: 'confirm-payment', orderId }),
-    cancelPayMongoCheckout: async orderId => {
-        return invokeOrderApi({ action: 'cancel-checkout', orderId });
+    createOrder: async (order, proof) => {
+        if (!proof) return invokeOrderApi({ action: 'create-order', order });
+        const formData = new FormData();
+        formData.append('action', 'create-order');
+        formData.append('order', JSON.stringify(order));
+        formData.append('proof', proof, proof.name);
+        return invokeOrderApi(formData);
     },
+    confirmPayment: async orderId => invokeOrderApi({ action: 'confirm-payment', orderId }),
+    getPaymentProofUrl: async orderId => invokeOrderApi({ action: 'payment-proof-url', orderId }),
     updateOrderStatus: async (orderId, status) => {
         const user = await requireUser();
         const reference = doc(firestore, 'orders', orderId);

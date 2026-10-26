@@ -1,6 +1,6 @@
 # Supabase Edge Functions checkout
 
-Firebase Auth and Firestore provide customer accounts and store data. Supabase Edge Functions securely validate orders and reserve stock. GCash and Maya payments are sent manually to the recipient details configured by an administrator; customers submit the transaction reference, and an administrator confirms receipt before the order is marked paid.
+Firebase Auth and Firestore provide customer accounts and store data. Supabase Edge Functions securely validate orders, reserve stock, and handle private payment-proof uploads. GCash and Maya payments are sent manually to recipient details configured by an administrator; customers submit a reference number and receipt photo, and the administrator verifies payment before marking the order paid.
 
 ## Configure
 
@@ -44,31 +44,48 @@ Firebase Auth and Firestore provide customer accounts and store data. Supabase E
    npx supabase secrets set --env-file .env.supabase
    ```
 
+6. Create the private proof bucket by running:
+
+   ```powershell
+   npx supabase db query --linked --file supabase/payment-proof-storage.sql
+   ```
+
+   Alternatively, run the contents of [`payment-proof-storage.sql`](./payment-proof-storage.sql) in Supabase Dashboard → SQL Editor. The bucket must remain private; the Edge Function generates short-lived links only for the order's customer or an administrator.
+
 ## Deploy
 
 ```powershell
-npx supabase functions deploy order-api --no-verify-jwt
+npx supabase functions deploy order-api --no-verify-jwt --use-api
 npm.cmd ci
 npm.cmd run build
 ```
 
-Deploy the website through the connected Vercel Git repository, or publish `dist` with your hosting provider. Update Firestore rules separately:
+The Edge Function uses Supabase's `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to upload proof photos to the private bucket. These server values must be available to the function and must never be added to Vercel `VITE_` variables.
 
-```powershell
-npx firebase-tools deploy --only firestore:rules --project artisan-79f5d
-```
+Deploy the website through the connected Vercel Git repository, or publish `dist` with your hosting provider.
 
-The Supabase gateway does not validate Supabase JWTs because customers sign in with Firebase. The order API verifies each Firebase ID token itself, checks current product prices and inventory, and writes the order and stock changes transactionally.
+## Administrator access
 
-The PayMongo webhook and pending-order expiry function are legacy support for older hosted-checkout orders. New orders do not create PayMongo sessions. Keep those functions deployed only if you still need to settle or expire existing PayMongo orders.
+Sign in with the Firebase account whose Firestore profile document at `users/{Firebase UID}` has `role` set to `Admin`. The Admin Dashboard link appears in the profile screen for that account. If the account is not yet designated, an authorized project administrator must set the role on the correct user's Firestore document; do not add public admin self-registration.
+
+Add the public website domain under Firebase Authentication → Settings → Authorized domains so admins and customers can sign in from the deployed site.
 
 ## Payment setup
 
-1. Sign in to the public website using the approved administrator account.
-2. Open the Admin dashboard, then **Settings**.
-3. Enter the GCash and/or Maya recipient account name and number and save. These are payment instructions, not private wallet credentials; customers can see the configured details at checkout.
-4. Customers select GCash or Maya, transfer the order total, and submit the transaction reference. The order remains **Awaiting payment verification** until an administrator checks the received payment and selects **Confirm payment** in Admin → Orders.
+1. Sign in with the administrator account and open **Profile → Admin Dashboard → Settings**.
+2. Enter and save the GCash and/or Maya recipient account name and number. Checkout shows the selected destination to the customer.
+3. Customers transfer the order total, enter the transaction reference, upload a JPG, PNG, or WebP receipt photo (up to 5 MB), and place the order.
+4. In **Admin Dashboard → Orders**, view the private proof image and verify the actual transaction in the wallet before selecting **Confirm payment**. A reference number or image alone does not verify funds.
 
-Never ask customers for wallet PINs, passwords, or one-time codes. A reference number alone is not proof of payment. Do not put Firebase service-account keys or Supabase secrets in Vercel `VITE_` variables.
+Never ask customers for wallet PINs, passwords, or one-time codes. The proof bucket is private; do not add public read policies or use the public `product-images` bucket for receipts.
 
-Customers can visit the deployed website without a Vercel account. To use registration, sign-in, checkout, and profiles from your public Vercel/custom domain, add that domain under Firebase Authentication → Settings → Authorized domains. Customers need their own ArtisanAisle account to place orders and see their order history across devices.
+## Remove legacy PayMongo functions
+
+New checkouts do not use PayMongo. Remove the old deployed functions from the linked Supabase project if they still exist:
+
+```powershell
+npx supabase functions delete paymongo-webhook --project-ref YOUR_PROJECT_REF
+npx supabase functions delete expire-pending-orders --project-ref YOUR_PROJECT_REF
+```
+
+This removes PayMongo endpoints only; existing PayMongo orders remain in Firestore and may require separate handling. Customers can access the public website without a Vercel account. They need an ArtisanAisle customer account to place orders and see their order history across devices.

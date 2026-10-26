@@ -383,6 +383,13 @@
 
             </div>
 
+            <div id="paymentProofGroup" class="form-group" hidden>
+                <label for="checkoutPaymentProof">Payment proof photo</label>
+                <input id="checkoutPaymentProof" type="file" accept="image/jpeg,image/png,image/webp">
+                <small>Required for GCash and Maya. Upload a clear receipt image (JPG, PNG, or WebP; max 5 MB).</small>
+                <img id="checkoutPaymentProofPreview" alt="Payment proof preview" hidden style="max-width:100%;max-height:240px;margin-top:10px;">
+            </div>
+
             <button class="btn"
             style="width:100%;"
             id="placeOrderButton" onclick="placeOrder()">
@@ -422,7 +429,6 @@
         My Orders
     </h1>
 
-    <p id="paymentReturnNotice" role="status" hidden></p>
     <div id="ordersList"></div>
 
 </section>
@@ -467,7 +473,6 @@
                 <option value="Cash on Delivery">Cash on Delivery</option>
                 <option value="GCash">GCash</option>
                 <option value="Maya">Maya</option>
-                <option value="Credit / Debit Card">Credit / Debit Card</option>
             </select>
         </div>
 
@@ -861,11 +866,15 @@ async function syncPaymentInstructions() {
     const referenceGroup = document.getElementById("paymentReferenceGroup");
     const recipientDetails = document.getElementById("paymentRecipientDetails");
     const referenceInput = document.getElementById("checkoutPaymentReference");
+    const proofGroup = document.getElementById("paymentProofGroup");
+    const proofInput = document.getElementById("checkoutPaymentProof");
     const help = document.getElementById("paymentHelp");
     const isWalletPayment = method === "GCash" || method === "Maya";
     referenceGroup.hidden = !isWalletPayment;
     recipientDetails.hidden = !isWalletPayment;
+    proofGroup.hidden = !isWalletPayment;
     referenceInput.required = isWalletPayment;
+    proofInput.required = isWalletPayment;
     if (!isWalletPayment) {
         help.textContent = "Cash is collected when your order is delivered.";
         return;
@@ -914,6 +923,7 @@ async function placeOrder() {
     const city = document.getElementById("checkoutCity").value.trim();
     const paymentMethod = document.getElementById("checkoutPayment").value;
     const paymentReference = document.getElementById("checkoutPaymentReference").value.trim();
+    const paymentProof = document.getElementById("checkoutPaymentProof").files[0];
     const phoneIsValid = /^(?:\+?63|0)9\d{9}$/.test(phone.replace(/[\s-]/g, ""));
     if (!fullName || !address || !city || !phoneIsValid) {
         alert("Enter your full name, a valid Philippine mobile number, and complete shipping address.");
@@ -921,6 +931,13 @@ async function placeOrder() {
     }
     if (paymentMethod !== "Cash on Delivery" && !/^[A-Za-z0-9][A-Za-z0-9 ._/#-]{3,79}$/.test(paymentReference)) {
         alert("Enter a valid GCash or Maya transaction reference number.");
+        return;
+    }
+    if (paymentMethod !== "Cash on Delivery"
+        && (!paymentProof
+            || !["image/jpeg", "image/png", "image/webp"].includes(paymentProof.type)
+            || paymentProof.size > 5 * 1024 * 1024)) {
+        alert("Upload a JPG, PNG, or WebP payment proof photo no larger than 5 MB.");
         return;
     }
 
@@ -966,14 +983,14 @@ async function placeOrder() {
             productIds,
             sellerIds,
             stockDeductions
-        });
+        }, paymentMethod === "Cash on Delivery" ? null : paymentProof);
 
         cart = [];
         saveCart();
         renderCart();
         alert(paymentMethod === "Cash on Delivery"
             ? "Order placed successfully."
-            : "Order placed. Your payment reference is awaiting admin verification.");
+            : "Order placed. Your payment proof and reference are awaiting admin verification.");
         showScreen("orders");
     } catch (error) {
         console.error("Unable to place order:", error);
@@ -1010,6 +1027,7 @@ function renderOrders() {
             </div>
             <p>Payment: ${escapeHtml(order.paymentMethod || "Not recorded")} — ${escapeHtml(order.paymentStatus || "Status unavailable")}</p>
             ${order.paymentReference ? `<p>Reference number: ${escapeHtml(order.paymentReference)}</p>` : ""}
+            ${order.paymentProofPath ? `<button class="secondary-btn" type="button" onclick="viewPaymentProof('${escapeHtml(order.id)}')">View payment proof</button>` : ""}
         </div>
     `).join("");
 }
@@ -1304,7 +1322,24 @@ function renderAdminOrders(orders) {
     const columns = ["id", "buyerName", "buyerEmail", "paymentMethod", "paymentReference", "paymentStatus", "total", "status"];
     return `<div class="table-wrap"><table><thead><tr>${columns.map(column => `<th>${escapeHtml(column)}</th>`).join("")}<th>Action</th></tr></thead>
         <tbody>${orders.map(order => `<tr>${columns.map(column => `<td>${escapeHtml(order[column] && typeof order[column] === "object" ? JSON.stringify(order[column]) : order[column] ?? "")}</td>`).join("")}
-        <td>${order.paymentStatus === "Awaiting payment verification" ? `<button class="secondary-btn" type="button" onclick="confirmPayment('${escapeHtml(order.id)}')">Confirm payment</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="${columns.length + 1}">No records found.</td></tr>`}</tbody></table></div>`;
+        <td>${order.paymentProofPath ? `<button class="secondary-btn" type="button" onclick="viewPaymentProof('${escapeHtml(order.id)}')">View proof</button>` : ""}
+        ${order.paymentStatus === "Awaiting payment verification" ? `<button class="secondary-btn" type="button" onclick="confirmPayment('${escapeHtml(order.id)}')">Confirm payment</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="${columns.length + 1}">No records found.</td></tr>`}</tbody></table></div>`;
+}
+
+async function viewPaymentProof(orderId) {
+    try {
+        const { signedUrl } = await window.firebaseApi.getPaymentProofUrl(orderId);
+        const dialog = document.createElement("dialog");
+        dialog.style.cssText = "max-width:min(90vw,900px);max-height:90vh;border:0;border-radius:12px;padding:16px;";
+        dialog.innerHTML = `<form method="dialog" style="text-align:right"><button class="secondary-btn">Close</button></form><img alt="Customer payment proof" style="display:block;max-width:85vw;max-height:75vh;margin:auto">`;
+        dialog.querySelector("img").src = signedUrl;
+        dialog.addEventListener("close", () => dialog.remove(), { once: true });
+        document.body.append(dialog);
+        dialog.showModal();
+    } catch (error) {
+        console.error("Unable to load payment proof:", error);
+        alert(error.message || "Unable to view payment proof.");
+    }
 }
 
 async function confirmPayment(orderId) {
@@ -1442,7 +1477,7 @@ async function openAdminDashboard() {
             return;
         }
         const profile = await window.firebaseApi.getAdminProfile(user.uid);
-        if (profile?.role !== "Admin" || profile.uid !== user.uid) {
+        if (profile?.role !== "Admin") {
             alert("Administrator access is required.");
             return;
         }
@@ -1593,8 +1628,23 @@ window.exportSellerOrders = exportSellerOrders;
 window.exportSalesCsv = exportSalesCsv;
 window.savePaymentSettings = savePaymentSettings;
 window.confirmPayment = confirmPayment;
+window.viewPaymentProof = viewPaymentProof;
 
 document.getElementById("checkoutPayment").addEventListener("change", syncPaymentInstructions);
+let paymentProofPreviewUrl = null;
+document.getElementById("checkoutPaymentProof").addEventListener("change", event => {
+    const preview = document.getElementById("checkoutPaymentProofPreview");
+    if (paymentProofPreviewUrl) URL.revokeObjectURL(paymentProofPreviewUrl);
+    paymentProofPreviewUrl = null;
+    const file = event.target.files[0];
+    preview.hidden = !file || !["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024;
+    if (!preview.hidden) {
+        paymentProofPreviewUrl = URL.createObjectURL(file);
+        preview.src = paymentProofPreviewUrl;
+    } else {
+        preview.removeAttribute("src");
+    }
+});
 document.querySelectorAll("[data-admin-view]").forEach(button => {
     button.addEventListener("click", () => setDashboardView("admin", button.dataset.adminView));
 });
@@ -1608,36 +1658,6 @@ renderOrders();
 window.firebaseApi.authReady.then(async () => {
     updateHeader();
     const params = new URLSearchParams(window.location.search);
-    const paymentNotice = document.getElementById("paymentReturnNotice");
-    if (params.get("payment") === "success") {
-        paymentNotice.textContent = "PayMongo returned you to ArtisanAisle. Your order will show as paid after the server verifies the payment.";
-        paymentNotice.hidden = false;
-        showScreen("orders");
-    } else if (params.get("payment") === "cancelled") {
-        const orderId = params.get("orderId");
-        if (orderId) {
-            try {
-                const result = await window.firebaseApi.cancelPayMongoCheckout(orderId);
-                if (result.cancelled) {
-                    cart = result.items || [];
-                    saveCart();
-                    renderCart();
-                    const cartNotice = document.getElementById("cartNotice");
-                    cartNotice.textContent = "Checkout was cancelled. Your reserved stock was released and your cart is ready to try again.";
-                    cartNotice.hidden = false;
-                    showScreen("cart");
-                } else {
-                    paymentNotice.textContent = "This checkout could not be cancelled. Check your order status before trying again.";
-                    showScreen("orders");
-                }
-            } catch (error) {
-                console.error("Unable to cancel PayMongo checkout:", error);
-                paymentNotice.textContent = error.message || "Unable to confirm cancellation. Check your order status before trying again.";
-                showScreen("orders");
-            }
-        }
-        paymentNotice.hidden = false;
-    }
     const productName = params.get("product");
     if (productName) {
         const price = Number(params.get("price"));
