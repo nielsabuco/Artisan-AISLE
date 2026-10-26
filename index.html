@@ -1538,6 +1538,7 @@ async function openAdminDashboard() {
 async function openSellerDashboard() {
     try {
         await window.firebaseApi.authReady;
+        showScreen("seller");
         const user = window.firebaseApi.currentUser;
         if (!user) {
             document.getElementById("sellerLoginModal").style.display = "flex";
