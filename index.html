@@ -1235,6 +1235,7 @@ function renderSalesReport(orders) {
 
 let activeAdminView = "dashboard";
 let activeSellerView = "dashboard";
+let sellerProfileUnsubscribe = null;
 
 function renderAdminDashboard() {
     const container = document.getElementById("adminContent");
@@ -1260,7 +1261,7 @@ function renderAdminDashboard() {
             </div>${renderSalesReport(orders)}`,
         reports: renderSalesReport(orders),
         users: `<h2>Users</h2><button class="btn" onclick="exportAdminCollection('users')">Export users CSV</button>${renderDataTable(data.users, ["name", "email", "phone", "city", "role"])}`,
-        sellers: `<h2>Sellers</h2><button class="btn" onclick="exportAdminCollection('sellers')">Export sellers CSV</button>${renderDataTable(data.sellers, ["name", "email", "category", "status"])}`,
+        sellers: `<h2>Sellers</h2><button class="btn" onclick="exportAdminCollection('sellers')">Export sellers CSV</button>${renderAdminSellers(data.sellers)}`,
         products: `<h2>Products</h2><button class="btn" onclick="exportAdminCollection('products')">Export products CSV</button>${renderDataTable(data.products, ["name", "category", "price", "stock", "sellerId", "status"])}`,
         orders: `<h2>Orders</h2><button class="btn" onclick="exportAdminCollection('orders')">Export orders CSV</button>${renderAdminOrders(orders)}`,
         settings: `<h2>Payment details</h2><p>Set the GCash and Maya recipient account details customers should pay. These details are visible to customers during checkout.</p><div id="adminPaymentSettings"><p>Loading payment settings…</p></div><h2>Data exports</h2><p>Export application records available to your administrator account.</p><div class="dashboard-actions">${["users", "sellers", "products", "orders", "reviews", "contactMessages"].map(name => `<button class="secondary-btn" onclick="exportAdminCollection('${name}')">Export ${escapeHtml(name)} CSV</button>`).join("")}<button class="btn" onclick="exportAdminData()">Export complete data (JSON)</button></div>`
@@ -1404,6 +1405,35 @@ function renderDataTable(records, columns) {
         <tbody>${(records || []).map(record => `<tr>${columns.map(column => `<td>${escapeHtml(record[column] && typeof record[column] === "object" ? JSON.stringify(record[column]) : record[column] ?? "")}</td>`).join("")}</tr>`).join("") || `<tr><td colspan="${columns.length}">No records found.</td></tr>`}</tbody></table></div>`;
 }
 
+function renderAdminSellers(sellers) {
+    const rows = (sellers || []).map(seller => {
+        const approved = ["Approved", "Active"].includes(seller.status);
+        const actions = approved
+            ? `<button class="action-btn suspend" onclick="setSellerApproval('${escapeHtml(seller.id)}','Pending')">Pause</button>`
+            : `<button class="action-btn restore" onclick="setSellerApproval('${escapeHtml(seller.id)}','Approved')">Approve</button>`;
+        return `<tr>
+            <td>${escapeHtml(seller.name || "")}</td>
+            <td>${escapeHtml(seller.email || "")}</td>
+            <td>${escapeHtml(seller.category || "")}</td>
+            <td><span class="status-badge ${approved ? "status-active" : "status-pending"}">${escapeHtml(seller.status || "Pending")}</span></td>
+            <td>${actions}</td>
+        </tr>`;
+    }).join("");
+    return `<div class="table-wrap"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Category</th><th>Status</th><th>Approval</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="5">No seller applications yet.</td></tr>`}</tbody></table></div>`;
+}
+
+async function setSellerApproval(sellerId, status) {
+    const action = status === "Approved" ? "approve" : "pause";
+    if (!confirm(`Are you sure you want to ${action} this seller?`)) return;
+    try {
+        await window.firebaseApi.adminWrite("sellers", sellerId, { status });
+    } catch (error) {
+        console.error(`Unable to ${action} seller:`, error);
+        alert(error.message || `Unable to ${action} seller.`);
+    }
+}
+
 function dashboardNavigation(role, activeView) {
     const views = role === "admin"
         ? ["dashboard", "users", "sellers", "products", "orders", "reports", "settings"]
@@ -1421,6 +1451,10 @@ function renderSellerDashboard() {
         return;
     }
 
+    const sellerApproved = ["Approved", "Active"].includes(seller.status);
+    const approvalNotice = sellerApproved
+        ? `<div class="seller-approval-notice approved" role="status"><strong>Seller account approved</strong><span>Your seller tools are available.</span></div>`
+        : `<div class="seller-approval-notice pending" role="status"><strong>Application ${seller.status === "Rejected" ? "not approved" : "pending admin approval"}</strong><span>You can use this dashboard while the admin reviews your seller account. Product listing tools will be available after approval.</span></div>`;
     const products = (window.firebaseProducts || []).filter(product => product.sellerId === user.uid);
     const orders = (window.firebaseSellerOrders || []).filter(order => order.sellerIds?.includes(user.uid));
     const productIds = new Set(products.map(product => product.id));
@@ -1432,7 +1466,7 @@ function renderSellerDashboard() {
     }));
     const sellerSales = sellerOrderValues.reduce((sum, order) => sum + orderAmount(order), 0);
     const views = {
-        dashboard: `<h2>Seller dashboard</h2><div class="stats">
+        dashboard: `<h2>Seller dashboard</h2>${approvalNotice}<div class="stats">
             <div class="stat-card"><h3>Your product sales</h3><p>₱${sellerSales.toFixed(2)}</p></div>
             <div class="stat-card"><h3>Orders with your products</h3><p>${orders.length}</p></div>
             <div class="stat-card"><h3>Active products</h3><p>${products.length}</p></div>
@@ -1440,7 +1474,7 @@ function renderSellerDashboard() {
             <button class="btn" onclick="exportSellerData()">Export seller data (JSON)</button>
             <button class="secondary-btn" onclick="exportSellerOrders()">Export orders (CSV)</button>
         </div>${renderSalesReport(sellerOrderValues)}`,
-        products: `<h2>My products</h2>${renderDataTable(products, ["name", "category", "price", "stock", "status"])}`,
+        products: `<h2>My products</h2>${!sellerApproved ? approvalNotice : ""}${renderDataTable(products, ["name", "category", "price", "stock", "status"])}`,
         inventory: `<h2>Inventory</h2>${renderDataTable(products, ["name", "stock", "status"])}`,
         orders: `<h2>Orders</h2>${renderDataTable(orders, ["id", "buyerName", "buyerEmail", "phone", "shippingAddress", "shippingCity", "paymentMethod", "paymentStatus", "total", "status"])}`,
         reports: renderSalesReport(sellerOrderValues),
@@ -1535,25 +1569,50 @@ async function openAdminDashboard() {
     }
 }
 
+function showSellerDashboard(profile, user) {
+    window.firebaseSellerProfile = profile;
+    document.getElementById("sellerLoginModal").style.display = "none";
+    showScreen("seller");
+    renderSellerDashboard();
+    if (sellerProfileUnsubscribe) sellerProfileUnsubscribe();
+    sellerProfileUnsubscribe = window.firebaseApi.subscribeSellerProfile(
+        user.uid,
+        updatedProfile => {
+            window.firebaseSellerProfile = updatedProfile;
+            renderSellerDashboard();
+        },
+        error => {
+            console.error("Seller profile listener failed:", error);
+            alert(error.message || "Unable to refresh seller approval status.");
+        }
+    );
+}
+
 async function openSellerDashboard() {
+    showScreen("seller");
+    const modal = document.getElementById("sellerLoginModal");
+    const container = document.getElementById("sellerContent");
+    modal.style.display = window.firebaseApi.currentUser ? "none" : "flex";
+    if (container) container.innerHTML = "<h2>Seller dashboard</h2><p>Loading your seller account…</p>";
     try {
         await window.firebaseApi.authReady;
-        showScreen("seller");
         const user = window.firebaseApi.currentUser;
         if (!user) {
-            document.getElementById("sellerLoginModal").style.display = "flex";
+            showSellerLoginForm();
+            modal.style.display = "flex";
             return;
         }
         const profile = await window.firebaseApi.getSeller(user.uid);
         if (!profile) {
-            document.getElementById("sellerLoginModal").style.display = "flex";
+            showSellerLoginForm();
+            modal.style.display = "flex";
+            if (container) container.innerHTML = "<h2>Seller dashboard</h2><p>Create a seller account to start your seller application.</p>";
             return;
         }
-        window.firebaseSellerProfile = profile;
-        showScreen("seller");
-        renderSellerDashboard();
+        showSellerDashboard(profile, user);
     } catch (error) {
         console.error("Unable to open seller dashboard:", error);
+        if (container) container.innerHTML = `<h2>Seller dashboard</h2><p role="alert">${escapeHtml(error.message || "Unable to load seller data.")}</p>`;
         alert(error.message || "Unable to load seller data.");
     }
 }
@@ -1590,10 +1649,7 @@ async function submitSellerLogin() {
         );
         const profile = await window.firebaseApi.getSeller(result.user.uid);
         if (!profile) throw new Error("This account is not registered as a seller.");
-        window.firebaseSellerProfile = profile;
-        document.getElementById("sellerLoginModal").style.display = "none";
-        showScreen("seller");
-        renderSellerDashboard();
+        showSellerDashboard(profile, result.user);
     } catch (error) {
         console.error("Seller sign-in failed:", error);
         alert(error.message || "Unable to sign in as seller.");
@@ -1610,10 +1666,9 @@ async function submitSellerRegister() {
             return;
         }
         const user = await window.firebaseApi.createSeller({ name, email, password });
-        window.firebaseSellerProfile = await window.firebaseApi.getSeller(user.uid);
-        document.getElementById("sellerLoginModal").style.display = "none";
-        showScreen("seller");
-        renderSellerDashboard();
+        const profile = await window.firebaseApi.getSeller(user.uid);
+        if (!profile) throw new Error("Seller account was created, but the seller profile could not be loaded. Please reload and open the Seller dashboard.");
+        showSellerDashboard(profile, user);
     } catch (error) {
         console.error("Seller registration failed:", error);
         alert(error.message || "Unable to create your seller account.");
@@ -1667,6 +1722,7 @@ window.saveProfileSettings = saveProfileSettings;
 window.logout = logout;
 window.updateHeader = updateHeader;
 window.setDashboardView = setDashboardView;
+window.setSellerApproval = setSellerApproval;
 window.exportAdminData = exportAdminData;
 window.exportAdminCollection = exportAdminCollection;
 window.exportSellerData = exportSellerData;

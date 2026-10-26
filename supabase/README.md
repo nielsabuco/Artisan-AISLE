@@ -17,6 +17,7 @@ Firebase Auth and Firestore provide customer accounts and store data. Supabase E
 
    ```dotenv
    APP_BASE_URL=https://YOUR_STABLE_PUBLIC_WEBSITE_DOMAIN
+   APP_ALLOWED_ORIGINS=https://artisan-aisle.vercel.app,https://YOUR_CUSTOM_DOMAIN
    FIREBASE_PROJECT_ID=artisan-79f5d
    FIREBASE_WEB_API_KEY=YOUR_FIREBASE_WEB_API_KEY
    FIREBASE_SERVICE_ACCOUNT_B64=BASE64_ENCODED_SERVICE_ACCOUNT_JSON
@@ -60,7 +61,7 @@ npm.cmd ci
 npm.cmd run build
 ```
 
-The Edge Function uses Supabase's `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to upload proof photos to the private bucket. These server values must be available to the function and must never be added to Vercel `VITE_` variables.
+The Edge Function uses Supabase's `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to upload proof photos to the private bucket. These server values must be available to the function and must never be added to Vercel `VITE_` variables. `APP_ALLOWED_ORIGINS` is a comma-separated list of exact website origins (no paths or trailing slash); include the production Vercel domain and any custom domain used for checkout.
 
 Deploy the website through the connected Vercel Git repository, or publish `dist` with your hosting provider.
 
@@ -69,6 +70,10 @@ Deploy the website through the connected Vercel Git repository, or publish `dist
 Sign in with the verified Firebase account `reniel.sabuco@ssu.edu.ph`. The Admin Dashboard link appears only for that account. Admin privileges are checked by the Firebase email and its verified status in the app, Firestore rules, and the order API; do not add public admin self-registration.
 
 Add the public website domain under Firebase Authentication → Settings → Authorized domains so admins and customers can sign in from the deployed site.
+
+## Seller approval
+
+New seller registrations start with `Pending` status and can open their dashboard immediately. An administrator can approve applications from Admin Dashboard → Sellers. Only approved sellers can create or edit product listings. Deploy the updated root `firestore.rules` to the Firebase project so seller approval is enforced by Firestore, not only by the interface.
 
 ## Payment setup
 

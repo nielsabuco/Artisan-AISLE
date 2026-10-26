@@ -8,6 +8,11 @@ service cloud.firestore {
         && request.auth.token.email == 'reniel.sabuco@ssu.edu.ph'
         && request.auth.token.email_verified == true;
     }
+    function isApprovedSeller(uid) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/sellers/$(uid))
+        && get(/databases/$(database)/documents/sellers/$(uid)).data.status in ['Approved', 'Active'];
+    }
 
     match /users/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
@@ -30,7 +35,19 @@ service cloud.firestore {
 
     match /sellers/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
-      allow write: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create: if isAdmin() || (
+        signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.status == 'Pending'
+      );
+      allow update: if isAdmin() || (
+        signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.status == resource.data.status
+      );
+      allow delete: if isAdmin();
     }
 
     match /settings/{settingId} {
@@ -40,12 +57,16 @@ service cloud.firestore {
 
     match /products/{productId} {
       allow read: if true;
-      allow create: if isAdmin() || (signedIn() && request.resource.data.sellerId == request.auth.uid);
+      allow create: if isAdmin() || (
+        signedIn()
+        && request.resource.data.sellerId == request.auth.uid
+        && isApprovedSeller(request.auth.uid)
+      );
       allow delete: if isAdmin() || (signedIn() && resource.data.sellerId == request.auth.uid);
       allow update: if signedIn() && (
         isAdmin()
         ||
-        resource.data.sellerId == request.auth.uid
+        (resource.data.sellerId == request.auth.uid && isApprovedSeller(request.auth.uid))
         || (
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'status', 'lastStockOrderId', 'updatedAt'])
           && request.resource.data.lastStockOrderId != resource.data.lastStockOrderId

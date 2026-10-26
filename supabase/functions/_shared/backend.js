@@ -16,8 +16,20 @@ export const jsonResponse = (body, status = 200, headers = {}) => new Response(J
 });
 
 export const corsHeaders = origin => {
-    const configured = (Deno.env.get("APP_BASE_URL") || "https://artisan-79f5d.web.app").replace(/\/+$/, "");
-    const allowed = new Set([configured, "http://localhost:5173", "http://127.0.0.1:5173"]);
+    const configured = (Deno.env.get("APP_BASE_URL") || "https://artisan-aisle.vercel.app").trim().replace(/\/+$/, "");
+    const configuredOrigins = (Deno.env.get("APP_ALLOWED_ORIGINS") || "")
+        .split(",")
+        .map(value => value.trim().replace(/\/+$/, ""))
+        .filter(Boolean);
+    const allowed = new Set([
+        configured,
+        ...configuredOrigins,
+        "https://artisan-aisle.vercel.app",
+        "https://artisan-79f5d.web.app",
+        "https://artisan-79f5d.firebaseapp.com",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ]);
     return {
         "Access-Control-Allow-Origin": allowed.has(origin) ? origin : configured,
         "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",

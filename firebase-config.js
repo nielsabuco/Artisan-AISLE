@@ -80,6 +80,9 @@ const invokeOrderApi = async body => {
     });
     if (error) {
         let message = error.message;
+        if (error.name === 'FunctionsFetchError') {
+            message = 'The checkout service could not be reached. Its Supabase deployment and allowed website origin may need to be updated.';
+        }
         try {
             const context = await error.context?.json();
             message = context?.error || context?.message || message;
@@ -104,6 +107,11 @@ const saveSellerProfile = async profile => {
     await setDoc(doc(firestore, 'sellers', user.uid), data, { merge: true });
     return data;
 };
+const subscribeSellerProfile = (uid, onChange, onError) => onSnapshot(
+    doc(firestore, 'sellers', uid),
+    snapshot => onChange(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null),
+    onError
+);
 
 const saveSocialProfile = async user => {
     const name = user.displayName || user.email?.split('@')[0] || 'ArtisanAisle customer';
@@ -175,10 +183,11 @@ const api = {
     uploadPaymentQr,
     createSeller: async ({ name, email, password }) => {
         const result = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-        await saveSellerProfile({ name, status: 'Active', category: 'General' });
+        await saveSellerProfile({ name, status: 'Pending', category: 'General' });
         return result.user;
     },
     getSeller: async uid => (await getDoc(doc(firestore, 'sellers', uid))).data(),
+    subscribeSellerProfile,
     getProduct: async productId => {
         const product = await getDoc(doc(firestore, 'products', productId));
         return product.exists() ? { id: product.id, ...product.data() } : null;
