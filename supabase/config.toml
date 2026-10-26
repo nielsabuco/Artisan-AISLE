@@ -1,0 +1,8 @@
+[functions.order-api]
+verify_jwt = false
+
+[functions.paymongo-webhook]
+verify_jwt = false
+
+[functions.expire-pending-orders]
+verify_jwt = false

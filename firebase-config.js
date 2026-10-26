@@ -10,7 +10,6 @@ window.FIREBASE_CONFIG = {
 import { initializeApp } from 'firebase/app';
 import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import { createClient } from '@supabase/supabase-js';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import {
   createUserWithEmailAndPassword,
   getAuth,
@@ -39,7 +38,6 @@ import {
 const firebaseApp = initializeApp(window.FIREBASE_CONFIG);
 const firestore = getFirestore(firebaseApp);
 const firebaseAuth = getAuth(firebaseApp);
-const firebaseFunctions = getFunctions(firebaseApp, 'asia-southeast1');
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
@@ -69,6 +67,26 @@ const requireUser = async () => {
     const user = firebaseAuth.currentUser;
     if (!user) throw new Error('Please log in first.');
     return user;
+};
+
+const invokeOrderApi = async body => {
+    const user = await requireUser();
+    if (!supabase) throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.');
+    const { data, error } = await supabase.functions.invoke('order-api', {
+        body,
+        headers: { Authorization: `Bearer ${await user.getIdToken()}` }
+    });
+    if (error) {
+        let message = error.message;
+        try {
+            const context = await error.context?.json();
+            message = context?.error || context?.message || message;
+        } catch (parseError) {
+            console.error('Unable to parse Supabase checkout error:', parseError);
+        }
+        throw new Error(message || 'Checkout service request failed.');
+    }
+    return data;
 };
 
 const saveUserProfile = async (profile, role = 'Customer') => {
@@ -242,19 +260,13 @@ const api = {
         await deleteDoc(reference);
     },
     createOrder: async order => {
-        await requireUser();
-        const createCashOrder = httpsCallable(firebaseFunctions, 'createCashOnDeliveryOrder');
-        return (await createCashOrder(order)).data;
+        return invokeOrderApi({ action: 'create-cod', order });
     },
     createPayMongoCheckout: async checkout => {
-        await requireUser();
-        const createCheckout = httpsCallable(firebaseFunctions, 'createPayMongoCheckout');
-        return (await createCheckout(checkout)).data;
+        return invokeOrderApi({ action: 'create-checkout', checkout });
     },
     cancelPayMongoCheckout: async orderId => {
-        await requireUser();
-        const cancelCheckout = httpsCallable(firebaseFunctions, 'cancelPayMongoCheckout');
-        return (await cancelCheckout({ orderId })).data;
+        return invokeOrderApi({ action: 'cancel-checkout', orderId });
     },
     updateOrderStatus: async (orderId, status) => {
         const user = await requireUser();

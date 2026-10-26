@@ -1,5 +1,7 @@
 .env
 .env.*
 !.env.example
+firebase-service-account*.json
+*-firebase-adminsdk-*.json
 node_modules/
 dist/
