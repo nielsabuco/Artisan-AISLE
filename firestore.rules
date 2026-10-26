@@ -5,7 +5,8 @@ service cloud.firestore {
     function owns(data) { return signedIn() && data.uid == request.auth.uid; }
     function isAdmin() {
       return signedIn()
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+        && request.auth.token.email == 'reniel.sabuco@ssu.edu.ph'
+        && request.auth.token.email_verified == true;
     }
 
     match /users/{uid} {

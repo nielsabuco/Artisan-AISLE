@@ -25,6 +25,7 @@
     <div class="header-links">
         <button onclick="showScreen('cart')">🛒 Cart</button>
         <button onclick="showScreen('orders')">📦 Orders</button>
+        <button id="adminHeaderLink" type="button" hidden onclick="openAdminDashboard()">Admin Dashboard</button>
         <button id="loginButton" onclick="window.location.href='login.html'">👤 Login</button>
     </div>
 
@@ -1093,7 +1094,8 @@ async function fillProfileForm() {
     document.getElementById("profileAddress").value = user.address || "";
     document.getElementById("profileCity").value = user.city || "";
     document.getElementById("profilePayment").value = user.paymentMethod || "Cash on Delivery";
-    document.getElementById("adminDashboardLink").style.display = user.role === "Admin" ? "" : "none";
+    document.getElementById("adminDashboardLink").style.display =
+        currentUser?.email?.trim().toLowerCase() === "reniel.sabuco@ssu.edu.ph" && currentUser.emailVerified ? "" : "none";
 }
 
 async function saveProfileSettings() {
@@ -1155,8 +1157,17 @@ function toggleSellerInfo() {
 
 function updateHeader() {
     const loginButton = document.getElementById("loginButton");
+    const adminButton = document.getElementById("adminHeaderLink");
     const currentUser = window.firebaseApi?.currentUser;
-    if (!loginButton || !currentUser) return;
+    if (adminButton) {
+        adminButton.hidden = currentUser?.email?.trim().toLowerCase() !== "reniel.sabuco@ssu.edu.ph" || !currentUser.emailVerified;
+    }
+    if (!loginButton) return;
+    if (!currentUser) {
+        loginButton.textContent = "👤 Login";
+        loginButton.onclick = () => { window.location.href = "login.html"; };
+        return;
+    }
     loginButton.textContent = `👤 ${currentUser.displayName || currentUser.email?.split("@")[0] || "Account"}`;
     loginButton.onclick = () => showScreen("profile");
 }
@@ -1511,8 +1522,7 @@ async function openAdminDashboard() {
             window.location.href = "login.html";
             return;
         }
-        const profile = await window.firebaseApi.getAdminProfile(user.uid);
-        if (profile?.role !== "Admin") {
+        if (user.email?.trim().toLowerCase() !== "reniel.sabuco@ssu.edu.ph" || !user.emailVerified) {
             alert("Administrator access is required.");
             return;
         }

@@ -208,5 +208,5 @@ export async function verifyFirebaseUser(request) {
     const result = await response.json().catch(() => ({}));
     const user = result.users?.[0];
     if (!response.ok || !user?.localId) throw new ApiError(401, "Your session has expired. Please sign in again.");
-    return { uid: user.localId, email: user.email || "", token };
+    return { uid: user.localId, email: user.email || "", emailVerified: user.emailVerified === true, token };
 }

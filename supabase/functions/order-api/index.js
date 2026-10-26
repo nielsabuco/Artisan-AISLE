@@ -292,9 +292,8 @@ async function requireConfiguredPaymentMethod(method) {
 }
 
 async function requireAdmin(user) {
-    const profileDocument = await firestoreRequest(`users/${user.uid}`);
-    if (decodeFields(profileDocument.fields).role !== "Admin") {
-        throw new ApiError(403, "Administrator access is required for this account.");
+    if (user.email?.trim().toLowerCase() !== "reniel.sabuco@ssu.edu.ph" || !user.emailVerified) {
+        throw new ApiError(403, "Sign in with the verified administrator email to perform this action.");
     }
 }
 

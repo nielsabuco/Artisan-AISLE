@@ -66,7 +66,7 @@ Deploy the website through the connected Vercel Git repository, or publish `dist
 
 ## Administrator access
 
-Sign in with the Firebase account whose Firestore profile document at `users/{Firebase UID}` has `role` set to `Admin`. The Admin Dashboard link appears in the profile screen for that account. If the account is not yet designated, an authorized project administrator must set the role on the correct user's Firestore document; do not add public admin self-registration.
+Sign in with the verified Firebase account `reniel.sabuco@ssu.edu.ph`. The Admin Dashboard link appears only for that account. Admin privileges are checked by the Firebase email and its verified status in the app, Firestore rules, and the order API; do not add public admin self-registration.
 
 Add the public website domain under Firebase Authentication → Settings → Authorized domains so admins and customers can sign in from the deployed site.
 

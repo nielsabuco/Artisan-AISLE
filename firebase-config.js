@@ -38,6 +38,8 @@ import {
 const firebaseApp = initializeApp(window.FIREBASE_CONFIG);
 const firestore = getFirestore(firebaseApp);
 const firebaseAuth = getAuth(firebaseApp);
+const ADMIN_EMAIL = 'reniel.sabuco@ssu.edu.ph';
+const isAdminAccount = user => user?.email?.trim().toLowerCase() === ADMIN_EMAIL && user.emailVerified === true;
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
@@ -131,8 +133,7 @@ const uploadProductImage = async file => {
 
 const uploadPaymentQr = async file => {
     const user = await requireUser();
-    const profile = await api.getAdminProfile(user.uid);
-    if (profile?.role !== 'Admin') throw new Error('Administrator access is required to upload payment QR codes.');
+    if (!isAdminAccount(user)) throw new Error('Sign in with the verified administrator email to upload payment QR codes.');
     if (!supabase) throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.');
     if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size < 1 || file.size > 5 * 1024 * 1024) {
         throw new Error('Choose a JPG, PNG, or WebP QR image no larger than 5 MB.');
@@ -190,27 +191,18 @@ const api = {
     getAdminProfile: async uid => (await getDoc(doc(firestore, 'users', uid))).data(),
     adminWrite: async (collectionName, recordId, data) => {
         const user = await requireUser();
-        const profile = await api.getAdminProfile(user.uid);
-        if (!profile || profile.role !== 'Admin') {
-            throw new Error('Administrator access is required for this account.');
-        }
+        if (!isAdminAccount(user)) throw new Error('Sign in with the verified administrator email to change admin settings.');
         await setDoc(doc(firestore, collectionName, recordId), { ...data, updatedAt: serverTimestamp() }, { merge: true });
     },
     adminDelete: async (collectionName, recordId) => {
         const user = await requireUser();
-        const profile = await api.getAdminProfile(user.uid);
-        if (!profile || profile.role !== 'Admin') {
-            throw new Error('Administrator access is required for this account.');
-        }
+        if (!isAdminAccount(user)) throw new Error('Sign in with the verified administrator email to perform this action.');
         await deleteDoc(doc(firestore, collectionName, recordId));
     },
     subscribeAdminData: async () => {
         const user = firebaseAuth.currentUser;
         if (!user) throw new Error('Please sign in as an admin first.');
-        const profile = await api.getAdminProfile(user.uid);
-        if (!profile || profile.role !== 'Admin') {
-            throw new Error('This Firebase account is not marked as an administrator.');
-        }
+        if (!isAdminAccount(user)) throw new Error('Sign in with the verified administrator email to open the Admin Dashboard.');
         if (window.firebaseAdminUnsubscribe) window.firebaseAdminUnsubscribe();
 
         const adminData = window.firebaseAdminData = {
@@ -230,8 +222,8 @@ const api = {
             snapshot => {
                 const records = mapSnapshot(snapshot);
                 if (name === 'users') {
-                    adminData.users = records.filter(record => record.role !== 'Admin');
-                    adminData.admins = records.filter(record => record.role === 'Admin');
+                    adminData.users = records.filter(record => record.id !== firebaseAuth.currentUser?.uid);
+                    adminData.admins = records.filter(record => record.id === firebaseAuth.currentUser?.uid);
                 } else {
                     adminData[name] = records;
                 }
@@ -270,8 +262,7 @@ const api = {
         const product = await getDoc(reference);
         if (!product.exists()) throw new Error('This product no longer exists in Firestore.');
 
-        const profile = await api.getAdminProfile(user.uid);
-        const isExactAdmin = profile?.role === 'Admin';
+        const isExactAdmin = isAdminAccount(user);
         const isOwner = product.data().sellerId === user.uid;
 
         if (!isExactAdmin && !isOwner) {
@@ -324,9 +315,7 @@ window.firebaseReviews = {};
 
 authReady.then(user => {
     if (!user) return;
-    getDoc(doc(firestore, 'users', user.uid)).then(profile => {
-        if (profile.data()?.role === 'Admin') api.subscribeAdminData().catch(console.error);
-    }).catch(error => console.error('Admin profile lookup failed:', error));
+    if (isAdminAccount(user)) api.subscribeAdminData().catch(console.error);
     onSnapshot(query(records('orders'), where('uid', '==', user.uid)), snapshot => {
         window.firebaseOrders = mapSnapshot(snapshot);
         if (typeof renderOrders === 'function') renderOrders();
