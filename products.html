@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | ArtisanAisle</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <a class="logo" href="index.html">🧺 Artisan<span>AISLE</span></a>
+        <div class="search">
+            <input id="productSearch" type="search" placeholder="Search products" aria-label="Search products">
+            <button id="searchButton" type="button">Search</button>
+        </div>
+        <div class="header-links">
+            <a href="index.html?screen=cart">🛒 Cart</a>
+            <a href="index.html?screen=orders">📦 Orders</a>
+            <a href="login.html">👤 Login</a>
+        </div>
+    </header>
+    <nav>
+        <a class="nav-btn" href="index.html">HOME</a>
+        <a class="nav-btn active" href="products.html">PRODUCTS</a>
+        <a class="nav-btn" href="categories.html">CATEGORIES</a>
+        <a class="nav-btn" href="artisans.html">ARTISANS</a>
+        <a class="nav-btn" href="about-us.html">ABOUT US</a>
+        <a class="nav-btn" href="contact.html">CONTACT</a>
+    </nav>
+    <main class="screen active">
+        <h1 class="section-title">All Products</h1>
+        <div class="product-layout">
+            <aside class="categories" aria-label="Product categories">
+                <h3>Categories</h3>
+                <button type="button" data-category="All Products">All Products</button>
+                <button type="button" data-category="Bags">Bags</button>
+                <button type="button" data-category="Home Decor">Home Decor</button>
+                <button type="button" data-category="Accessories">Accessories</button>
+                <button type="button" data-category="Woven Items">Woven Items</button>
+                <button type="button" data-category="Wood Crafts">Wood Crafts</button>
+                <button type="button" data-category="Souvenirs">Souvenirs</button>
+                <button type="button" data-category="Jewelry">Jewelry</button>
+            </aside>
+            <div id="productGrid" class="product-grid" aria-live="polite"></div>
+        </div>
+    </main>
+    <footer>
+        <p>© 2026 ArtisanAisle | Supporting Local Artisans</p>
+    </footer>
+    <script type="module" src="products-page.js"></script>
+</body>
+</html>

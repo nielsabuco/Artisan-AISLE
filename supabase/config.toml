@@ -1,0 +1,3 @@
+[functions.order-api]
+verify_jwt = false
+entrypoint = "./functions/order-api/index.js"

@@ -18,7 +18,7 @@
     </a>
 
     <div class="search">
-        <input id="searchInput" type="text" placeholder="Search handmade products..." onkeydown="if(event.key==='Enter'){searchProducts();}">
+        <input id="searchInput" type="search" name="product-search" autocomplete="off" placeholder="Search products" onkeydown="if(event.key==='Enter'){searchProducts();}">
         <button type="button" onclick="searchProducts()">Search</button>
     </div>
 
@@ -43,8 +43,6 @@
 </nav>
 
 
-<!-- ================= HOME ================= -->
-
 <section id="home" class="screen active">
 
     <div class="hero">
@@ -62,7 +60,7 @@
             </p>
 
             <button class="btn"
-                onclick="showScreen('products')">
+                onclick="window.location.href='products.html'">
                 SHOP NOW
             </button>
 
@@ -177,6 +175,11 @@
                 ₱<span id="detailPrice">0.00</span>
             </p>
 
+            <button id="detailSellerButton" class="seller-name" type="button" onclick="toggleSellerInfo()">View seller information</button>
+            <p id="detailSeller" class="seller-name" hidden></p>
+
+            <div id="productReviews" class="product-reviews"></div>
+
             <p id="detailDescription">
                 Handmade craft made by local artisans. Durable, unique and perfect for everyday use.
             </p>
@@ -239,6 +242,7 @@
         My Cart
     </h1>
 
+    <p id="cartNotice" role="status" hidden></p>
     <div class="cart-container">
 
         <div class="cart-items">
@@ -266,7 +270,7 @@
 
             <button type="button" class="btn"
             style="width:100%;margin-top:20px;"
-            onclick="showScreen('checkout')">
+            onclick="goToCheckout()">
                 Proceed to Checkout
             </button>
 
@@ -324,6 +328,7 @@
                     <option value="Maya">Maya</option>
                     <option value="Credit / Debit Card">Credit / Debit Card</option>
                 </select>
+                <small id="paymentHelp" role="status">Choose a payment method to see payment instructions.</small>
 
                 <p id="checkoutPaymentNote" style="font-size:12px; color:#555; margin-top:6px;">
                     Pay in cash upon delivery to your doorstep.
@@ -599,6 +604,18 @@
 
 <!-- Main Storefront Application Script -->
 <script>
+(async () => {
+  // Wait for Firebase to be ready before executing anything
+  await new Promise(resolve => {
+    const checkFirebase = () => {
+      if (window.firebaseApi) {
+        resolve();
+      } else {
+        setTimeout(checkFirebase, 10);
+      }
+    };
+    checkFirebase();
+  });
 
 /* ================= APPLICATION STATE ================= */
 
@@ -755,6 +772,13 @@ function bootstrapApplication() {
 
 
 /* ================= SCREEN NAVIGATION ================= */
+
+function updateNavigationState(activeScreen) {
+    document.querySelectorAll(".nav-btn").forEach(button => {
+        const isActive = button.dataset.screen === activeScreen;
+        button.classList.toggle("active", isActive);
+    });
+}
 
 function showScreen(screenID) {
     document.querySelectorAll(".screen").forEach(screen => {
@@ -926,6 +950,7 @@ function changeQuantity(amount) {
     document.getElementById("quantity").innerText = quantity;
 }
 
+/* ================= CART & CHECKOUT ================= */
 
 /* ================= CART OPERATIONS ================= */
 
@@ -937,9 +962,7 @@ function getCart() {
     }
 }
 
-function saveCart(cart) {
-    localStorage.setItem("handicraft_cart", JSON.stringify(cart));
-}
+let cart = readStoredArray("artisanCart");
 
 function addToCart() {
     if (!selectedProduct) return;
@@ -1269,6 +1292,8 @@ async function processGCashVerification() {
         verifyBtn.disabled = false;
         verifyBtn.innerText = "Verify & Confirm Order";
     }
+    loginButton.textContent = `👤 ${currentUser.displayName || currentUser.email?.split("@")[0] || "Account"}`;
+    loginButton.onclick = () => showScreen("profile");
 }
 
 function cancelGCashPayment() {
@@ -1597,8 +1622,7 @@ function openAdminLoginModal() {
 }
 
 function closeAdminLoginModal() {
-    const modal = document.getElementById("adminLoginModal");
-    if (modal) modal.style.display = "none";
+    document.getElementById("adminLoginModal").style.display = "none";
 }
 
 function submitAdminLogin() {
