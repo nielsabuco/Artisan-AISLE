@@ -64,7 +64,9 @@ function renderProfileData(user) {
   document.getElementById('detailPhone').textContent = user.phone || 'None provided';
   document.getElementById('detailAddress').textContent = user.address ? `${user.address}${user.city ? ', ' + user.city : ''}` : 'None provided';
   
-  const roleTitle = user.role === 'admin' ? 'Platform Administrator' : (user.role === 'seller' ? 'Verified Artisan Seller' : 'Registered Customer');
+  const isAdmin = String(user.role || '').toLowerCase() === 'admin' || (window.ArtisanDB && window.ArtisanDB.isEmailAdmin(user.email));
+  const isSeller = String(user.role || '').toLowerCase() === 'seller' || (user.sellerStatus || '').toLowerCase() === 'approved';
+  const roleTitle = isAdmin ? 'Platform Administrator' : (isSeller ? 'Verified Artisan Seller' : 'Registered Customer');
   document.getElementById('detailRole').textContent = roleTitle;
 }
 

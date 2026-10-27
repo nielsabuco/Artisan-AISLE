@@ -31,12 +31,15 @@ export function updateHeaderAuth() {
     const userMenu = document.createElement('div');
     userMenu.className = 'user-header-menu';
 
-    const roleBadge = user.role === 'admin' 
+    const isAdmin = String(user.role || '').toLowerCase() === 'admin' || (ArtisanDB.isEmailAdmin && ArtisanDB.isEmailAdmin(user.email));
+    const isSeller = String(user.role || '').toLowerCase() === 'seller' || String(user.sellerStatus || '').toLowerCase() === 'approved';
+
+    const roleBadge = isAdmin 
       ? '<span class="header-role-badge admin">Admin</span>' 
-      : (user.role === 'seller' ? '<span class="header-role-badge seller">Seller</span>' : '');
+      : (isSeller ? '<span class="header-role-badge seller">Seller</span>' : '');
 
     const avatarUrl = user.avatar || user.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
-    const displayName = (user.name || user.email.split('@')[0]).split(' ')[0];
+    const displayName = (user.name || (user.email ? user.email.split('@')[0] : 'User')).split(' ')[0];
 
     userMenu.innerHTML = `
       <div class="user-pill" id="userPill">
@@ -51,8 +54,8 @@ export function updateHeaderAuth() {
         </div>
         <a href="profile.html" class="dropdown-item">My Profile</a>
         <a href="cart.html#orders" class="dropdown-item">My Orders</a>
-        ${user.role === 'seller' ? '<a href="seller.html" class="dropdown-item portal-item">Seller Portal</a>' : ''}
-        ${user.role === 'admin' ? '<a href="admin.html" class="dropdown-item admin-item">Admin Portal</a>' : ''}
+        ${isSeller ? '<a href="seller.html" class="dropdown-item portal-item">Seller Portal</a>' : ''}
+        ${isAdmin ? '<a href="admin.html" class="dropdown-item admin-item">Admin Portal</a>' : ''}
         <button type="button" class="dropdown-item logout-btn" id="headerLogoutBtn">Logout</button>
       </div>
     `;

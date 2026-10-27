@@ -24,8 +24,9 @@ function initAdminAuth() {
     }
 
     currentAdmin = await ArtisanDB.getUserProfile(user.uid) || user;
+    const isUserAdmin = await ArtisanDB.checkIsAdmin(currentAdmin);
 
-    if (currentAdmin.role !== 'admin') {
+    if (!isUserAdmin && String(currentAdmin.role || '').toLowerCase() !== 'admin') {
       if (accessCard) accessCard.style.display = 'block';
       if (dashboardLayout) dashboardLayout.style.display = 'none';
 
@@ -42,6 +43,9 @@ function initAdminAuth() {
       });
       return;
     }
+
+    // Access granted - guarantee role is set to admin
+    currentAdmin.role = 'admin';
 
     // Access granted
     if (accessCard) accessCard.style.display = 'none';
@@ -210,8 +214,8 @@ function renderUsersTable(users) {
   tbody.innerHTML = '';
   users.forEach(u => {
     const tr = document.createElement('tr');
-    const roleClass = (u.role || 'user').toLowerCase();
-    const isAdmin = u.role === 'admin';
+    const roleClass = String(u.role || 'user').toLowerCase();
+    const isAdmin = roleClass === 'admin' || (ArtisanDB.isEmailAdmin && ArtisanDB.isEmailAdmin(u.email));
 
     tr.innerHTML = `
       <td>

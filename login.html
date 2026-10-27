@@ -123,7 +123,10 @@
         return;
       }
 
-      if (user && user.role === 'admin') {
+      const db = window.ArtisanDB || window.firebaseApi;
+      const isAdmin = user && (String(user.role || '').toLowerCase() === 'admin' || (db && db.isEmailAdmin && db.isEmailAdmin(user.email)));
+
+      if (isAdmin) {
         window.location.href = 'admin.html';
         return;
       }

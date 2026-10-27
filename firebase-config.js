@@ -70,12 +70,13 @@ export const ArtisanDB = {
       await updateProfile(user, { displayName: name }).catch(() => {});
     }
 
+    const isEmailAdmin = this.isEmailAdmin(email);
     const userData = {
       uid: user.uid,
       name: name.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
-      role: 'user', // Default account role MUST be user
+      role: isEmailAdmin ? 'admin' : 'user', // Default account role is user unless admin email
       sellerStatus: 'none', // none | pending | approved | rejected
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
@@ -92,11 +93,75 @@ export const ArtisanDB = {
     return userData;
   },
 
+  isEmailAdmin(email) {
+    if (!email) return false;
+    const clean = String(email).trim().toLowerCase();
+    const adminEmails = [
+      'nielsabuco2006@gmail.com',
+      'reniel.sabuco@ssu.edu.ph',
+      'admin@artisan.com',
+      'admin@artisanaisle.com'
+    ];
+    if (adminEmails.includes(clean)) return true;
+    if (clean.startsWith('admin@')) return true;
+    if (clean.includes('admin') && (clean.endsWith('@artisan.com') || clean.endsWith('@artisanaisle.com'))) return true;
+    return false;
+  },
+
+  async checkIsAdmin(userOrUid) {
+    if (!userOrUid) return false;
+    let uid = typeof userOrUid === 'string' ? userOrUid : userOrUid.uid;
+    let email = (typeof userOrUid === 'object' && userOrUid.email) ? userOrUid.email : '';
+
+    // 1. Check Firebase Auth token claims
+    try {
+      const authUser = auth.currentUser;
+      if (authUser && (!uid || authUser.uid === uid)) {
+        if (!email && authUser.email) email = authUser.email;
+        const token = await authUser.getIdTokenResult().catch(() => null);
+        if (token && token.claims) {
+          if (token.claims.admin === true || 
+              String(token.claims.role || '').toLowerCase() === 'admin' ||
+              String(token.claims.adminRole || '').toLowerCase() === 'admin') {
+            return true;
+          }
+        }
+      }
+    } catch (e) {}
+
+    // 2. Check admin email rules
+    if (this.isEmailAdmin(email)) return true;
+
+    // 3. Check Firestore user document
+    if (uid) {
+      try {
+        const snap = await getDoc(doc(db, 'users', uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          const r = String(data.role || data.Role || '').trim().toLowerCase();
+          if (r === 'admin' || data.isAdmin === true || data.is_admin === true) {
+            return true;
+          }
+          if (this.isEmailAdmin(data.email)) return true;
+        }
+      } catch (e) {}
+    }
+
+    // 4. Check passed object
+    if (typeof userOrUid === 'object') {
+      const r = String(userOrUid.role || userOrUid.Role || '').trim().toLowerCase();
+      if (r === 'admin' || userOrUid.isAdmin === true) return true;
+      if (this.isEmailAdmin(userOrUid.email)) return true;
+    }
+
+    return false;
+  },
+
   async loginUser(email, password) {
     const cred = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
     const user = cred.user;
-    const profile = await this.getUserProfile(user.uid);
-    const sessionData = profile || {
+    let profile = await this.getUserProfile(user.uid);
+    let sessionData = profile || {
       uid: user.uid,
       name: user.displayName || email.split('@')[0],
       email: user.email,
@@ -104,6 +169,12 @@ export const ArtisanDB = {
       role: 'user',
       sellerStatus: 'none'
     };
+
+    if (this.isEmailAdmin(user.email) || String(sessionData.role || '').toLowerCase() === 'admin') {
+      sessionData.role = 'admin';
+      this.updateUserRole(user.uid, 'admin').catch(() => {});
+    }
+
     this._saveLocalSession(sessionData);
     return sessionData;
   },
@@ -114,18 +185,21 @@ export const ArtisanDB = {
     const cred = await signInWithPopup(auth, provider);
     const user = cred.user;
 
+    const email = (user.email || '').trim().toLowerCase();
+    const isAdmin = this.isEmailAdmin(email);
+
     // Check if user profile already exists in Firestore
     let profile = await this.getUserProfile(user.uid);
     if (!profile) {
       // First-time Google login: create profile document
-      const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Artisan Customer');
+      const displayName = user.displayName || (email ? email.split('@')[0] : 'Artisan Customer');
       profile = {
         uid: user.uid,
         name: displayName,
-        email: (user.email || '').trim().toLowerCase(),
+        email: email,
         phone: user.phoneNumber || '',
         avatar: user.photoURL || '',
-        role: 'user', // Default account role MUST be user
+        role: isAdmin ? 'admin' : 'user', // Automatically Admin if email rule matches
         sellerStatus: 'none', // none | pending | approved | rejected
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -136,6 +210,10 @@ export const ArtisanDB = {
         console.warn('Firestore set user warning on Google login:', err.message);
       }
     } else {
+      if (isAdmin && profile.role !== 'admin') {
+        profile.role = 'admin';
+        this.updateUserRole(user.uid, 'admin').catch(() => {});
+      }
       // Existing profile: update avatar if available and not set
       if (!profile.avatar && user.photoURL) {
         try {
@@ -173,7 +251,23 @@ export const ArtisanDB = {
     try {
       const snap = await getDoc(doc(db, 'users', uid));
       if (snap.exists()) {
-        return { id: snap.id, ...snap.data() };
+        const data = snap.data();
+        let role = String(data.role || data.Role || '').trim().toLowerCase();
+        const isAdmin = role === 'admin' || data.isAdmin === true || data.is_admin === true || this.isEmailAdmin(data.email);
+
+        if (isAdmin) {
+          role = 'admin';
+          // Ensure persisted in Firestore if it was stored as 'Admin' or not marked yet
+          if (data.role !== 'admin') {
+            updateDoc(doc(db, 'users', uid), { role: 'admin' }).catch(() => {});
+          }
+        } else if (role === 'seller' || String(data.sellerStatus || '').toLowerCase() === 'approved') {
+          role = 'seller';
+        } else {
+          role = role || 'user';
+        }
+
+        return { id: snap.id, ...data, role };
       }
     } catch (err) {
       console.warn('Error fetching user profile from Firestore:', err.message);
@@ -201,14 +295,39 @@ export const ArtisanDB = {
   onAuth(callback) {
     return onAuthStateChanged(auth, async (user) => {
       if (user) {
+        let isTokenAdmin = false;
+        try {
+          const token = await user.getIdTokenResult();
+          if (token && token.claims) {
+            if (token.claims.admin === true || String(token.claims.role || '').toLowerCase() === 'admin') {
+              isTokenAdmin = true;
+            }
+          }
+        } catch (e) {}
+
         const profile = await this.getUserProfile(user.uid);
-        const activeUser = profile || {
+        let activeUser = profile || {
           uid: user.uid,
-          name: user.displayName || user.email.split('@')[0],
+          name: user.displayName || (user.email ? user.email.split('@')[0] : 'User'),
           email: user.email,
           role: 'user',
           sellerStatus: 'none'
         };
+
+        const email = activeUser.email || (user.email || '');
+        const rawRole = String(activeUser.role || activeUser.Role || '').trim().toLowerCase();
+
+        if (isTokenAdmin || rawRole === 'admin' || activeUser.isAdmin === true || this.isEmailAdmin(email)) {
+          activeUser.role = 'admin';
+          if (profile && profile.role !== 'admin') {
+            updateDoc(doc(db, 'users', user.uid), { role: 'admin' }).catch(() => {});
+          }
+        } else if (rawRole === 'seller' || String(activeUser.sellerStatus || '').toLowerCase() === 'approved') {
+          activeUser.role = 'seller';
+        } else {
+          activeUser.role = rawRole || 'user';
+        }
+
         this._saveLocalSession(activeUser);
         callback(activeUser);
       } else {
