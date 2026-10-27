@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart & Checkout | ArtisanAisle</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <a class="logo" href="index.html">Artisan<span>AISLE</span></a>
+    <div class="search">
+      <input id="siteSearchInput" type="search" placeholder="Search handcrafted treasures..." aria-label="Search products">
+      <button id="siteSearchButton" type="button">Search</button>
+    </div>
+    <div class="header-links">
+      <a href="cart.html" class="active">Cart</a>
+      <a href="login.html" id="loginButton">Login</a>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav>
+    <a class="nav-btn" href="index.html">HOME</a>
+    <a class="nav-btn" href="products.html">PRODUCTS</a>
+    <a class="nav-btn" href="categories.html">CATEGORIES</a>
+    <a class="nav-btn" href="artisans.html">ARTISANS</a>
+    <a class="nav-btn" href="about-us.html">ABOUT US</a>
+    <a class="nav-btn" href="contact.html">CONTACT</a>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="page-container">
+    <!-- View Switcher Tabs -->
+    <div class="cart-tabs-bar">
+      <button type="button" class="cart-tab-btn active" id="tabCartBtn">Shopping Cart & Checkout</button>
+      <button type="button" class="cart-tab-btn" id="tabOrdersBtn">My Orders History</button>
+    </div>
+
+    <!-- TAB 1: CART & CHECKOUT -->
+    <div id="cartSection" class="cart-layout-view">
+      <!-- Empty Cart Message -->
+      <div id="emptyCartState" class="empty-state-card" style="display: none;">
+        <div class="empty-state-icon">🧺</div>
+        <h2>Your Cart is Currently Empty</h2>
+        <p>Explore authentic Filipino handicrafts, woven bags, home decor, and souvenirs crafted by local artisans.</p>
+        <a href="products.html" class="primary-btn">Browse Products</a>
+      </div>
+
+      <!-- Active Cart Content -->
+      <div id="activeCartContent" class="checkout-grid-container">
+        <!-- Left: Items & Delivery Details -->
+        <div class="checkout-left-col">
+          <div class="cart-card-box">
+            <div class="box-header-row">
+              <h2>Cart Items (<span id="cartCountTitle">0</span>)</h2>
+              <button type="button" class="text-link-btn" id="clearCartBtn">Clear Cart</button>
+            </div>
+            <div id="cartItemsList" class="cart-items-wrapper">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Shipping Details Form -->
+          <div class="cart-card-box" id="shippingFormBox">
+            <h2>Delivery & Shipping Information</h2>
+            <form id="checkoutDeliveryForm">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="shippingFullName">Recipient Full Name *</label>
+                  <input type="text" id="shippingFullName" required placeholder="Juan Dela Cruz">
+                </div>
+                <div class="form-group">
+                  <label for="shippingPhone">Mobile Contact Number *</label>
+                  <input type="tel" id="shippingPhone" required placeholder="0912 345 6789">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="shippingAddress">Street Address / House / Unit Number *</label>
+                <input type="text" id="shippingAddress" required placeholder="123 Artisan Village, Barangay San Isidro">
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="shippingCity">City / Municipality / Province *</label>
+                  <input type="text" id="shippingCity" required placeholder="Vigan City, Ilocos Sur">
+                </div>
+                <div class="form-group">
+                  <label for="shippingPostal">Postal / ZIP Code</label>
+                  <input type="text" id="shippingPostal" placeholder="2700">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="shippingNotes">Special Delivery Instructions (Optional)</label>
+                <input type="text" id="shippingNotes" placeholder="Leave at guardhouse, call upon arrival, etc.">
+              </div>
+            </form>
+          </div>
+
+          <!-- Payment Options -->
+          <div class="cart-card-box" id="paymentOptionsBox">
+            <h2>Select Payment Method</h2>
+            <div class="payment-selector-group">
+              <label class="payment-radio-label">
+                <input type="radio" name="paymentOption" value="Cash on Delivery" checked>
+                <div class="payment-radio-card">
+                  <div class="payment-title">Cash on Delivery (COD)</div>
+                  <div class="payment-sub">Pay in cash upon physical package delivery. Available nationwide.</div>
+                </div>
+              </label>
+
+              <label class="payment-radio-label">
+                <input type="radio" name="paymentOption" value="GCash">
+                <div class="payment-radio-card">
+                  <div class="payment-title">GCash (Direct to Artisan Seller)</div>
+                  <div class="payment-sub">Send money directly to the seller's registered GCash account with instant verification.</div>
+                </div>
+              </label>
+            </div>
+
+            <!-- GCash Direct Seller Panel (shown when GCash selected) -->
+            <div id="gcashDirectDetailsPanel" class="gcash-seller-box" style="display: none;">
+              <h3>Artisan Seller GCash Details</h3>
+              <p class="gcash-instruction">Please transfer the exact total amount to the seller's registered GCash account below:</p>
+              
+              <div class="gcash-credentials-card">
+                <div class="gcash-row">
+                  <span class="gcash-label">Account Name:</span>
+                  <strong class="gcash-val" id="gcashAccountNameDisplay">Loading...</strong>
+                </div>
+                <div class="gcash-row">
+                  <span class="gcash-label">GCash Mobile Number:</span>
+                  <div class="gcash-number-copy-wrap">
+                    <strong class="gcash-val highlight" id="gcashMobileNumberDisplay">Loading...</strong>
+                    <button type="button" class="copy-small-btn" id="copyGcashNumberBtn">Copy</button>
+                  </div>
+                </div>
+                <div id="gcashQrContainer" class="gcash-qr-preview-wrap" style="display: none;">
+                  <img id="gcashQrImage" src="" alt="Seller GCash QR Code">
+                  <span class="qr-caption">Scan to pay via GCash App</span>
+                </div>
+              </div>
+
+              <div class="form-group gcash-ref-group">
+                <label for="gcashReferenceInput">Enter 13-Digit GCash Transaction Reference Number *</label>
+                <input type="text" id="gcashReferenceInput" maxlength="13" placeholder="e.g. 1002345678912">
+                <small class="helper-text">You can find this 13-digit reference number in your GCash SMS confirmation or App receipt.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Order Summary Sidebar -->
+        <div class="checkout-right-col">
+          <div class="cart-card-box sticky-summary">
+            <h2>Order Summary</h2>
+            <div class="summary-breakdown">
+              <div class="summary-line">
+                <span>Items Subtotal</span>
+                <span id="summarySubtotal">₱0.00</span>
+              </div>
+              <div class="summary-line">
+                <span>Shipping Fee</span>
+                <span id="summaryShipping">₱50.00</span>
+              </div>
+              <div class="summary-line total">
+                <span>Total Amount</span>
+                <span id="summaryGrandTotal" class="grand-total">₱0.00</span>
+              </div>
+            </div>
+
+            <div class="security-guarantee-note">
+              🛡️ 100% Secure Checkout | Supporting Authentic Filipino Artisans
+            </div>
+
+            <div id="checkoutErrorNotice" class="error-banner" style="display: none;"></div>
+
+            <button type="button" class="primary-btn checkout-submit-btn" id="placeOrderSubmitBtn">
+              <span class="btn-text">Place Order Now</span>
+              <span class="btn-spinner" style="display: none;"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: MY ORDERS HISTORY -->
+    <div id="ordersSection" class="orders-layout-view" style="display: none;">
+      <div class="box-header-row">
+        <h2>My Order History</h2>
+        <span class="orders-subtitle">Track fulfillment and shipment status for your handcrafted items</span>
+      </div>
+
+      <div id="userOrdersList" class="orders-card-container">
+        <div class="empty-state-card">
+          <p>Loading your orders...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Order Success Modal -->
+  <div id="orderSuccessModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="success-icon-badge">✓</div>
+      <h2>Order Successfully Placed!</h2>
+      <p>Thank you for supporting our local artisans. Your order details have been recorded.</p>
+      
+      <div class="order-receipt-summary">
+        <div class="receipt-row">
+          <span>Order Number:</span>
+          <strong id="receiptOrderNumber">#ORD-000000</strong>
+        </div>
+        <div class="receipt-row">
+          <span>Payment Method:</span>
+          <strong id="receiptPaymentMethod">Cash on Delivery</strong>
+        </div>
+        <div class="receipt-row">
+          <span>Payment Status:</span>
+          <span class="status-badge-inline" id="receiptPaymentStatus">Processing</span>
+        </div>
+        <div class="receipt-row">
+          <span>Total Paid:</span>
+          <strong id="receiptTotalAmount">₱0.00</strong>
+        </div>
+      </div>
+
+      <div class="modal-actions-row">
+        <button type="button" class="secondary-btn" id="successViewOrdersBtn">View My Orders</button>
+        <button type="button" class="primary-btn" id="successContinueShoppingBtn">Continue Shopping</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 ArtisanAisle | Supporting Local Filipino Artisans & Communities</p>
+  </footer>
+
+  <script type="module" src="header-auth.js"></script>
+  <script type="module" src="cart-page.js"></script>
+</body>
+</html>

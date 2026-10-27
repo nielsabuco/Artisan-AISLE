@@ -22,24 +22,23 @@
         <button type="button" onclick="searchProducts()">Search</button>
     </div>
 
-    <!-- Clean buttons without emojis -->
+    <!-- Clean header buttons pointing to dedicated portals -->
     <div class="header-links">
-        <button type="button" id="headerCartBtn" onclick="showScreen('cart')">Cart</button>
-        <button type="button" id="headerOrdersBtn" onclick="showScreen('orders')">Orders</button>
-        <button type="button" id="loginButton" onclick="handleHeaderLoginClick()">Login</button>
+        <a href="cart.html" id="headerCartBtn">Cart</a>
+        <a href="profile.html" id="headerProfileBtn">Profile</a>
+        <a href="login.html" id="loginButton">Login</a>
     </div>
 
 </header>
 
-<!-- Navigation without seller link (Sellers have their own dedicated portal) -->
+<!-- Navigation without seller/admin link (Dedicated portals for sellers and admin) -->
 <nav>
-    <button type="button" class="nav-btn active" onclick="showScreen('home')">HOME</button>
-    <button type="button" class="nav-btn" onclick="showScreen('products')">PRODUCTS</button>
-    <button type="button" class="nav-btn" onclick="openAdminDashboard()">ADMIN</button>
-    <button type="button" class="nav-btn" onclick="window.location.href='categories.html'">CATEGORIES</button>
-    <button type="button" class="nav-btn" onclick="window.location.href='artisans.html'">ARTISANS</button>
-    <button type="button" class="nav-btn" onclick="window.location.href='about-us.html'">ABOUT US</button>
-    <button type="button" class="nav-btn" onclick="window.location.href='contact.html'">CONTACT</button>
+    <a class="nav-btn active" href="index.html">HOME</a>
+    <a class="nav-btn" href="products.html">PRODUCTS</a>
+    <a class="nav-btn" href="categories.html">CATEGORIES</a>
+    <a class="nav-btn" href="artisans.html">ARTISANS</a>
+    <a class="nav-btn" href="about-us.html">ABOUT US</a>
+    <a class="nav-btn" href="contact.html">CONTACT</a>
 </nav>
 
 
@@ -599,8 +598,9 @@
 </footer>
 
 
-<!-- Connect Firebase backend service layer -->
+<!-- Connect Firebase backend service layer & universal header auth -->
 <script type="module" src="firebase-config.js"></script>
+<script type="module" src="header-auth.js"></script>
 
 <!-- Main Storefront Application Script -->
 <script>
@@ -608,7 +608,7 @@
   // Wait for Firebase to be ready before executing anything
   await new Promise(resolve => {
     const checkFirebase = () => {
-      if (window.firebaseApi) {
+      if (window.ArtisanDB || window.firebaseApi) {
         resolve();
       } else {
         setTimeout(checkFirebase, 10);

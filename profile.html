@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile & Settings | ArtisanAisle</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <a class="logo" href="index.html">Artisan<span>AISLE</span></a>
+    <div class="search">
+      <input id="siteSearchInput" type="search" placeholder="Search handcrafted treasures..." aria-label="Search products">
+      <button id="siteSearchButton" type="button">Search</button>
+    </div>
+    <div class="header-links">
+      <a href="cart.html">Cart</a>
+      <a href="login.html" id="loginButton">Login</a>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav>
+    <a class="nav-btn" href="index.html">HOME</a>
+    <a class="nav-btn" href="products.html">PRODUCTS</a>
+    <a class="nav-btn" href="categories.html">CATEGORIES</a>
+    <a class="nav-btn" href="artisans.html">ARTISANS</a>
+    <a class="nav-btn" href="about-us.html">ABOUT US</a>
+    <a class="nav-btn" href="contact.html">CONTACT</a>
+  </nav>
+
+  <!-- Main Profile View -->
+  <main class="page-container">
+    <!-- Unauthenticated Guard Notice -->
+    <div id="profileAuthGuard" class="empty-state-card" style="display: none;">
+      <div class="empty-state-icon">👤</div>
+      <h2>Please Sign In</h2>
+      <p>Log in or create an account to view and manage your profile, orders, and seller status.</p>
+      <div class="modal-actions-row">
+        <a href="login.html" class="primary-btn">Sign In</a>
+        <a href="create-account.html" class="secondary-btn">Register New Account</a>
+      </div>
+    </div>
+
+    <!-- Active Profile Content -->
+    <div id="activeProfileContent" class="profile-layout-container" style="display: none;">
+      <!-- Hero Banner / Identity Card -->
+      <div class="profile-hero-card">
+        <div class="profile-avatar-wrapper">
+          <img id="userAvatarImg" class="profile-main-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="User Profile Picture">
+          <!-- Separate Edit Profile Picture Icon -->
+          <button type="button" class="avatar-edit-icon-btn" id="avatarEditIconBtn" title="Change Profile Picture">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile-identity-info">
+          <div class="profile-name-row">
+            <h1 id="userNameDisplay">Loading...</h1>
+            <span class="role-badge" id="userRoleBadge">User</span>
+            <!-- Separate Edit Profile Information Button -->
+            <button type="button" class="edit-profile-btn" id="openEditProfileModalBtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              Edit Profile
+            </button>
+          </div>
+          <p id="userEmailDisplay" class="profile-email-text">user@example.com</p>
+          <div class="profile-meta-pills">
+            <span class="meta-pill" id="userPhonePill">No phone added</span>
+            <span class="meta-pill" id="userAddressPill">No address added</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid: Seller Application & Personal Information -->
+      <div class="profile-details-grid">
+        <!-- 1. Artisan Seller Status Card -->
+        <div class="profile-card-box seller-status-card">
+          <div class="box-header-row">
+            <h2>Artisan Seller Status</h2>
+            <span class="status-badge" id="sellerStatusBadge">Not Applied</span>
+          </div>
+
+          <div id="sellerStatusContent" class="seller-status-body">
+            <!-- Dynamically populated based on sellerStatus: none, pending, approved, rejected -->
+          </div>
+        </div>
+
+        <!-- 2. Account Information Card -->
+        <div class="profile-card-box">
+          <div class="box-header-row">
+            <h2>Shipping & Account Details</h2>
+          </div>
+          <div class="info-data-list">
+            <div class="info-data-row">
+              <span class="info-label">Full Name:</span>
+              <strong class="info-val" id="detailFullName">-</strong>
+            </div>
+            <div class="info-data-row">
+              <span class="info-label">Email Address:</span>
+              <strong class="info-val" id="detailEmail">-</strong>
+            </div>
+            <div class="info-data-row">
+              <span class="info-label">Mobile Phone:</span>
+              <strong class="info-val" id="detailPhone">-</strong>
+            </div>
+            <div class="info-data-row">
+              <span class="info-label">Default Shipping Address:</span>
+              <strong class="info-val" id="detailAddress">-</strong>
+            </div>
+            <div class="info-data-row">
+              <span class="info-label">Account Role:</span>
+              <strong class="info-val" id="detailRole">Standard Customer</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications & Activity Card -->
+      <div class="profile-card-box">
+        <div class="box-header-row">
+          <h2>Account Notifications & Updates</h2>
+          <span class="notifications-count" id="notifCountBadge">0 alerts</span>
+        </div>
+        <div id="notificationsList" class="notifications-wrapper">
+          <p class="empty-muted">No new notifications.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL 1: Edit Profile (Avatar Image Upload & Info) -->
+  <div id="editProfileModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card edit-profile-modal-box">
+      <div class="modal-header-row">
+        <h2>Edit Profile Information</h2>
+        <button type="button" class="close-modal-btn" id="closeEditProfileModalBtn">✕</button>
+      </div>
+
+      <form id="editProfileForm">
+        <!-- Avatar Upload Section -->
+        <div class="avatar-upload-control">
+          <div class="avatar-preview-wrap">
+            <img id="editAvatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Avatar Preview">
+          </div>
+          <div class="avatar-upload-inputs">
+            <label for="avatarFileInput" class="custom-file-upload-btn">
+              Choose New Photo
+            </svg>
+            </label>
+            <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
+            <small class="helper-text">JPEG, PNG, or WebP. Max 5MB.</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="editFullName">Full Name *</label>
+          <input type="text" id="editFullName" required placeholder="Juan Dela Cruz">
+        </div>
+
+        <div class="form-group">
+          <label for="editPhone">Mobile Phone Number</label>
+          <input type="tel" id="editPhone" placeholder="0912 345 6789">
+        </div>
+
+        <div class="form-group">
+          <label for="editAddress">Delivery Address</label>
+          <input type="text" id="editAddress" placeholder="123 Street Name, Barangay">
+        </div>
+
+        <div class="form-group">
+          <label for="editCity">City / Province</label>
+          <input type="text" id="editCity" placeholder="Vigan City, Ilocos Sur">
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" class="secondary-btn" id="cancelEditProfileBtn">Cancel</button>
+          <button type="submit" class="primary-btn" id="saveProfileChangesBtn">
+            <span class="btn-text">Save Changes</span>
+            <span class="btn-spinner" style="display: none;"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Seller Application Form Modal -->
+  <div id="sellerApplicationModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card wide-modal">
+      <div class="modal-header-row">
+        <h2>Artisan Seller Application</h2>
+        <button type="button" class="close-modal-btn" id="closeSellerModalBtn">✕</button>
+      </div>
+      <p class="modal-subtitle">Join our curated marketplace of Filipino craftsmen. Applications are reviewed directly by the platform admin.</p>
+
+      <form id="sellerApplicationForm">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="appShopName">Shop or Brand Name *</label>
+            <input type="text" id="appShopName" required placeholder="e.g. Cordillera Weavers Guild">
+          </div>
+          <div class="form-group">
+            <label for="appCategory">Primary Craft Category *</label>
+            <select id="appCategory" required>
+              <option value="Bags">Bags & Purses</option>
+              <option value="Home Decor">Home Decor & Lamps</option>
+              <option value="Woven Items">Woven Mats & Baskets</option>
+              <option value="Wood Crafts">Wood Carvings & Sculptures</option>
+              <option value="Jewelry">Handcrafted Jewelry</option>
+              <option value="Accessories">Fashion Accessories</option>
+              <option value="Souvenirs">Traditional Souvenirs</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="appCraftStory">Your Craftsmanship Story & Products *</label>
+          <textarea id="appCraftStory" rows="3" required placeholder="Tell us about the traditional techniques, materials, and artisan community behind your products."></textarea>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="appGcashName">Registered GCash Account Name *</label>
+            <input type="text" id="appGcashName" required placeholder="Name on GCash ID">
+          </div>
+          <div class="form-group">
+            <label for="appGcashNumber">Registered GCash Mobile Number *</label>
+            <input type="tel" id="appGcashNumber" required placeholder="0912 345 6789">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="appGovId">Government ID / DTI / Business Permit Reference *</label>
+          <input type="text" id="appGovId" required placeholder="e.g. DTI-0482914 or National ID / PhilSys Number">
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" class="secondary-btn" id="cancelSellerAppBtn">Cancel</button>
+          <button type="submit" class="primary-btn" id="submitSellerAppBtn">
+            <span class="btn-text">Submit Application to Admin</span>
+            <span class="btn-spinner" style="display: none;"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 ArtisanAisle | Supporting Local Filipino Artisans & Communities</p>
+  </footer>
+
+  <script type="module" src="header-auth.js"></script>
+  <script type="module" src="profile-page.js"></script>
+</body>
+</html>

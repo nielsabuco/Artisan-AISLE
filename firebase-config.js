@@ -54,6 +54,11 @@ export const ArtisanDB = {
   app,
   auth,
   db,
+  authReady: Promise.resolve(),
+  get currentUser() {
+    return auth.currentUser;
+  },
+  db,
 
   // --- Auth & Users ---
   async registerUser(name, email, phone, password) {
@@ -531,6 +536,131 @@ export const ArtisanDB = {
     await updateDoc(doc(db, 'orders', orderId), updates);
   },
 
+  // --- Users Management for Admin ---
+  subscribeAllUsers(callback) {
+    return onSnapshot(collection(db, 'users'), (snap) => {
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      callback(list);
+    }, (err) => {
+      console.warn('All users snapshot error:', err);
+      this.getAllUsers().then(callback).catch(() => callback([]));
+    });
+  },
+
+  async getAllUsers() {
+    try {
+      const snap = await getDocs(collection(db, 'users'));
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (e) {
+      console.warn('Error fetching all users:', e);
+      return [];
+    }
+  },
+
+  async updateUserRole(uid, role, sellerStatus) {
+    const updates = { role, updatedAt: serverTimestamp() };
+    if (sellerStatus) updates.sellerStatus = sellerStatus;
+    await updateDoc(doc(db, 'users', uid), updates);
+  },
+
+  // --- Image Optimization & Upload Helper ---
+  async uploadImage(file, maxSize = 1200) {
+    return new Promise((resolve, reject) => {
+      if (!file) return resolve('');
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let { width, height } = img;
+          if (width > maxSize || height > maxSize) {
+            if (width > height) {
+              height = Math.round((height * maxSize) / width);
+              width = maxSize;
+            } else {
+              width = Math.round((width * maxSize) / height);
+              height = maxSize;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.85);
+          resolve(compressed);
+        };
+        img.onerror = () => resolve(e.target.result);
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  },
+
+  // --- Client Cart System ---
+  getCart() {
+    try {
+      return JSON.parse(localStorage.getItem('artisan_cart') || '[]');
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveCart(cart) {
+    localStorage.setItem('artisan_cart', JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent('artisan-cart-updated', { detail: cart }));
+  },
+
+  addToCart(product, quantity = 1) {
+    const cart = this.getCart();
+    const existingIndex = cart.findIndex(item => item.id === product.id || item.productId === product.id);
+    const qty = Math.max(1, Number(quantity) || 1);
+
+    if (existingIndex > -1) {
+      const maxStock = Number(cart[existingIndex].stock) || 99;
+      cart[existingIndex].quantity = Math.min(maxStock, (Number(cart[existingIndex].quantity) || 1) + qty);
+    } else {
+      cart.push({
+        id: product.id,
+        productId: product.id,
+        name: product.name || 'Handcrafted Treasure',
+        price: Number(product.price) || 0,
+        image: product.image || 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=600&q=80',
+        sellerId: product.sellerId || '',
+        sellerName: product.sellerName || 'Artisan Partner',
+        category: product.category || 'General',
+        stock: Number(product.stock) || 10,
+        quantity: qty
+      });
+    }
+
+    this.saveCart(cart);
+    return cart;
+  },
+
+  removeFromCart(productId) {
+    let cart = this.getCart();
+    cart = cart.filter(item => item.id !== productId && item.productId !== productId);
+    this.saveCart(cart);
+    return cart;
+  },
+
+  updateCartQuantity(productId, quantity) {
+    const cart = this.getCart();
+    const item = cart.find(i => i.id === productId || i.productId === productId);
+    if (item) {
+      const maxStock = Number(item.stock) || 99;
+      item.quantity = Math.max(1, Math.min(maxStock, Number(quantity) || 1));
+      this.saveCart(cart);
+    }
+    return cart;
+  },
+
+  clearCart() {
+    localStorage.removeItem('artisan_cart');
+    window.dispatchEvent(new CustomEvent('artisan-cart-updated', { detail: [] }));
+  },
+
   // --- Notifications ---
   subscribeNotifications(userId, callback) {
     if (!userId) {
@@ -546,9 +676,35 @@ export const ArtisanDB = {
       console.warn('Notifications snapshot warning:', err);
       callback([]);
     });
+  },
+
+  async getOrder(orderId) {
+    if (!orderId) return null;
+    try {
+      const snap = await getDoc(doc(db, 'orders', orderId));
+      if (snap.exists()) return { id: snap.id, ...snap.data() };
+    } catch (e) {
+      console.warn('Error getOrder:', e);
+    }
+    return null;
+  },
+
+  async saveReview(reviewData) {
+    return await addDoc(collection(db, 'reviews'), {
+      ...reviewData,
+      createdAt: serverTimestamp()
+    });
+  },
+
+  async saveContactMessage(msgData) {
+    return await addDoc(collection(db, 'contact_messages'), {
+      ...msgData,
+      createdAt: serverTimestamp()
+    });
   }
 };
 
 window.ArtisanDB = ArtisanDB;
+window.firebaseApi = ArtisanDB;
 
 console.log("ArtisanAisle Firebase backend initialized successfully.");

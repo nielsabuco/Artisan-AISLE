@@ -3,22 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products | ArtisanAisle</title>
+    <title>Handcrafted Products Catalog | ArtisanAisle</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Header -->
     <header>
-        <a class="logo" href="index.html">🧺 Artisan<span>AISLE</span></a>
+        <a class="logo" href="index.html">Artisan<span>AISLE</span></a>
         <div class="search">
-            <input id="productSearch" type="search" placeholder="Search products" aria-label="Search products">
+            <input id="productSearch" type="search" placeholder="Search authentic Filipino crafts..." aria-label="Search products">
             <button id="searchButton" type="button">Search</button>
         </div>
         <div class="header-links">
-            <a href="index.html?screen=cart">🛒 Cart</a>
-            <a href="index.html?screen=orders">📦 Orders</a>
-            <a href="login.html">👤 Login</a>
+            <a href="cart.html">Cart</a>
+            <a href="login.html" id="loginButton">Login</a>
         </div>
     </header>
+
+    <!-- Navigation -->
     <nav>
         <a class="nav-btn" href="index.html">HOME</a>
         <a class="nav-btn active" href="products.html">PRODUCTS</a>
@@ -27,26 +32,44 @@
         <a class="nav-btn" href="about-us.html">ABOUT US</a>
         <a class="nav-btn" href="contact.html">CONTACT</a>
     </nav>
-    <main class="screen active">
-        <h1 class="section-title">All Products</h1>
+
+    <main class="page-container">
+        <div class="catalog-header-banner">
+            <h1 class="section-title">Authentic Filipino Handicrafts</h1>
+            <p class="catalog-subtitle">Direct from community weavers, carvers, and pottery artisans across Luzon, Visayas, and Mindanao.</p>
+        </div>
+
         <div class="product-layout">
-            <aside class="categories" aria-label="Product categories">
-                <h3>Categories</h3>
-                <button type="button" data-category="All Products">All Products</button>
-                <button type="button" data-category="Bags">Bags</button>
-                <button type="button" data-category="Home Decor">Home Decor</button>
-                <button type="button" data-category="Accessories">Accessories</button>
-                <button type="button" data-category="Woven Items">Woven Items</button>
-                <button type="button" data-category="Wood Crafts">Wood Crafts</button>
-                <button type="button" data-category="Souvenirs">Souvenirs</button>
-                <button type="button" data-category="Jewelry">Jewelry</button>
+            <aside class="categories-sidebar" aria-label="Product categories">
+                <h3>Filter by Category</h3>
+                <div class="category-buttons-list">
+                    <button type="button" class="cat-filter-btn active" data-category="All Products">All Products</button>
+                    <button type="button" class="cat-filter-btn" data-category="Bags">Bags & Purses</button>
+                    <button type="button" class="cat-filter-btn" data-category="Home Decor">Home Decor & Lamps</button>
+                    <button type="button" class="cat-filter-btn" data-category="Accessories">Accessories</button>
+                    <button type="button" class="cat-filter-btn" data-category="Woven Items">Woven Items & Baskets</button>
+                    <button type="button" class="cat-filter-btn" data-category="Wood Crafts">Wood Crafts & Carvings</button>
+                    <button type="button" class="cat-filter-btn" data-category="Souvenirs">Traditional Souvenirs</button>
+                    <button type="button" class="cat-filter-btn" data-category="Jewelry">Handmade Jewelry</button>
+                </div>
             </aside>
-            <div id="productGrid" class="product-grid" aria-live="polite"></div>
+
+            <div class="catalog-grid-area">
+                <div class="catalog-status-bar">
+                    <span id="productsCountLabel">Loading catalog...</span>
+                </div>
+                <div id="productGrid" class="product-grid" aria-live="polite">
+                    <!-- Products populated dynamically from Firestore -->
+                </div>
+            </div>
         </div>
     </main>
+
     <footer>
-        <p>© 2026 ArtisanAisle | Supporting Local Artisans</p>
+        <p>© 2026 ArtisanAisle | Supporting Local Filipino Artisans & Communities</p>
     </footer>
+
+    <script type="module" src="header-auth.js"></script>
     <script type="module" src="products-page.js"></script>
 </body>
 </html>

@@ -51,16 +51,29 @@
           localStorage.setItem('handicraft_logged_in_user', JSON.stringify(loggedUser));
         }
 
-        // If approved seller, prompt or redirect to seller portal or storefront
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectTarget = urlParams.get('redirect');
+
+        if (redirectTarget) {
+          window.location.href = redirectTarget;
+          return;
+        }
+
+        // Role-based destination
+        if (loggedUser && loggedUser.role === 'admin') {
+          window.location.href = 'admin.html';
+          return;
+        }
+
         if (loggedUser && (loggedUser.role === 'seller' || loggedUser.sellerStatus === 'approved')) {
-          const gotoSeller = confirm('Welcome back, Artisan! Would you like to go directly to your Seller Portal?');
+          const gotoSeller = confirm('Welcome back, Artisan! Would you like to go to your Seller Portal?');
           if (gotoSeller) {
             window.location.href = 'seller.html';
             return;
           }
         }
 
-        window.location.href = 'index.html';
+        window.location.href = 'profile.html';
       } catch (err) {
         console.error('Login error:', err);
         let msg = 'Invalid email or password.';

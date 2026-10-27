@@ -1,96 +1,130 @@
-import './firebase-config.js';
+import { ArtisanDB } from './firebase-config.js';
+import { handleAddToCart, updateHeaderAuth } from './header-auth.js';
 
-const starterProducts = [
-    { name: 'Woven Handbag', price: 650, category: 'Bags', image: 'https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg' },
-    { name: 'Rattan Basket', price: 550, category: 'Woven Items', image: 'https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg' },
-    { name: 'Traditional Salakot Hat', price: 250, category: 'Accessories', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10' },
-    { name: 'Handmade Lamp', price: 750, category: 'Home Decor', image: 'https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg' },
-    { name: 'Ceramic Vase', price: 500, category: 'Home Decor', image: 'https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg' },
-    { name: 'Ceramic Bowl', price: 500, category: 'Home Decor', image: 'https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg' },
-    { name: 'Wooden Vase', price: 450, category: 'Home Decor', image: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80' },
-    { name: 'Macrame Wall Hanging', price: 750, category: 'Home Decor', image: 'https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg' }
-];
-
-let products = starterProducts;
+let liveProducts = [];
 let activeCategory = 'All Products';
+
 const grid = document.getElementById('productGrid');
 const searchInput = document.getElementById('productSearch');
-searchInput.value = new URLSearchParams(window.location.search).get('search') || '';
+const countLabel = document.getElementById('productsCountLabel');
 
-function renderProducts() {
-    const query = searchInput.value.trim().toLowerCase();
-    const matchingProducts = products.filter(product =>
-        (activeCategory === 'All Products' || product.category === activeCategory)
-        && `${product.name} ${product.category}`.toLowerCase().includes(query)
-    );
-    grid.replaceChildren();
-
-    if (matchingProducts.length === 0) {
-        const emptyMessage = document.createElement('p');
-        emptyMessage.textContent = 'No products match your search.';
-        grid.append(emptyMessage);
-        return;
-    }
-
-    matchingProducts.forEach(product => {
-        const card = document.createElement('article');
-        card.className = 'product-card';
-        card.dataset.category = product.category;
-
-        const image = document.createElement('img');
-        image.src = product.image || starterProducts[0].image;
-        image.alt = product.name;
-        image.loading = 'lazy';
-
-        const info = document.createElement('div');
-        info.className = 'product-info';
-        const name = document.createElement('h3');
-        name.textContent = product.name;
-        const price = document.createElement('p');
-        price.className = 'price';
-        price.textContent = `₱${Number(product.price).toFixed(2)}`;
-        const viewButton = document.createElement('button');
-        viewButton.className = 'card-btn';
-        viewButton.type = 'button';
-        viewButton.textContent = 'View Details';
-        viewButton.addEventListener('click', () => {
-            const params = new URLSearchParams({
-                product: product.name,
-                price: String(product.price)
-            });
-            if (product.id) params.set('productId', product.id);
-            window.location.href = `index.html?${params.toString()}`;
-        });
-
-        info.append(name, price, viewButton);
-        card.append(image, info);
-        grid.append(card);
-    });
+if (searchInput) {
+  searchInput.value = new URLSearchParams(window.location.search).get('search') || '';
 }
 
-document.querySelectorAll('[data-category]').forEach(button => {
-    button.addEventListener('click', () => {
-        activeCategory = button.dataset.category;
-        renderProducts();
-    });
+document.addEventListener('DOMContentLoaded', () => {
+  setupCategoryFilters();
+  setupSearch();
+  startProductsSubscription();
 });
-document.getElementById('searchButton').addEventListener('click', renderProducts);
-searchInput.addEventListener('input', renderProducts);
 
-window.addEventListener('artisan-products-updated', event => {
-    const remoteProducts = event.detail
-        .filter(product => !product.deleted && product.status !== 'Out of Stock')
-        .map(product => ({
-            ...product,
-            name: product.name || product.title || 'Unnamed product',
-            price: Number(product.price) || 0,
-            category: product.category || 'Other',
-            image: product.image || product.imageUrl || ''
-        }));
-    products = [...starterProducts, ...remoteProducts.filter(remote =>
-        !starterProducts.some(starter => starter.name.toLowerCase() === remote.name.toLowerCase())
-    )];
+function startProductsSubscription() {
+  ArtisanDB.subscribeProducts((products) => {
+    // Only display active products that are not deleted
+    liveProducts = products.filter(p => !p.deleted && p.status !== 'Hidden');
     renderProducts();
-});
+  });
+}
 
-renderProducts();
+function renderProducts() {
+  if (!grid) return;
+  const query = (searchInput?.value || '').trim().toLowerCase();
+
+  const filtered = liveProducts.filter(product => {
+    const matchesCategory = activeCategory === 'All Products' || (product.category || '').toLowerCase() === activeCategory.toLowerCase();
+    const searchTarget = `${product.name || ''} ${product.category || ''} ${product.sellerName || ''} ${product.description || ''}`.toLowerCase();
+    const matchesSearch = !query || searchTarget.includes(query);
+    return matchesCategory && matchesSearch;
+  });
+
+  if (countLabel) {
+    countLabel.textContent = `Showing ${filtered.length} authentic handcrafted product${filtered.length === 1 ? '' : 's'}`;
+  }
+
+  grid.innerHTML = '';
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state-card" style="grid-column: 1 / -1;">
+        <div class="empty-state-icon">🔍</div>
+        <h2>No Products Found</h2>
+        <p>No handcrafted items matched "${query || activeCategory}". Try searching for another term or browse all categories.</p>
+        <button type="button" class="primary-btn" id="resetFiltersBtn">Reset Filters</button>
+      </div>
+    `;
+    document.getElementById('resetFiltersBtn')?.addEventListener('click', () => {
+      activeCategory = 'All Products';
+      if (searchInput) searchInput.value = '';
+      document.querySelectorAll('.cat-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.category === 'All Products'));
+      renderProducts();
+    });
+    return;
+  }
+
+  filtered.forEach(product => {
+    const card = document.createElement('article');
+    card.className = 'product-card';
+    card.dataset.category = product.category || 'General';
+
+    const stock = Number(product.stock) || 0;
+    const isOutOfStock = stock <= 0;
+    const stockBadge = isOutOfStock
+      ? '<span class="stock-pill out-of-stock">Out of Stock</span>'
+      : (stock <= 3 ? `<span class="stock-pill low-stock">Only ${stock} left</span>` : `<span class="stock-pill in-stock">${stock} in stock</span>`);
+
+    const defaultImage = 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80';
+    const imageUrl = product.image || defaultImage;
+    const priceFormatted = `₱${Number(product.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+    card.innerHTML = `
+      <div class="product-thumb-wrap">
+        <img src="${imageUrl}" alt="${product.name}" loading="lazy" onerror="this.src='${defaultImage}'">
+        ${stockBadge}
+      </div>
+      <div class="product-info">
+        <span class="product-card-category">${product.category || 'Handicrafts'}</span>
+        <h3 class="product-card-title">${product.name}</h3>
+        <p class="product-card-artisan">By <strong>${product.sellerName || 'Artisan Partner'}</strong></p>
+        <div class="product-card-pricing">
+          <span class="price-val">${priceFormatted}</span>
+        </div>
+        <div class="product-card-actions">
+          <button type="button" class="primary-btn add-to-cart-btn" ${isOutOfStock ? 'disabled' : ''}>
+            ${isOutOfStock ? 'Sold Out' : 'Add to Cart'}
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Add to Cart Action
+    const addBtn = card.querySelector('.add-to-cart-btn');
+    if (addBtn && !isOutOfStock) {
+      addBtn.addEventListener('click', () => {
+        handleAddToCart(product, 1);
+        addBtn.textContent = 'Added!';
+        setTimeout(() => {
+          addBtn.textContent = 'Add to Cart';
+        }, 1200);
+      });
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+function setupCategoryFilters() {
+  const buttons = document.querySelectorAll('.cat-filter-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = btn.dataset.category;
+      renderProducts();
+    });
+  });
+}
+
+function setupSearch() {
+  document.getElementById('searchButton')?.addEventListener('click', renderProducts);
+  searchInput?.addEventListener('input', renderProducts);
+}
