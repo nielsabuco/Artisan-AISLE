@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Portal | ArtisanAisle</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="seller-portal-body">
+
+  <!-- Header -->
+  <header>
+    <a class="logo" href="index.html">🧺 Artisan<span>AISLE</span></a>
+    <div class="seller-header-badge">
+      <span class="portal-tag">Artisan Seller Portal</span>
+    </div>
+    <div class="header-links">
+      <button type="button" class="btn-subtle" onclick="window.location.href='index.html'">Storefront</button>
+      <button type="button" class="btn-subtle" onclick="handleSellerLogout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- Access Restricted Screen (Shown to non-sellers or unapproved accounts) -->
+  <div id="sellerRestrictedGate" class="portal-gate" style="display: none;">
+    <div class="gate-card">
+      <div class="gate-icon">🔒</div>
+      <h2>Seller Access Restricted</h2>
+      <p id="gateMessage">Only approved artisan sellers can access the Seller Portal. If you have applied, your application is currently under admin review.</p>
+      <div class="gate-actions">
+        <button class="btn" onclick="window.location.href='index.html#profile'">Check Application in Profile</button>
+        <button class="secondary-btn" onclick="window.location.href='index.html'">Back to Storefront</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="sellerLoading" class="portal-loading">
+    <div class="spinner"></div>
+    <p>Authenticating seller profile...</p>
+  </div>
+
+  <!-- Main Seller Portal (Only for approved sellers) -->
+  <main id="sellerPortalMain" class="dashboard-wrap" style="display: none;">
+    <div class="dashboard">
+      
+      <!-- Sidebar Navigation (Clean, professional labels without emojis) -->
+      <aside class="sidebar">
+        <div class="seller-sidebar-profile">
+          <h3 id="sidebarShopName">My Artisan Shop</h3>
+          <p id="sidebarSellerName">Verified Artisan</p>
+          <span class="status-badge status-active">Approved Seller</span>
+        </div>
+
+        <nav class="seller-nav">
+          <button class="nav-item active" data-view="dashboard" onclick="setSellerView('dashboard')">Dashboard</button>
+          <button class="nav-item" data-view="products" onclick="setSellerView('products')">My Products</button>
+          <button class="nav-item" data-view="add-product" onclick="setSellerView('add-product')">Add Product</button>
+          <button class="nav-item" data-view="orders" onclick="setSellerView('orders')">Orders</button>
+          <button class="nav-item" data-view="settings" onclick="setSellerView('settings')">Shop Settings</button>
+          <button class="nav-item" onclick="window.location.href='index.html'">Storefront</button>
+          <button class="nav-item logout" onclick="handleSellerLogout()">Logout</button>
+        </nav>
+      </aside>
+
+      <!-- Dashboard Content View Area -->
+      <section class="dashboard-content">
+        <div id="sellerViewContainer"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Edit Stock Modal -->
+  <div id="stockModal" class="seller-login-modal" style="display: none;">
+    <div class="seller-login-box">
+      <h3>Update Product Stock</h3>
+      <p id="stockModalProductName">Product Name</p>
+      <input id="stockModalInput" type="number" min="0" placeholder="New stock count" />
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button class="btn" style="flex:1;" onclick="submitStockUpdate()">Save Stock</button>
+        <button class="secondary-btn" style="flex:1;" onclick="closeStockModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 ArtisanAisle | Empowering Local Filipino Artisans</p>
+  </footer>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script>
+    let currentSellerUser = null;
+    let currentSellerProfile = null;
+    let sellerProducts = [];
+    let sellerOrders = [];
+    let currentActiveView = 'dashboard';
+    let activeStockProductId = null;
+
+    // Check Authentication on Page Load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Give firebase-config module a brief moment to initialize
+      const interval = setInterval(() => {
+        if (window.ArtisanDB) {
+          clearInterval(interval);
+          initSellerPortal();
+        }
+      }, 50);
+    });
+
+    async function initSellerPortal() {
+      window.ArtisanDB.onAuth(async (user) => {
+        document.getElementById('sellerLoading').style.display = 'none';
+
+        if (!user) {
+          showRestricted("You must be logged in to access the Seller Portal.", true);
+          return;
+        }
+
+        currentSellerUser = user;
+
+        // Fetch fresh profile from Firestore
+        const profile = await window.ArtisanDB.getUserProfile(user.uid);
+        currentSellerProfile = profile || user;
+
+        // Strict Enforcement: Never grant seller privileges before admin approval
+        const isApproved = (profile && profile.role === 'seller' && profile.sellerStatus === 'approved') ||
+                           (profile && profile.role === 'seller' && profile.sellerStatus !== 'pending' && profile.sellerStatus !== 'rejected');
+
+        if (!isApproved) {
+          const statusText = profile?.sellerStatus === 'pending'
+            ? "Your seller application is currently pending admin review. You cannot manage products until approved."
+            : profile?.sellerStatus === 'rejected'
+            ? `Your seller application was not approved. Reason: ${profile?.sellerRejectionReason || 'Requirements not met.'}`
+            : "You have not registered as an artisan seller. Please apply through your profile on the homepage.";
+          showRestricted(statusText, false);
+          return;
+        }
+
+        // Approved! Show Seller Portal Main
+        document.getElementById('sellerRestrictedGate').style.display = 'none';
+        document.getElementById('sellerPortalMain').style.display = 'block';
+
+        // Load seller info
+        const sellerDoc = await window.ArtisanDB.getSeller(user.uid);
+        const shopName = sellerDoc?.shopName || profile?.shopName || 'Artisan Shop';
+        const sellerName = sellerDoc?.name || profile?.name || user.name || 'Artisan Creator';
+
+        document.getElementById('sidebarShopName').innerText = shopName;
+        document.getElementById('sidebarSellerName').innerText = sellerName;
+
+        // Listen to live products for this seller
+        window.ArtisanDB.subscribeProducts((allProducts) => {
+          sellerProducts = allProducts.filter(p => p.sellerId === user.uid || (p.sellerEmail && p.sellerEmail.toLowerCase() === user.email.toLowerCase()));
+          renderCurrentView();
+        });
+
+        // Listen to live orders for this seller
+        window.ArtisanDB.subscribeSellerOrders(user.uid, (orders) => {
+          sellerOrders = orders;
+          renderCurrentView();
+        });
+
+        renderCurrentView();
+      });
+    }
+
+    function showRestricted(msg, requireLogin) {
+      document.getElementById('sellerLoading').style.display = 'none';
+      document.getElementById('sellerPortalMain').style.display = 'none';
+      const gate = document.getElementById('sellerRestrictedGate');
+      gate.style.display = 'flex';
+      document.getElementById('gateMessage').innerText = msg;
+    }
+
+    function setSellerView(viewName) {
+      currentActiveView = viewName;
+      document.querySelectorAll('.seller-nav .nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-view') === viewName);
+      });
+      renderCurrentView();
+    }
+
+    function renderCurrentView() {
+      const container = document.getElementById('sellerViewContainer');
+      if (!container || !currentSellerUser) return;
+
+      if (currentActiveView === 'dashboard') {
+        renderDashboardView(container);
+      } else if (currentActiveView === 'products') {
+        renderProductsView(container);
+      } else if (currentActiveView === 'add-product') {
+        renderAddProductView(container);
+      } else if (currentActiveView === 'orders') {
+        renderOrdersView(container);
+      } else if (currentActiveView === 'settings') {
+        renderSettingsView(container);
+      }
+    }
+
+    // View: Dashboard Overview
+    function renderDashboardView(container) {
+      const totalProducts = sellerProducts.length;
+      const totalOrders = sellerOrders.length;
+      const totalRevenue = sellerOrders
+        .filter(o => o.paymentStatus === 'Paid')
+        .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+      const lowStockCount = sellerProducts.filter(p => (Number(p.stock) || 0) < 5).length;
+
+      container.innerHTML = `
+        <div class="admin-content-header">
+          <div>
+            <h1>Shop Dashboard</h1>
+            <p>Welcome back, ${currentSellerProfile?.name || 'Artisan'}! Here is your live shop performance.</p>
+          </div>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-box">
+            <h3>My Products</h3>
+            <p>${totalProducts}</p>
+          </div>
+          <div class="summary-box">
+            <h3>Orders Received</h3>
+            <p>${totalOrders}</p>
+          </div>
+          <div class="summary-box">
+            <h3>Verified Sales</h3>
+            <p>₱${totalRevenue.toLocaleString()}.00</p>
+          </div>
+          <div class="summary-box">
+            <h3>Low Stock Alerts</h3>
+            <p style="${lowStockCount > 0 ? 'color:#c53030;' : ''}">${lowStockCount}</p>
+          </div>
+        </div>
+
+        <div class="admin-panel" style="margin-top:25px;">
+          <div class="admin-panel-header">
+            <h2>Recent Orders</h2>
+            <button class="secondary-btn" onclick="setSellerView('orders')">View All Orders</button>
+          </div>
+          <div class="table-box">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order Number</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Payment</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sellerOrders.length === 0 ? `
+                  <tr><td colspan="6" style="text-align:center; padding:25px;">No orders received yet.</td></tr>
+                ` : sellerOrders.slice(0, 5).map(o => `
+                  <tr>
+                    <td><strong>${o.orderNumber || o.id}</strong></td>
+                    <td>${o.customerName || 'Customer'}</td>
+                    <td>${Array.isArray(o.items) ? o.items.length : 1}</td>
+                    <td>₱${Number(o.total || 0).toLocaleString()}.00</td>
+                    <td><span class="status-badge ${o.paymentStatus === 'Paid' ? 'status-active' : 'status-suspended'}">${o.paymentStatus || 'Unpaid'}</span></td>
+                    <td><span class="status-badge ${o.orderStatus === 'Confirmed' || o.orderStatus === 'Delivered' ? 'status-active' : 'status-pending'}">${o.orderStatus || 'Processing'}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // View: My Products
+    function renderProductsView(container) {
+      container.innerHTML = `
+        <div class="admin-panel">
+          <div class="admin-panel-header">
+            <h2>My Products (${sellerProducts.length})</h2>
+            <button class="btn" onclick="setSellerView('add-product')">Add New Product</button>
+          </div>
+          <div class="table-box">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sellerProducts.length === 0 ? `
+                  <tr><td colspan="7" style="text-align:center; padding:30px;">You haven't listed any products yet. Click "Add New Product" to start selling!</td></tr>
+                ` : sellerProducts.map(p => `
+                  <tr>
+                    <td><img src="${p.image || 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=150&q=80'}" style="width:45px; height:45px; border-radius:8px; object-fit:cover;" /></td>
+                    <td><strong>${p.name}</strong></td>
+                    <td>${p.category || 'Craft'}</td>
+                    <td>₱${Number(p.price || 0).toLocaleString()}.00</td>
+                    <td>
+                      <span style="${(Number(p.stock) || 0) < 5 ? 'color:#c53030; font-weight:bold;' : ''}">${p.stock || 0}</span>
+                      <button class="action-btn" style="margin-left:8px;" onclick="openStockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.stock || 0})">Edit</button>
+                    </td>
+                    <td><span class="status-badge ${p.status === 'Active' ? 'status-active' : 'status-suspended'}">${p.status || 'Active'}</span></td>
+                    <td>
+                      <button class="action-btn ${p.status === 'Active' ? 'suspend' : 'restore'}" onclick="toggleSellerProductStatus('${p.id}', '${p.status}')">${p.status === 'Active' ? 'Deactivate' : 'Activate'}</button>
+                      <button class="action-btn delete" onclick="deleteSellerProduct('${p.id}')">Delete</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // View: Add Product
+    function renderAddProductView(container) {
+      container.innerHTML = `
+        <div class="settings-panel">
+          <div class="settings-header">
+            <h2>Add Handcrafted Product</h2>
+            <p>Publish a new handmade creation to the ArtisanAisle live storefront.</p>
+          </div>
+          <form class="admin-form" onsubmit="handleSellerAddProduct(event)">
+            <div class="form-group">
+              <label>Product Name</label>
+              <input id="newProdName" placeholder="e.g. Handwoven Pandan Shoulder Bag" required />
+            </div>
+
+            <div class="form-group">
+              <label>Category</label>
+              <select id="newProdCategory">
+                <option value="Bags">Bags</option>
+                <option value="Home Decor">Home Decor</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Woven Items">Woven Items</option>
+                <option value="Wood Crafts">Wood Crafts</option>
+                <option value="Souvenirs">Souvenirs</option>
+                <option value="Jewelry">Jewelry</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Price (PHP)</label>
+              <input id="newProdPrice" type="number" min="1" step="0.01" placeholder="650.00" required />
+            </div>
+
+            <div class="form-group">
+              <label>Available Stock</label>
+              <input id="newProdStock" type="number" min="1" placeholder="10" required />
+            </div>
+
+            <div class="form-group">
+              <label>Product Image URL (or upload below)</label>
+              <input id="newProdImageUrl" placeholder="https://..." />
+            </div>
+
+            <div class="form-group">
+              <label>Upload Image File</label>
+              <input id="newProdImageFile" type="file" accept="image/*" />
+            </div>
+
+            <div class="form-group">
+              <label>Product Description & Materials</label>
+              <textarea id="newProdDesc" rows="3" placeholder="Describe the artisan craft, materials used, and care instructions..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; font-family:inherit;"></textarea>
+            </div>
+
+            <button type="submit" id="saveProdBtn" class="btn" style="margin-top:10px;">Publish Product</button>
+          </form>
+        </div>
+      `;
+    }
+
+    // View: Orders
+    function renderOrdersView(container) {
+      container.innerHTML = `
+        <div class="admin-panel">
+          <div class="admin-panel-header">
+            <h2>Orders Received (${sellerOrders.length})</h2>
+          </div>
+          <div class="table-box">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer Info</th>
+                  <th>Items Ordered</th>
+                  <th>Total Amount</th>
+                  <th>Payment Method</th>
+                  <th>Payment Status</th>
+                  <th>Fulfillment Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sellerOrders.length === 0 ? `
+                  <tr><td colspan="8" style="text-align:center; padding:30px;">No customer orders received yet.</td></tr>
+                ` : sellerOrders.map(o => `
+                  <tr>
+                    <td><strong>${o.orderNumber || o.id}</strong><br><small>${o.createdAt ? new Date(o.createdAt.seconds * 1000).toLocaleDateString() : 'Recent'}</small></td>
+                    <td>
+                      <strong>${o.customerName || 'Customer'}</strong><br>
+                      <small>${o.customerPhone || ''}</small><br>
+                      <small>${o.deliveryAddress?.city || ''}</small>
+                    </td>
+                    <td>
+                      ${Array.isArray(o.items) ? o.items.map(it => `<div>${it.name} × ${it.quantity}</div>`).join('') : '--'}
+                    </td>
+                    <td><strong>₱${Number(o.total || 0).toLocaleString()}.00</strong></td>
+                    <td>${o.paymentMethod || 'Cash on Delivery'}</td>
+                    <td>
+                      <span class="status-badge ${o.paymentStatus === 'Paid' ? 'status-active' : 'status-suspended'}">
+                        ${o.paymentStatus || 'Unpaid'}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="status-badge ${o.orderStatus === 'Delivered' ? 'status-active' : o.orderStatus === 'Shipped' ? 'status-active' : 'status-pending'}">
+                        ${o.orderStatus || 'Processing'}
+                      </span>
+                    </td>
+                    <td>
+                      ${o.orderStatus === 'Delivered' ? `
+                        <span style="color:#285c3b; font-weight:bold;">Completed</span>
+                      ` : `
+                        <select onchange="updateFulfillmentStatus('${o.id}', this.value)" style="padding:4px 8px; border-radius:6px; border:1px solid #ccc;">
+                          <option value="">Update Status...</option>
+                          <option value="Processing" ${o.orderStatus === 'Processing' ? 'selected' : ''}>Processing</option>
+                          <option value="Shipped" ${o.orderStatus === 'Shipped' ? 'selected' : ''}>Mark Shipped</option>
+                          <option value="Delivered" ${o.orderStatus === 'Delivered' ? 'selected' : ''}>Mark Delivered</option>
+                        </select>
+                      `}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // View: Shop Settings & GCash Account
+    async function renderSettingsView(container) {
+      const sellerDoc = await window.ArtisanDB.getSeller(currentSellerUser.uid) || {};
+      container.innerHTML = `
+        <div class="settings-panel">
+          <div class="settings-header">
+            <h2>Shop & Payout Settings</h2>
+            <p>Ensure your registered GCash details are accurate so customer payments reach your account directly.</p>
+          </div>
+          <form class="admin-form" onsubmit="handleSaveSellerSettings(event)">
+            <div class="form-group">
+              <label>Artisan / Shop Name</label>
+              <input id="settingsShopName" value="${sellerDoc.shopName || currentSellerProfile?.shopName || ''}" required />
+            </div>
+
+            <div class="form-group">
+              <label>Seller Full Name</label>
+              <input id="settingsSellerName" value="${sellerDoc.name || currentSellerProfile?.name || ''}" required />
+            </div>
+
+            <div class="form-group">
+              <label>Contact Phone</label>
+              <input id="settingsPhone" value="${sellerDoc.phone || currentSellerProfile?.phone || ''}" required />
+            </div>
+
+            <div class="form-group" style="border:1px solid #285c3b; padding:15px; border-radius:10px; background:#f4f9f4;">
+              <label style="color:#285c3b; font-weight:bold;">Registered GCash Account Name (for Buyer Direct Payments)</label>
+              <input id="settingsGcashName" value="${sellerDoc.gcashName || sellerDoc.name || ''}" placeholder="Full Name as registered on GCash" required />
+              <small style="color:#555;">Must exactly match your GCash account name.</small>
+            </div>
+
+            <div class="form-group" style="border:1px solid #285c3b; padding:15px; border-radius:10px; background:#f4f9f4;">
+              <label style="color:#285c3b; font-weight:bold;">Registered GCash Mobile Number</label>
+              <input id="settingsGcashNumber" value="${sellerDoc.gcashNumber || sellerDoc.phone || ''}" placeholder="09XXXXXXXXX" required />
+              <small style="color:#555;">Customers choosing GCash at checkout will be instructed to send payments directly to this number.</small>
+            </div>
+
+            <div class="form-group">
+              <label>Shop Bio / Cultural Craft Story</label>
+              <textarea id="settingsBio" rows="3" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; font-family:inherit;">${sellerDoc.bio || ''}</textarea>
+            </div>
+
+            <button type="submit" class="btn" style="margin-top:10px;">Save Shop Settings</button>
+          </form>
+        </div>
+      `;
+    }
+
+    // Product Creation Handler
+    async function handleSellerAddProduct(event) {
+      event.preventDefault();
+      const btn = document.getElementById('saveProdBtn');
+      btn.disabled = true;
+      btn.innerText = "Publishing...";
+
+      try {
+        const name = document.getElementById('newProdName').value.trim();
+        const category = document.getElementById('newProdCategory').value;
+        const price = Number(document.getElementById('newProdPrice').value);
+        const stock = Number(document.getElementById('newProdStock').value);
+        let imageUrl = document.getElementById('newProdImageUrl').value.trim();
+        const imageFile = document.getElementById('newProdImageFile').files[0];
+        const description = document.getElementById('newProdDesc').value.trim();
+
+        if (imageFile) {
+          imageUrl = await readFileAsBase64(imageFile);
+        }
+
+        if (!imageUrl) {
+          imageUrl = "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80";
+        }
+
+        // Fetch seller GCash details
+        const sellerDoc = await window.ArtisanDB.getSeller(currentSellerUser.uid) || {};
+
+        const productPayload = {
+          name,
+          category,
+          price,
+          stock,
+          image: imageUrl,
+          description: description || "Handcrafted by local Filipino artisans.",
+          sellerId: currentSellerUser.uid,
+          sellerName: sellerDoc.shopName || currentSellerProfile?.name || "Artisan Seller",
+          sellerEmail: currentSellerUser.email,
+          sellerGCash: sellerDoc.gcashNumber || '',
+          sellerGCashName: sellerDoc.gcashName || '',
+          status: "Active"
+        };
+
+        await window.ArtisanDB.addProduct(productPayload);
+        alert("Product published successfully to the storefront!");
+        setSellerView('products');
+      } catch (err) {
+        alert("Failed to publish product: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Publish Product";
+      }
+    }
+
+    // Helper: Read file as Base64 Data URL
+    function readFileAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Stock Update Modal Handlers
+    function openStockModal(productId, productName, currentStock) {
+      activeStockProductId = productId;
+      document.getElementById('stockModalProductName').innerText = productName;
+      document.getElementById('stockModalInput').value = currentStock;
+      document.getElementById('stockModal').style.display = 'flex';
+    }
+
+    function closeStockModal() {
+      document.getElementById('stockModal').style.display = 'none';
+      activeStockProductId = null;
+    }
+
+    async function submitStockUpdate() {
+      if (!activeStockProductId) return;
+      const newStock = Number(document.getElementById('stockModalInput').value);
+      if (isNaN(newStock) || newStock < 0) {
+        alert("Please enter a valid stock number.");
+        return;
+      }
+      try {
+        await window.ArtisanDB.updateProduct(activeStockProductId, { stock: newStock });
+        closeStockModal();
+        alert("Stock updated successfully.");
+      } catch (e) {
+        alert("Error updating stock: " + e.message);
+      }
+    }
+
+    // Toggle Product Status
+    async function toggleSellerProductStatus(productId, currentStatus) {
+      const nextStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
+      try {
+        await window.ArtisanDB.updateProduct(productId, { status: nextStatus });
+      } catch (e) {
+        alert("Error toggling product status: " + e.message);
+      }
+    }
+
+    // Delete Product
+    async function deleteSellerProduct(productId) {
+      if (!confirm("Are you sure you want to delete this product?")) return;
+      try {
+        await window.ArtisanDB.deleteProduct(productId);
+        alert("Product removed.");
+      } catch (e) {
+        alert("Error deleting product: " + e.message);
+      }
+    }
+
+    // Fulfillment Status Update
+    async function updateFulfillmentStatus(orderId, newStatus) {
+      if (!newStatus) return;
+      try {
+        await window.ArtisanDB.updateOrderStatus(orderId, newStatus);
+        alert(`Order fulfillment updated to: ${newStatus}`);
+      } catch (e) {
+        alert("Error updating order: " + e.message);
+      }
+    }
+
+    // Save Settings
+    async function handleSaveSellerSettings(event) {
+      event.preventDefault();
+      try {
+        const shopName = document.getElementById('settingsShopName').value.trim();
+        const name = document.getElementById('settingsSellerName').value.trim();
+        const phone = document.getElementById('settingsPhone').value.trim();
+        const gcashName = document.getElementById('settingsGcashName').value.trim();
+        const gcashNumber = document.getElementById('settingsGcashNumber').value.trim();
+        const bio = document.getElementById('settingsBio').value.trim();
+
+        await window.ArtisanDB.saveSellerProfile(currentSellerUser.uid, {
+          shopName,
+          name,
+          phone,
+          gcashName,
+          gcashNumber,
+          bio
+        });
+
+        alert("Shop and GCash payout settings saved successfully.");
+      } catch (e) {
+        alert("Failed to save settings: " + e.message);
+      }
+    }
+
+    // Logout Handler
+    async function handleSellerLogout() {
+      if (window.ArtisanDB) {
+        await window.ArtisanDB.logoutUser();
+      }
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

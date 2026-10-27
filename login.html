@@ -9,65 +9,71 @@
 <body>
   <div class="box">
     <h1>Login</h1>
-    <input id="loginInput" type="text" placeholder="Email or Phone Number" />
-    <input id="passwordInput" type="password" placeholder="Password" />
-    <button onclick="loginUser()">Login</button>
+    <p style="color:#666; font-size:14px; margin-bottom:15px;">Sign in to your ArtisanAisle account.</p>
+    <input id="loginInput" type="text" placeholder="Email Address" required />
+    <input id="passwordInput" type="password" placeholder="Password" required />
+    <button id="loginBtn" type="button" onclick="loginUser()">Login</button>
     <div class="link">
       <a href="create-account.html">Create an account</a>
     </div>
+    <div class="link" style="margin-top:10px;">
+      <a href="index.html">Back to Storefront</a>
+    </div>
   </div>
+
+  <script type="module" src="firebase-config.js"></script>
   <script>
-    function getStoredUsers() {
-      const rawUsers = localStorage.getItem('handicraft_users');
-      if (rawUsers) {
-        try {
-          const parsed = JSON.parse(rawUsers);
-          return Array.isArray(parsed) ? parsed : [];
-        } catch (error) {
-          return [];
-        }
-      }
-
-      const legacyUser = localStorage.getItem('handicraft_user');
-      if (legacyUser) {
-        try {
-          const parsed = JSON.parse(legacyUser);
-          return parsed ? [parsed] : [];
-        } catch (error) {
-          return [];
-        }
-      }
-
-      return [];
-    }
-
-    function loginUser() {
-      const identifier = document.getElementById('loginInput').value.trim();
+    async function loginUser() {
+      const email = document.getElementById('loginInput').value.trim();
       const password = document.getElementById('passwordInput').value.trim();
+      const btn = document.getElementById('loginBtn');
 
-      if (!identifier || !password) {
-        alert('Please enter your email/phone and password.');
+      if (!email || !password) {
+        alert('Please enter your email and password.');
         return;
       }
 
-      const users = getStoredUsers();
-      const normalizedIdentifier = identifier.toLowerCase();
-      const normalizedPhone = identifier.replace(/\D/g, '');
+      btn.disabled = true;
+      btn.innerText = 'Logging in...';
 
-      const storedUser = users.find(user => {
-        const existingEmail = (user.email || '').toLowerCase();
-        const existingPhone = (user.phone || '').replace(/\D/g, '');
-        return existingEmail === normalizedIdentifier || existingPhone === normalizedPhone;
-      });
+      try {
+        let loggedUser = null;
+        if (window.ArtisanDB) {
+          loggedUser = await window.ArtisanDB.loginUser(email, password);
+        } else {
+          // Local fallback
+          loggedUser = {
+            email,
+            name: email.split('@')[0],
+            role: 'user',
+            sellerStatus: 'none'
+          };
+          localStorage.setItem('handicraft_logged_in_user', JSON.stringify(loggedUser));
+        }
 
-      if (!storedUser || storedUser.password !== password) {
-        alert('Invalid email/phone or password.');
-        return;
+        // If approved seller, prompt or redirect to seller portal or storefront
+        if (loggedUser && (loggedUser.role === 'seller' || loggedUser.sellerStatus === 'approved')) {
+          const gotoSeller = confirm('Welcome back, Artisan! Would you like to go directly to your Seller Portal?');
+          if (gotoSeller) {
+            window.location.href = 'seller.html';
+            return;
+          }
+        }
+
+        window.location.href = 'index.html';
+      } catch (err) {
+        console.error('Login error:', err);
+        let msg = 'Invalid email or password.';
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+          msg = 'Invalid email or password. Please verify your credentials.';
+        } else if (err.code === 'auth/invalid-email') {
+          msg = 'Please enter a valid email address.';
+        }
+        alert(msg);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Login';
       }
-
-      localStorage.setItem('handicraft_logged_in_user', JSON.stringify({ name: storedUser.name, email: storedUser.email, phone: storedUser.phone }));
-      localStorage.setItem('handicraft_profile', JSON.stringify({ name: storedUser.name, email: storedUser.email, phone: storedUser.phone }));
-      window.location.href = 'index.html';
     }
   </script>
 </body>

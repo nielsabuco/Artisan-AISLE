@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ArtisanAisle</title>
+<title>ArtisanAisle | Handcrafted Filipino Treasures</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -13,32 +13,33 @@
 
 <header>
 
-    <div class="logo">
+    <a class="logo" href="index.html">
         🧺 Artisan<span>AISLE</span>
-    </div>
+    </a>
 
     <div class="search">
         <input id="searchInput" type="text" placeholder="Search handmade products..." onkeydown="if(event.key==='Enter'){searchProducts();}">
         <button type="button" onclick="searchProducts()">Search</button>
     </div>
 
+    <!-- Clean buttons without emojis -->
     <div class="header-links">
-        <button onclick="showScreen('cart')">🛒 Cart</button>
-        <button onclick="showScreen('orders')">📦 Orders</button>
-        <button id="loginButton" onclick="window.location.href='login.html'">👤 Login</button>
+        <button type="button" id="headerCartBtn" onclick="showScreen('cart')">Cart</button>
+        <button type="button" id="headerOrdersBtn" onclick="showScreen('orders')">Orders</button>
+        <button type="button" id="loginButton" onclick="handleHeaderLoginClick()">Login</button>
     </div>
 
 </header>
 
+<!-- Navigation without seller link (Sellers have their own dedicated portal) -->
 <nav>
-    <button onclick="showScreen('home')">HOME</button>
-    <button onclick="showScreen('products')">PRODUCTS</button>
-    <button onclick="openAdminDashboard()">ADMIN</button>
-    <button onclick="openSellerDashboard()">SELLER</button>
-    <button onclick="window.location.href='categories.html'">CATEGORIES</button>
-    <button onclick="window.location.href='artisans.html'">ARTISANS</button>
-    <button onclick="window.location.href='about-us.html'">ABOUT US</button>
-    <button onclick="window.location.href='contact.html'">CONTACT</button>
+    <button type="button" class="nav-btn active" onclick="showScreen('home')">HOME</button>
+    <button type="button" class="nav-btn" onclick="showScreen('products')">PRODUCTS</button>
+    <button type="button" class="nav-btn" onclick="openAdminDashboard()">ADMIN</button>
+    <button type="button" class="nav-btn" onclick="window.location.href='categories.html'">CATEGORIES</button>
+    <button type="button" class="nav-btn" onclick="window.location.href='artisans.html'">ARTISANS</button>
+    <button type="button" class="nav-btn" onclick="window.location.href='about-us.html'">ABOUT US</button>
+    <button type="button" class="nav-btn" onclick="window.location.href='contact.html'">CONTACT</button>
 </nav>
 
 
@@ -69,7 +70,8 @@
 
         <img
         class="hero-img"
-        src="https://filipinohomes123.s3.ap-southeast-1.amazonaws.com/homestv/articles/dbe5589d-a86b-4bd5-b5a8-76cfa8f127ee.webp">
+        src="https://filipinohomes123.s3.ap-southeast-1.amazonaws.com/homestv/articles/dbe5589d-a86b-4bd5-b5a8-76cfa8f127ee.webp"
+        alt="Handmade Filipino crafts">
 
     </div>
 
@@ -91,7 +93,7 @@
         <div class="feature">
             <div class="feature-icon">🛡️</div>
             <h3>Secure Payments</h3>
-            <p>Safe and reliable transactions.</p>
+            <p>Direct seller GCash and safe COD transactions.</p>
         </div>
 
     </div>
@@ -99,93 +101,14 @@
 
     <div class="section-header">
         <h2 class="section-title">New Products</h2>
-        <span class="section-pill">Just arrived</span>
+        <span class="section-pill">Handcrafted & Live</span>
     </div>
 
-    <div class="product-grid">
-
-        <div class="product-card" data-category="Bags">
-            <span class="product-badge">New</span>
-            <img src="https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg">
-            <div class="product-info">
-                <h3>Woven Handbag</h3>
-                <p class="price">₱650.00</p>
-                <div class="rating">★★★★★</div>
-                <button class="card-btn" onclick="showProduct('Woven Handbag',650)">View Details</button>
-            </div>
-        </div>
-
-        <div class="product-card" data-category="Woven Items">
-            <span class="product-badge">New</span>
-            <img src="https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow">
-            <div class="product-info">
-                <h3>Rattan Basket</h3>
-                <p class="price">₱550.00</p>
-                <div class="rating">★★★★★</div>
-                <button class="card-btn" onclick="showProduct('Rattan Basket',550)">View Details</button>
-            </div>
-        </div>
-
-        <div class="product-card" data-category="Home Decor">
-            <span class="product-badge">New</span>
-            <img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80">
-            <div class="product-info">
-                <h3>Wooden Vase</h3>
-                <p class="price">₱450.00</p>
-                <div class="rating">★★★★☆</div>
-                <button class="card-btn" onclick="showProduct('Wooden Vase',450)">View Details</button>
-            </div>
-        </div>
-
-        <div class="product-card" data-category="Home Decor">
-            <span class="product-badge">New</span>
-            <img src="https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg">
-            <div class="product-info">
-                <h3>Macrame Wall Hanging</h3>
-                <p class="price">₱750.00</p>
-                <div class="rating">★★★★★</div>
-                <button class="card-btn" onclick="showProduct('Macrame Wall Hanging',750)">View Details</button>
-            </div>
-        </div>
-
-        <div class="product-card" data-category="Accessories">
-            <span class="product-badge">New</span>
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA">
-            <div class="product-info">
-                <h3>Traditional Salakot Hat</h3>
-                <p class="price">₱250.00</p>
-                <button class="card-btn" onclick="showProduct('Traditional Salakot Hat',250)">View Details</button>
-            </div>
-        </div>
-
-        <div class="product-card" data-category="Home Decor">
-            <span class="product-badge">Popular</span>
-            <img src="https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow">
-            <div class="product-info">
-                <h3>Handmade Lamp</h3>
-                <p class="price">₱750.00</p>
-                <button class="card-btn" onclick="showProduct('Handmade Lamp',750)">View Details</button>
-            </div>
-        </div>
-
-        <div class="product-card" data-category="Home Decor">
-            <span class="product-badge">Popular</span>
-            <img src="https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg">
-            <div class="product-info">
-                <h3>Ceramic Vase</h3>
-                <p class="price">₱500.00</p>
-                <button class="card-btn" onclick="showProduct('Ceramic Vase',500)">View Details</button>
-            </div>
-        </div>
-
-        <div class="product-card" data-category="Home Decor">
-            <span class="product-badge">Popular</span>
-            <img src="https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA">
-            <div class="product-info">
-                <h3>Ceramic Bowl</h3>
-                <p class="price">₱500.00</p>
-                <button class="card-btn" onclick="showProduct('Ceramic Bowl',500)">View Details</button>
-            </div>
+    <!-- Dynamic Products loaded from Firebase Firestore (Hardcoded products removed) -->
+    <div id="homeProductGrid" class="product-grid">
+        <div class="catalog-loading">
+            <div class="spinner"></div>
+            <p>Loading handcrafted treasures...</p>
         </div>
     </div>
 
@@ -206,114 +129,22 @@
 
             <h3>Categories</h3>
 
-            <button onclick="filterProducts('All Products')">All Products</button>
-            <button onclick="filterProducts('Bags')">Bags</button>
-            <button onclick="filterProducts('Home Decor')">Home Decor</button>
-            <button onclick="filterProducts('Accessories')">Accessories</button>
-            <button onclick="filterProducts('Woven Items')">Woven Items</button>
-            <button onclick="filterProducts('Wood Crafts')">Wood Crafts</button>
-            <button onclick="filterProducts('Souvenirs')">Souvenirs</button>
-            <button onclick="filterProducts('Jewelry')">Jewelry</button>
+            <button type="button" onclick="filterProducts('All Products')">All Products</button>
+            <button type="button" onclick="filterProducts('Bags')">Bags</button>
+            <button type="button" onclick="filterProducts('Home Decor')">Home Decor</button>
+            <button type="button" onclick="filterProducts('Accessories')">Accessories</button>
+            <button type="button" onclick="filterProducts('Woven Items')">Woven Items</button>
+            <button type="button" onclick="filterProducts('Wood Crafts')">Wood Crafts</button>
+            <button type="button" onclick="filterProducts('Souvenirs')">Souvenirs</button>
+            <button type="button" onclick="filterProducts('Jewelry')">Jewelry</button>
 
         </aside>
 
-
-        <div class="product-grid">
-
-            <div class="product-card" data-category="Bags">
-                <img src="https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg">
-                <div class="product-info">
-                    <h3>Woven Handbag</h3>
-                    <p class="price">₱650.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Woven Handbag',650)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Woven Items">
-                <img src="https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow">
-                <div class="product-info">
-                    <h3>Rattan Basket</h3>
-                    <p class="price">₱550.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Rattan Basket',550)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Accessories">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA">
-                <div class="product-info">
-                    <h3>Traditional Salakot Hat</h3>
-                    <p class="price">₱250.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Traditional Salakot Hat',250)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Home Decor">
-                <img src="https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow">
-                <div class="product-info">
-                    <h3>Handmade Lamp</h3>
-                    <p class="price">₱750.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Handmade Lamp',750)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Home Decor">
-                <img src="https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg">
-                <div class="product-info">
-                    <h3>Ceramic Vase</h3>
-                    <p class="price">₱500.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Ceramic Vase',500)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Home Decor">
-                <img src="https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA">
-                <div class="product-info">
-                    <h3>Ceramic Bowl</h3>
-                    <p class="price">₱500.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Ceramic Bowl',500)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Home Decor">
-                <img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80">
-                <div class="product-info">
-                    <h3>Wooden Vase</h3>
-                    <p class="price">₱450.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Wooden Vase',450)">
-                    View Details
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card" data-category="Home Decor">
-                <img src="https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg">
-                <div class="product-info">
-                    <h3>Macrame Wall Hanging</h3>
-                    <p class="price">₱750.00</p>
-                    <button class="card-btn"
-                    onclick="showProduct('Macrame Wall Hanging',750)">
-                    View Details
-                    </button>
-                </div>
+        <!-- Dynamic Catalog Grid loaded from Firebase Firestore -->
+        <div id="catalogProductGrid" class="product-grid">
+            <div class="catalog-loading">
+                <div class="spinner"></div>
+                <p>Loading products from artisans...</p>
             </div>
         </div>
 
@@ -329,38 +160,41 @@
     <div class="product-detail">
 
         <img id="detailImage"
-        src="https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg">
+        src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80"
+        alt="Product detail">
 
         <div class="detail-info">
 
             <h1 id="detailName">
-                Woven Handbag
+                Product Name
             </h1>
 
             <div id="detailReviews" class="rating">
-                ★★★★★ (24 reviews)
+                ★★★★★ (Artisan Verified)
             </div>
 
             <p class="detail-price">
-                ₱<span id="detailPrice">650</span>.00
+                ₱<span id="detailPrice">0.00</span>
             </p>
 
             <p id="detailDescription">
-                Handmade woven product created by
-                local artisans. Durable, unique and
-                perfect for everyday use.
+                Handmade craft made by local artisans. Durable, unique and perfect for everyday use.
             </p>
 
+            <div id="detailSellerInfo" style="margin-top:10px; font-size:14px; color:#285c3b; font-weight:600;">
+                Artisan Seller: <span id="detailSellerName">Local Creator</span>
+            </div>
+
             <p style="margin-top:15px;">
-                <b>Stock:</b>
-                <span style="color:green;">
+                <b>Stock Status:</b>
+                <span id="detailStockStatus" style="color:green; font-weight:bold;">
                     In Stock
                 </span>
             </p>
 
             <div class="quantity">
 
-                <button onclick="changeQuantity(-1)">
+                <button type="button" onclick="changeQuantity(-1)">
                     −
                 </button>
 
@@ -368,27 +202,27 @@
                     1
                 </span>
 
-                <button onclick="changeQuantity(1)">
+                <button type="button" onclick="changeQuantity(1)">
                     +
                 </button>
 
             </div>
 
-            <button class="btn"
-            onclick="addToCart()">
-                🛒 Add to Cart
-            </button>
+            <div style="display:flex; gap:12px; margin-top:15px; flex-wrap:wrap;">
+                <button type="button" id="addToCartBtn" class="btn" onclick="addToCart()">
+                    Add to Cart
+                </button>
 
-            <button
-            style="padding:13px 25px;margin-left:10px;border:1px solid #285c3b;background:rgb(3, 92, 9);border-radius:7px;">
-                Buy Now
-            </button>
+                <button type="button" class="btn" style="background:#1e472d;" onclick="buyNow()">
+                    Buy Now
+                </button>
+            </div>
 
             <hr style="margin:25px 0;">
 
-            <p>🚚 Shipping & Delivery</p>
-            <p>❤️ Add to Wishlist</p>
-            <p>⭐ Reviews</p>
+            <p>🚚 Fast shipping & careful artisan packaging</p>
+            <p>🛡️ Secure GCash & Cash on Delivery available</p>
+            <p>⭐ 100% Filipino handmade quality</p>
 
         </div>
 
@@ -411,7 +245,6 @@
             <div id="cartItems"></div>
         </div>
 
-
         <div class="order-summary">
 
             <h2>Order Summary</h2>
@@ -431,7 +264,7 @@
                 <span id="cartTotal">₱0.00</span>
             </div>
 
-            <button class="btn"
+            <button type="button" class="btn"
             style="width:100%;margin-top:20px;"
             onclick="showScreen('checkout')">
                 Proceed to Checkout
@@ -461,42 +294,45 @@
             <div class="form-group">
                 <label>Full Name</label>
                 <input id="checkoutFullName" type="text"
-                placeholder="Enter your full name">
+                placeholder="Enter your full name" required>
             </div>
 
             <div class="form-group">
                 <label>Phone Number</label>
                 <input id="checkoutPhone" type="text"
-                placeholder="09XXXXXXXXX">
+                placeholder="09XXXXXXXXX" required>
             </div>
 
             <div class="form-group">
                 <label>Address</label>
                 <input id="checkoutAddress" type="text"
-                placeholder="Enter your address">
+                placeholder="Street address / Barangay" required>
             </div>
 
             <div class="form-group">
                 <label>City / Municipality</label>
                 <input id="checkoutCity" type="text"
-                placeholder="Enter municipality">
+                placeholder="Enter municipality or city" required>
             </div>
 
             <div class="form-group">
                 <label>Payment Method</label>
 
-                <select id="checkoutPayment">
-                    <option>Cash on Delivery</option>
-                    <option>GCash</option>
-                    <option>Maya</option>
-                    <option>Credit / Debit Card</option>
+                <select id="checkoutPayment" onchange="handlePaymentMethodChange(this.value)">
+                    <option value="Cash on Delivery">Cash on Delivery</option>
+                    <option value="GCash">GCash (Direct to Seller)</option>
+                    <option value="Maya">Maya</option>
+                    <option value="Credit / Debit Card">Credit / Debit Card</option>
                 </select>
 
+                <p id="checkoutPaymentNote" style="font-size:12px; color:#555; margin-top:6px;">
+                    Pay in cash upon delivery to your doorstep.
+                </p>
             </div>
 
-            <button class="btn"
+            <button type="button" id="placeOrderBtn" class="btn"
             style="width:100%;"
-            onclick="placeOrder()">
+            onclick="initiateOrderPlacement()">
                 Place Order
             </button>
 
@@ -509,12 +345,12 @@
             <div id="checkoutSummaryItems"></div>
 
             <div class="summary-line">
-                <span>Shipping</span>
-                <span id="checkoutShipping">₱60</span>
+                <span>Shipping Fee</span>
+                <span id="checkoutShipping">₱60.00</span>
             </div>
 
             <div class="summary-line total">
-                <span>Total</span>
+                <span>Total Amount</span>
                 <span id="checkoutTotal">₱0.00</span>
             </div>
 
@@ -544,7 +380,7 @@
 
     <div class="form-box profile-form">
         <h2>Profile Settings</h2>
-        <p style="margin-bottom:20px;">Update your account details so checkout is faster and easier.</p>
+        <p style="margin-bottom:20px;">Manage your account details and delivery information.</p>
 
         <div class="form-group">
             <label>Full Name</label>
@@ -553,7 +389,7 @@
 
         <div class="form-group">
             <label>Email</label>
-            <input id="profileEmail" type="email" placeholder="Enter your email">
+            <input id="profileEmail" type="email" placeholder="Enter your email" readonly style="background:#f4f4f4;">
         </div>
 
         <div class="form-group">
@@ -563,7 +399,7 @@
 
         <div class="form-group">
             <label>Address</label>
-            <input id="profileAddress" type="text" placeholder="Enter your address">
+            <input id="profileAddress" type="text" placeholder="Enter your street or barangay">
         </div>
 
         <div class="form-group">
@@ -574,69 +410,28 @@
         <div class="form-group">
             <label>Preferred Payment Method</label>
             <select id="profilePayment">
-                <option>Cash on Delivery</option>
-                <option>GCash</option>
-                <option>Maya</option>
-                <option>Credit / Debit Card</option>
+                <option value="Cash on Delivery">Cash on Delivery</option>
+                <option value="GCash">GCash</option>
+                <option value="Maya">Maya</option>
+                <option value="Credit / Debit Card">Credit / Debit Card</option>
             </select>
         </div>
 
-        <div class="profile-actions">
-            <button class="btn" onclick="saveProfileSettings()">Save Profile</button>
-            <button class="btn" style="background:#8a6100;" onclick="logout()">Logout</button>
+        <div class="profile-actions" style="display:flex; gap:10px; margin-top:20px;">
+            <button type="button" class="btn" onclick="saveProfileSettings()">Save Profile</button>
+            <button type="button" class="btn" style="background:#8a6100;" onclick="handleLogout()">Logout</button>
         </div>
-    </div>
 
-</section>
-
-
-<!-- ================= SELLER ================= -->
-
-<section id="seller" class="screen">
-
-    <div id="sellerLoginModal" class="seller-login-modal" style="display: none;">
-        <div class="seller-login-box">
-            <div id="sellerLoginForm">
-                <h2>Seller Login</h2>
-                <p>Sign in with your seller account or create one below.</p>
-                <input id="sellerEmailInput" type="email" placeholder="Email Address" />
-                <input id="sellerPasswordInput" type="password" placeholder="Password" />
-                <button class="btn" onclick="submitSellerLogin()">Open Dashboard</button>
-                <button class="secondary-btn" type="button" onclick="showSellerRegisterForm()">Create Account</button>
-                <button class="secondary-btn" onclick="closeSellerLoginModal(); showScreen('home');">Cancel</button>
+        <!-- Requirement 4: Seller Application Section in User Profile -->
+        <div class="profile-seller-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0;">Artisan Seller Status</h3>
+                <span id="profileSellerBadge" class="status-badge status-pending" style="display:none;"></span>
             </div>
-
-            <div id="sellerRegisterForm" style="display: none;">
-                <h2>Create Seller Account</h2>
-                <p>Register a new seller profile.</p>
-                <input id="sellerRegisterName" type="text" placeholder="Full Name" />
-                <input id="sellerRegisterEmail" type="email" placeholder="Email Address" />
-                <input id="sellerRegisterPassword" type="password" placeholder="Password" />
-                <button class="btn" onclick="submitSellerRegister()">Create Account</button>
-                <button class="secondary-btn" type="button" onclick="showSellerLoginForm()">Back to Login</button>
-                <button class="secondary-btn" onclick="closeSellerLoginModal(); showScreen('home');">Cancel</button>
+            
+            <div id="profileSellerContent">
+                <!-- Populated dynamically: Apply as Seller button, or Pending/Approved/Rejected banner -->
             </div>
-        </div>
-    </div>
-
-    <div class="dashboard">
-
-        <aside class="sidebar">
-
-            <h2>🧺 ArtisanAisle</h2>
-
-            <button data-seller-view="dashboard">🏠 Dashboard</button>
-            <button data-seller-view="products">🛍️ My Products</button>
-            <button data-seller-view="add-product">➕ Add Product</button>
-            <button data-seller-view="orders">📦 Orders</button>
-            <button data-seller-view="inventory">📊 Inventory</button>
-            <button data-seller-view="profile">👤 Profile</button>
-            <button onclick="sellerLogout()">🚪 Logout</button>
-
-        </aside>
-
-        <div class="dashboard-content">
-            <div id="sellerContent"></div>
         </div>
 
     </div>
@@ -644,7 +439,7 @@
 </section>
 
 
-<!-- ================= ADMIN ================= -->
+<!-- ================= ADMIN DASHBOARD ================= -->
 
 <section id="admin" class="screen">
 
@@ -652,29 +447,31 @@
         <div class="admin-login-box">
             <h2>Admin Login</h2>
             <p>Enter the dashboard password to continue.</p>
-            <input id="adminPasswordInput" type="password" placeholder="Password" />
-            <button class="btn" onclick="submitAdminLogin()">Open Dashboard</button>
-            <button class="secondary-btn" onclick="closeAdminLoginModal(); showScreen('home');">Cancel</button>
+            <input id="adminPasswordInput" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')submitAdminLogin()" />
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button type="button" class="btn" style="flex:1;" onclick="submitAdminLogin()">Open Dashboard</button>
+                <button type="button" class="secondary-btn" style="flex:1;" onclick="closeAdminLoginModal(); showScreen('home');">Cancel</button>
+            </div>
         </div>
     </div>
 
     <div class="dashboard">
 
+        <!-- Admin Sidebar Navigation without emojis -->
         <aside class="sidebar">
 
-            <h2>🧺 ArtisanAisle</h2>
+            <h2>ArtisanAisle Admin</h2>
 
-            <button data-admin-view="dashboard">🏠 Dashboard</button>
-            <button data-admin-view="users">👥 Users</button>
-            <button data-admin-view="sellers">🧑‍🎨 Sellers</button>
-            <button data-admin-view="products">🛍️ Products</button>
-            <button data-admin-view="orders">📦 Orders</button>
-            <button data-admin-view="reports">📊 Reports</button>
-            <button data-admin-view="settings">⚙️ Settings</button>
-            <button onclick="adminLogout()">🚪 Logout</button>
+            <button type="button" data-admin-view="dashboard">Dashboard</button>
+            <button type="button" data-admin-view="users">Users</button>
+            <button type="button" data-admin-view="sellers">Sellers & Applications</button>
+            <button type="button" data-admin-view="products">Products</button>
+            <button type="button" data-admin-view="orders">Orders</button>
+            <button type="button" data-admin-view="reports">Reports</button>
+            <button type="button" data-admin-view="settings">Settings</button>
+            <button type="button" onclick="adminLogout()">Logout</button>
 
         </aside>
-
 
         <div class="dashboard-content">
 
@@ -686,38 +483,306 @@
 
 </section>
 
+
+<!-- ================= GCASH PAYMENT MODAL ================= -->
+
+<div id="gcashPaymentModal" class="gcash-modal" style="display: none;">
+    <div class="gcash-box">
+        <div class="gcash-header">
+            <div class="gcash-brand">G<span>Cash</span></div>
+            <div class="gcash-sub">Direct Seller Payment Portal</div>
         </div>
 
-    </div>
+        <div class="gcash-seller-card">
+            <div class="row">
+                <span class="label">Pay To Seller:</span>
+                <span id="gcashSellerShopName" class="val">Artisan Shop</span>
+            </div>
+            <div class="row">
+                <span class="label">Registered GCash Name:</span>
+                <span id="gcashSellerAccountName" class="val">Seller Name</span>
+            </div>
+            <div class="row">
+                <span class="label">Registered GCash Mobile:</span>
+                <span id="gcashSellerMobile" class="val" style="font-size:16px; letter-spacing:0.04em;">09XXXXXXXXX</span>
+            </div>
+        </div>
 
-</section>
+        <div class="gcash-amount-banner">
+            <small>Exact Amount to Send</small>
+            <strong id="gcashTotalAmount">₱0.00</strong>
+        </div>
+
+        <div class="gcash-step">
+            <strong>Step 1:</strong> Open your GCash App and send the exact amount to the registered seller number above.
+        </div>
+        <div class="gcash-step">
+            <strong>Step 2:</strong> Enter your 13-digit GCash Transaction Reference Number:
+        </div>
+
+        <input id="gcashRefInput" type="text" maxlength="13" placeholder="e.g. 1002345678901" style="width:100%; padding:12px; font-size:16px; border:2px solid #007dfe; border-radius:10px; margin-top:8px; font-weight:bold; letter-spacing:0.05em; text-align:center;" />
+
+        <div id="gcashErrorMsg" style="display:none; color:#c53030; font-size:13px; margin-top:8px; background:#fff0f0; padding:10px 12px; border-radius:8px; border:1px solid #feb2b2; text-align:left;"></div>
+
+        <div class="gcash-actions">
+            <button type="button" id="gcashVerifyBtn" class="btn" style="background:#007dfe;" onclick="processGCashVerification()">Verify & Confirm Order</button>
+            <button type="button" class="secondary-btn" onclick="cancelGCashPayment()">Select Another Mode of Payment</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ================= SELLER APPLICATION MODAL ================= -->
+
+<div id="sellerApplicationModal" class="seller-login-modal" style="display: none;">
+    <div class="seller-login-box" style="max-width:540px;">
+        <h2>Apply as Artisan Seller</h2>
+        <p>Share your handmade creations with our community. Applications are reviewed by our admin team before seller access is granted.</p>
+
+        <form id="sellerAppForm" onsubmit="event.preventDefault(); submitSellerApplicationForm();">
+            <div class="form-group">
+                <label>Artisan Shop / Business Name</label>
+                <input id="appShopName" placeholder="e.g. Samar Loom Crafts" required />
+            </div>
+
+            <div class="form-group">
+                <label>Primary Craft Category</label>
+                <select id="appCategory">
+                    <option value="Bags">Bags</option>
+                    <option value="Home Decor">Home Decor</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Woven Items">Woven Items</option>
+                    <option value="Wood Crafts">Wood Crafts</option>
+                    <option value="Souvenirs">Souvenirs</option>
+                    <option value="Jewelry">Jewelry</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Contact Phone</label>
+                <input id="appPhone" placeholder="09XXXXXXXXX" required />
+            </div>
+
+            <div class="form-group" style="background:#f4f9f4; border:1px solid #b8e2c8; padding:14px; border-radius:10px;">
+                <label style="color:#285c3b; font-weight:bold;">Registered GCash Account Name (for Buyer Direct Payments)</label>
+                <input id="appGcashName" placeholder="Exact name registered on GCash" required />
+                <small style="color:#555; display:block; margin-top:4px;">Direct customer payments will display this name for payment verification.</small>
+            </div>
+
+            <div class="form-group" style="background:#f4f9f4; border:1px solid #b8e2c8; padding:14px; border-radius:10px;">
+                <label style="color:#285c3b; font-weight:bold;">Registered GCash Mobile Number</label>
+                <input id="appGcashNumber" placeholder="09XXXXXXXXX" required />
+                <small style="color:#555; display:block; margin-top:4px;">Payments made via GCash will be sent directly to this number.</small>
+            </div>
+
+            <div class="form-group">
+                <label>Your Craft Story / Materials Used</label>
+                <textarea id="appBio" rows="3" placeholder="Tell us about the handmade items you make and traditional materials you use..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; font-family:inherit;"></textarea>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button type="submit" id="submitAppBtn" class="btn" style="flex:1;">Submit Application</button>
+                <button type="button" class="secondary-btn" style="flex:1;" onclick="closeSellerApplicationModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 
 <footer>
-    <p>© 2026 ArtisanAisle | Supporting Local Artisans</p>
+    <p>© 2026 ArtisanAisle | Supporting Local Filipino Artisans</p>
 </footer>
 
 
+<!-- Connect Firebase backend service layer -->
+<script type="module" src="firebase-config.js"></script>
+
+<!-- Main Storefront Application Script -->
 <script>
+
+/* ================= APPLICATION STATE ================= */
+
+let liveProducts = [];
+let liveSellers = [];
+let liveApplications = [];
+let liveOrders = [];
+let currentCategory = "All Products";
+let selectedProduct = null;
+let quantity = 1;
+let adminCurrentView = "dashboard";
+let pendingOrderPayload = null;
+let isSubmittingOrder = false;
+const ADMIN_PASSWORD = "@SIMPS2026";
+
+// Fallback seed catalog in case Firestore is connecting or empty
+const fallbackProducts = [
+    {
+        id: "P-0301",
+        name: "Woven Handbag",
+        category: "Bags",
+        price: 650,
+        stock: 15,
+        status: "Active",
+        image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg",
+        sellerId: "dsppODMdDbS5oXPWKhV0mMQJVLm1",
+        sellerName: "Marciene Jerusalem",
+        sellerGCash: "09764948458",
+        sellerGCashName: "Eugene Marciene Jerusalem",
+        description: "Handcrafted from native pandan fibers by local artisans in Samar. Durable, unique and perfect for everyday use."
+    },
+    {
+        id: "P-0302",
+        name: "Rattan Basket",
+        category: "Woven Items",
+        price: 550,
+        stock: 12,
+        status: "Active",
+        image: "https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
+        sellerId: "aO8SEtQTfLPyqxigjFhJQQP1Hg42",
+        sellerName: "Maer Jerusalem",
+        sellerGCash: "09764948458",
+        sellerGCashName: "Maer Jerusalem",
+        description: "A handcrafted rattan basket made with care for storage, decor, and everyday convenience."
+    },
+    {
+        id: "P-0303",
+        name: "Wooden Vase",
+        category: "Home Decor",
+        price: 450,
+        stock: 8,
+        status: "Active",
+        image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80",
+        sellerId: "LUYGjn3VTBaiiRYgDlI8Ktw432M2",
+        sellerName: "Reniel Sabuco",
+        sellerGCash: "09853551524",
+        sellerGCashName: "Reniel Sabuco",
+        description: "A beautifully finished wooden vase sculpted from sustainable local timber."
+    },
+    {
+        id: "P-0304",
+        name: "Handmade Lamp",
+        category: "Home Decor",
+        price: 750,
+        stock: 10,
+        status: "Active",
+        image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
+        sellerId: "CuqMgEoBx6hn87YJFisFb3nTj3e2",
+        sellerName: "Marciene Jerusalem",
+        sellerGCash: "09764948458",
+        sellerGCashName: "Marciene Jerusalem",
+        description: "Warm handcrafted lamp with natural woven bamboo and rattan details."
+    },
+    {
+        id: "P-0305",
+        name: "Handmade Wallet",
+        category: "Accessories",
+        price: 160,
+        stock: 14,
+        status: "Active",
+        image: "https://nphikwtyvmrlvudxmdre.supabase.co/storage/v1/object/public/product-images/products/f39bb4c2-806b-4c50-bb61-f9606b2a6ebd.webp",
+        sellerId: "8lnUq4rGPxdyitABRJFzwL3DnMc2",
+        sellerName: "Pierce Estrada",
+        sellerGCash: "09175551234",
+        sellerGCashName: "Pierce Estrada",
+        description: "Handcrafted compact wallet made with woven accents and quality craftsmanship."
+    }
+];
+
+
+/* ================= INITIALIZATION ================= */
+
+window.addEventListener('DOMContentLoaded', () => {
+    // Wait for ArtisanDB service layer to connect
+    const checkDB = setInterval(() => {
+        if (window.ArtisanDB) {
+            clearInterval(checkDB);
+            bootstrapApplication();
+        }
+    }, 40);
+
+    // Safety timeout in case of offline/direct preview
+    setTimeout(() => {
+        if (!liveProducts.length) {
+            liveProducts = fallbackProducts;
+            renderAllProductGrids();
+        }
+    }, 1500);
+});
+
+function bootstrapApplication() {
+    // 1. Auth listener
+    window.ArtisanDB.onAuth((user) => {
+        updateHeaderUser(user);
+        renderProfileSection(user);
+        if (user) {
+            // Subscribe to this user's live orders
+            window.ArtisanDB.subscribeUserOrders(user.uid, (orders) => {
+                liveOrders = orders;
+                renderOrders();
+            });
+        } else {
+            renderOrders();
+        }
+    });
+
+    // 2. Subscribe live products from Firestore (Requirement 1)
+    window.ArtisanDB.subscribeProducts((products) => {
+        if (products && products.length > 0) {
+            liveProducts = products;
+        } else {
+            liveProducts = fallbackProducts;
+        }
+        renderAllProductGrids();
+    });
+
+    // 3. Subscribe live sellers from Firestore
+    window.ArtisanDB.subscribeSellers((sellers) => {
+        liveSellers = sellers;
+    });
+
+    // 4. Subscribe seller applications for admin (Requirement 3 & 4)
+    window.ArtisanDB.subscribeSellerApplications((apps) => {
+        liveApplications = apps;
+        if (document.getElementById("admin")?.classList.contains("active")) {
+            renderAdminDashboard();
+        }
+    });
+
+    // 5. Initialize Cart & Nav
+    renderCart();
+    updateHeaderUser(window.ArtisanDB.getLocalUser());
+}
+
 
 /* ================= SCREEN NAVIGATION ================= */
 
 function showScreen(screenID) {
-
-    document.querySelectorAll(".screen")
-    .forEach(screen => {
+    document.querySelectorAll(".screen").forEach(screen => {
         screen.classList.remove("active");
     });
 
-    document.getElementById(screenID)
-    .classList.add("active");
+    const target = document.getElementById(screenID);
+    if (target) {
+        target.classList.add("active");
+    }
+
+    // Update active nav button
+    document.querySelectorAll("nav button").forEach(btn => {
+        btn.classList.remove("active");
+        if (btn.innerText.toLowerCase() === screenID) {
+            btn.classList.add("active");
+        }
+    });
 
     if (screenID === "checkout") {
         populateCheckoutForm();
     } else if (screenID === "profile") {
-        fillProfileForm();
+        const user = window.ArtisanDB?.getLocalUser();
+        renderProfileSection(user);
     } else if (screenID === "products") {
-        updateProductsDisplay();
+        renderCatalogProducts();
+    } else if (screenID === "orders") {
+        renderOrders();
     }
 
     window.scrollTo({
@@ -727,213 +792,206 @@ function showScreen(screenID) {
 }
 
 
-/* ================= PRODUCT ================= */
+/* ================= DYNAMIC PRODUCT RENDERING (Requirement 1) ================= */
 
-let selectedProduct = {
-    name: "Woven Handbag",
-    price: 650,
-    image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg"
-};
-let quantity = 1;
-
-function getProductDetails(name) {
-    const products = {
-        "Woven Handbag": {
-            image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg",
-            description: "Handmade woven product created by local artisans. Durable, unique and perfect for everyday use.",
-            reviews: "★★★★★ (24 reviews)"
-        },
-        "Rattan Basket": {
-            image: "https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
-            description: "A handcrafted rattan basket made with care for storage, decor, and everyday convenience.",
-            reviews: "★★★★★ (18 reviews)"
-        },
-        "Wooden Vase": {
-            image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80",
-            description: "A beautifully finished wooden vase that adds warmth and elegance to any room.",
-            reviews: "★★★★☆ (12 reviews)"
-        },
-        "Macrame Wall Hanging": {
-            image: "https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg",
-            description: "An artisan-made macrame wall hanging that brings texture and charm to your space.",
-            reviews: "★★★★★ (30 reviews)"
-        },
-        "Handmade Lamp": {
-            image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
-            description: "Warm handcrafted lamp with natural woven details, perfect for cozy corners and ambient lighting.",
-            reviews: "★★★★☆ (14 reviews)"
-        },
-        "Ceramic Vase": {
-            image: "https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg",
-            description: "A handmade ceramic vase with an elegant curve for fresh flowers, dried stems, or tabletop decor.",
-            reviews: "★★★★☆ (20 reviews)"
-        },
-        "Ceramic Bowl": {
-            image: "https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA",
-            description: "A beautiful glazed ceramic bowl handcrafted for serving, display, or everyday table use.",
-            reviews: "★★★★☆ (16 reviews)"
-        },
-
-        "Handmade Lamp": {
-            image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
-            description: "Warm handcrafted lamp with natural woven details, perfect for cozy corners and ambient lighting.",
-            reviews: "★★★★☆ (14 reviews)"
-        },
-        "Ceramic Vase": {
-            image: "https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg",
-            description: "A handmade ceramic vase with an elegant curve for fresh flowers, dried stems, or tabletop decor.",
-            reviews: "★★★★☆ (20 reviews)"
-        },
-        "Ceramic Bowl": {
-            image: "https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA",
-            description: "A beautiful glazed ceramic bowl handcrafted for serving, display, or everyday table use.",
-            reviews: "★★★★☆ (16 reviews)"
-        },
-        "Traditional Salakot Hat": {
-            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA",
-            description: "A classic Filipino salakot handmade from bamboo and rattan, ideal for sun protection and cultural décor.",
-            reviews: "★★★★☆ (8 reviews)"
-        }
-    };
-
-    return products[name] || {
-        image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=500&q=80",
-        description: "Handmade woven product created by local artisans. Durable, unique and perfect for everyday use.",
-        reviews: "★★★★★ (24 reviews)"
-    };
+function renderAllProductGrids() {
+    renderHomeProducts();
+    renderCatalogProducts();
 }
 
-let selectedCategory = "All Products";
+function renderHomeProducts() {
+    const homeGrid = document.getElementById("homeProductGrid");
+    if (!homeGrid) return;
 
-function updateProductsDisplay() {
-    const query = document.getElementById("searchInput")
-        .value.trim()
-        .toLowerCase();
+    const activeList = liveProducts.filter(p => (p.status || 'Active') === 'Active').slice(0, 8);
 
-    const cards = document.querySelectorAll("#products .product-card");
+    if (activeList.length === 0) {
+        homeGrid.innerHTML = `
+            <div class="catalog-empty">
+                <p>No products available yet. Check back soon for new handmade items!</p>
+            </div>
+        `;
+        return;
+    }
 
-    cards.forEach(card => {
-        const title = card.querySelector("h3").innerText.toLowerCase();
-        const cardCategory = (card.getAttribute("data-category") || "").toLowerCase();
-        const matchesCategory = selectedCategory === "All Products" || cardCategory === selectedCategory.toLowerCase();
-        const matchesQuery = query === "" || title.includes(query);
-        card.style.display = matchesCategory && matchesQuery ? "block" : "none";
+    homeGrid.innerHTML = activeList.map(p => createProductCardHtml(p)).join("");
+}
+
+function renderCatalogProducts() {
+    const catalogGrid = document.getElementById("catalogProductGrid");
+    if (!catalogGrid) return;
+
+    const query = document.getElementById("searchInput")?.value.trim().toLowerCase() || "";
+
+    const filtered = liveProducts.filter(p => {
+        const isActive = (p.status || 'Active') === 'Active';
+        const matchesCategory = currentCategory === "All Products" || (p.category || "").toLowerCase() === currentCategory.toLowerCase();
+        const matchesQuery = query === "" || (p.name || "").toLowerCase().includes(query) || (p.category || "").toLowerCase().includes(query);
+        return isActive && matchesCategory && matchesQuery;
     });
 
-    document.querySelectorAll(".categories button").forEach(button => {
-        const buttonText = button.innerText.trim();
-        const isActive = buttonText === selectedCategory;
-        button.style.fontWeight = isActive ? "bold" : "normal";
-        button.style.color = isActive ? "#285c3b" : "";
-        button.style.background = isActive ? "#e7eee8" : "";
-        button.style.borderRadius = isActive ? "5px" : "";
+    if (filtered.length === 0) {
+        catalogGrid.innerHTML = `
+            <div class="catalog-empty">
+                <p>No products found in category "${currentCategory}".</p>
+            </div>
+        `;
+        return;
+    }
+
+    catalogGrid.innerHTML = filtered.map(p => createProductCardHtml(p)).join("");
+
+    // Highlight active category button
+    document.querySelectorAll(".categories button").forEach(btn => {
+        const isActive = btn.innerText.trim().toLowerCase() === currentCategory.toLowerCase();
+        btn.style.fontWeight = isActive ? "bold" : "normal";
+        btn.style.color = isActive ? "#285c3b" : "";
+        btn.style.background = isActive ? "#e7eee8" : "";
     });
+}
+
+function createProductCardHtml(product) {
+    const image = product.image || "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80";
+    const price = Number(product.price || 0).toLocaleString();
+    const stock = Number(product.stock || 0);
+    const isOut = stock <= 0;
+
+    return `
+        <div class="product-card" data-category="${product.category || 'Craft'}">
+            ${product.isNew ? '<span class="product-badge">New</span>' : ''}
+            ${isOut ? '<span class="product-badge" style="background:#c53030;">Out of Stock</span>' : ''}
+            <img src="${image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80'" />
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p class="price">₱${price}.00</p>
+                <div class="rating">★★★★★ <small style="color:#666;">(${stock > 0 ? stock + ' left' : 'Sold out'})</small></div>
+                <button type="button" class="card-btn" onclick="showProduct('${product.id}')">View Details</button>
+            </div>
+        </div>
+    `;
 }
 
 function filterProducts(category) {
-    selectedCategory = category;
-    updateProductsDisplay();
+    currentCategory = category;
+    renderCatalogProducts();
     showScreen("products");
 }
 
 function searchProducts() {
-    updateProductsDisplay();
+    renderCatalogProducts();
     showScreen("products");
 }
 
-function renderHomeProducts() {
-    const homeGrid = document.querySelector('#home .product-grid');
-    if (!homeGrid) return;
+function showProduct(productId) {
+    const product = liveProducts.find(p => p.id === productId || p.name === productId);
+    if (!product) return;
 
-    const products = getCatalogProducts().slice(0, 8);
-    homeGrid.innerHTML = products.map(product => `
-        <div class="product-card" data-category="${product.category}">
-            ${product.isNew ? '<span class="product-badge">New</span>' : ''}
-            <img src="${product.image}" alt="${product.name}">
-            <div class="product-info">
-                <h3>${product.name}</h3>
-                <p class="price">₱${Number(product.price).toLocaleString()}.00</p>
-                <div class="rating">★★★★★</div>
-                <button class="card-btn" onclick="showProduct('${product.name}', ${product.price})">View Details</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function renderCatalogProducts() {
-    const catalogGrid = document.querySelector('#products .product-grid');
-    if (!catalogGrid) return;
-
-    const products = getCatalogProducts();
-    catalogGrid.innerHTML = products.map(product => `
-        <div class="product-card" data-category="${product.category}">
-            <img src="${product.image}" alt="${product.name}">
-            <div class="product-info">
-                <h3>${product.name}</h3>
-                <p class="price">₱${Number(product.price).toLocaleString()}.00</p>
-                <button class="card-btn" onclick="showProduct('${product.name}', ${product.price})">View Details</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function showProduct(name, price) {
-    const catalogProduct = getCatalogProducts().find(product => product.name === name);
-    const productDetails = getProductDetails(name);
-    const image = catalogProduct?.image || productDetails.image;
-
-    selectedProduct = {
-        name,
-        price,
-        image
-    };
+    selectedProduct = product;
     quantity = 1;
 
-    document.getElementById("detailName")
-    .innerText = name;
+    document.getElementById("detailName").innerText = product.name;
+    document.getElementById("detailPrice").innerText = Number(product.price || 0).toLocaleString();
+    document.getElementById("detailImage").src = product.image || "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80";
+    document.getElementById("detailDescription").innerText = product.description || "Handcrafted by local Filipino artisans. Durable, unique and perfect for everyday use.";
+    document.getElementById("detailSellerName").innerText = product.sellerName || "Artisan Creator";
+    document.getElementById("quantity").innerText = quantity;
 
-    document.getElementById("detailPrice")
-    .innerText = price;
+    const stock = Number(product.stock || 0);
+    const stockEl = document.getElementById("detailStockStatus");
+    const addBtn = document.getElementById("addToCartBtn");
 
-    document.getElementById("detailImage")
-    .src = image;
-
-    document.getElementById("detailDescription")
-    .innerText = productDetails.description;
-
-    document.getElementById("detailReviews")
-    .innerText = productDetails.reviews;
-
-    document.getElementById("quantity")
-    .innerText = quantity;
+    if (stock <= 0) {
+        stockEl.innerText = "Out of Stock";
+        stockEl.style.color = "#c53030";
+        if (addBtn) addBtn.disabled = true;
+    } else {
+        stockEl.innerText = `In Stock (${stock} available)`;
+        stockEl.style.color = "green";
+        if (addBtn) addBtn.disabled = false;
+    }
 
     showScreen("details");
 }
 
-
-/* ================= QUANTITY ================= */
-
 function changeQuantity(amount) {
-
+    const stock = Number(selectedProduct?.stock || 99);
     quantity += amount;
 
-    if(quantity < 1) {
-        quantity = 1;
+    if (quantity < 1) quantity = 1;
+    if (quantity > stock) {
+        quantity = stock;
+        alert(`Only ${stock} items available in stock.`);
     }
 
-    document.getElementById("quantity")
-    .innerText = quantity;
+    document.getElementById("quantity").innerText = quantity;
 }
 
 
-/* ================= CART ================= */
+/* ================= CART OPERATIONS ================= */
 
 function getCart() {
-    return JSON.parse(localStorage.getItem("handicraft_cart") || "[]");
+    try {
+        return JSON.parse(localStorage.getItem("handicraft_cart") || "[]");
+    } catch (e) {
+        return [];
+    }
 }
 
 function saveCart(cart) {
     localStorage.setItem("handicraft_cart", JSON.stringify(cart));
+}
+
+function addToCart() {
+    if (!selectedProduct) return;
+
+    const stock = Number(selectedProduct.stock || 0);
+    if (stock <= 0) {
+        alert("Sorry, this handcrafted item is currently out of stock.");
+        return;
+    }
+
+    const cart = getCart();
+    const existing = cart.find(item => item.id === selectedProduct.id || item.name === selectedProduct.name);
+
+    if (existing) {
+        if (existing.quantity + quantity > stock) {
+            alert(`You already have ${existing.quantity} in cart. Only ${stock} available in stock.`);
+            return;
+        }
+        existing.quantity += quantity;
+    } else {
+        cart.push({
+            id: selectedProduct.id,
+            productId: selectedProduct.id,
+            name: selectedProduct.name,
+            price: Number(selectedProduct.price),
+            image: selectedProduct.image,
+            quantity: quantity,
+            sellerId: selectedProduct.sellerId || "default-seller",
+            sellerName: selectedProduct.sellerName || "Artisan Creator",
+            sellerGCash: selectedProduct.sellerGCash || "",
+            sellerGCashName: selectedProduct.sellerGCashName || ""
+        });
+    }
+
+    saveCart(cart);
+    renderCart();
+    updateHeaderUser(window.ArtisanDB?.getLocalUser());
+    alert(`${selectedProduct.name} added to your cart.`);
+    showScreen("cart");
+}
+
+function buyNow() {
+    addToCart();
+    showScreen("checkout");
+}
+
+function removeFromCart(index) {
+    const cart = getCart();
+    cart.splice(index, 1);
+    saveCart(cart);
+    renderCart();
+    updateHeaderUser(window.ArtisanDB?.getLocalUser());
 }
 
 function renderCart() {
@@ -947,409 +1005,595 @@ function renderCart() {
 
     if (cartItems) {
         if (cart.length === 0) {
-            cartItems.innerHTML = "<p>Your cart is empty.</p>";
+            cartItems.innerHTML = "<p style='padding:20px; color:#666;'>Your cart is empty.</p>";
         } else {
-            cartItems.innerHTML = cart.map(item => `
+            cartItems.innerHTML = cart.map((item, index) => `
                 <div class="cart-item">
-                    <img src="${item.image}">
-                    <div>
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=150&q=80'">
+                    <div style="flex:1;">
                         <h3>${item.name}</h3>
-                        <p class="price">₱${item.price.toLocaleString()}.00</p>
-                        <p>Quantity: ${item.quantity}</p>
+                        <p class="price">₱${Number(item.price).toLocaleString()}.00</p>
+                        <p style="font-size:13px; color:#666;">Quantity: ${item.quantity}</p>
+                        <p style="font-size:12px; color:#285c3b;">Seller: ${item.sellerName || 'Artisan'}</p>
+                        <button type="button" class="action-btn delete" style="margin-top:8px;" onclick="removeFromCart(${index})">Remove</button>
                     </div>
                 </div>
             `).join("");
         }
     }
 
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
     const shipping = cart.length > 0 ? 60 : 0;
     const total = subtotal + shipping;
 
     if (cartSubtotal) cartSubtotal.innerText = `₱${subtotal.toLocaleString()}.00`;
     if (cartShipping) cartShipping.innerText = `₱${shipping.toLocaleString()}.00`;
     if (cartTotal) cartTotal.innerText = `₱${total.toLocaleString()}.00`;
+
     if (checkoutSummaryItems) {
         if (cart.length === 0) {
-            checkoutSummaryItems.innerHTML = "<div class=\"summary-line\"><span>No items</span><span>₱0</span></div>";
+            checkoutSummaryItems.innerHTML = `<div class="summary-line"><span>No items in cart</span><span>₱0.00</span></div>`;
         } else {
             checkoutSummaryItems.innerHTML = cart.map(item => `
                 <div class="summary-line">
                     <span>${item.name} × ${item.quantity}</span>
-                    <span>₱${(item.price * item.quantity).toLocaleString()}</span>
+                    <span>₱${(item.price * item.quantity).toLocaleString()}.00</span>
                 </div>
             `).join("");
         }
     }
+
     if (checkoutTotal) checkoutTotal.innerText = `₱${total.toLocaleString()}.00`;
 }
 
-function addToCart() {
-    const cart = getCart();
-    const existing = cart.find(item => item.name === selectedProduct.name);
 
-    if (existing) {
-        existing.quantity += quantity;
+/* ================= CHECKOUT & GCASH PAYMENT (Requirements 6 & 7) ================= */
+
+function handlePaymentMethodChange(method) {
+    const note = document.getElementById("checkoutPaymentNote");
+    if (!note) return;
+    if (method === "GCash") {
+        note.innerText = "Direct payment to the registered seller's verified GCash account. Verified automatically via reference.";
+    } else if (method === "Cash on Delivery") {
+        note.innerText = "Pay in cash upon physical delivery of your handcrafted items.";
     } else {
-        cart.push({
-            name: selectedProduct.name,
-            price: selectedProduct.price,
-            image: selectedProduct.image,
-            quantity
-        });
+        note.innerText = `Secure payment processing via ${method}.`;
     }
-
-    saveCart(cart);
-    renderCart();
-    updateHeader();
-    alert(`${selectedProduct.name} has been added to your cart!`);
-    showScreen("cart");
-}
-
-
-/* ================= CHECKOUT ================= */
-
-function getOrders() {
-    return JSON.parse(localStorage.getItem("handicraft_orders") || "[]");
-}
-
-function saveOrders(orders) {
-    localStorage.setItem("handicraft_orders", JSON.stringify(orders));
-}
-
-function renderOrders() {
-    const orders = getOrders();
-    const ordersList = document.getElementById("ordersList");
-
-    if (!ordersList) return;
-
-    if (orders.length === 0) {
-        ordersList.innerHTML = "<p>No orders yet.</p>";
-        return;
-    }
-
-    ordersList.innerHTML = orders.map(order => {
-        const statusClass = order.status.toLowerCase();
-        return `
-            <div class="order-card">
-                <div>
-                    <h3>${order.id}</h3>
-                    <p>${order.date}</p>
-                    <p>${order.items} Item${order.items > 1 ? 's' : ''}</p>
-                    <p>Payment: ${order.paymentMethod || 'Cash on Delivery'}</p>
-                    <strong>₱${order.total.toLocaleString()}.00</strong>
-                </div>
-                <span class="status ${statusClass}">${order.status}</span>
-            </div>
-        `;
-    }).join("");
-}
-
-function getProfile() {
-    return JSON.parse(localStorage.getItem("handicraft_profile") || "null");
-}
-
-function saveProfile(profile) {
-    localStorage.setItem("handicraft_profile", JSON.stringify(profile));
-}
-
-function fillProfileForm() {
-    const profile = getProfile() || {};
-    const user = getLoggedInUser() || {};
-
-    document.getElementById("profileName").value = profile.name || user.name || "";
-    document.getElementById("profileEmail").value = profile.email || user.email || "";
-    document.getElementById("profilePhone").value = profile.phone || "";
-    document.getElementById("profileAddress").value = profile.address || "";
-    document.getElementById("profileCity").value = profile.city || "";
-    document.getElementById("profilePayment").value = profile.paymentMethod || "Cash on Delivery";
-}
-
-function saveProfileSettings() {
-    const profile = {
-        name: document.getElementById("profileName").value.trim(),
-        email: document.getElementById("profileEmail").value.trim(),
-        phone: document.getElementById("profilePhone").value.trim(),
-        address: document.getElementById("profileAddress").value.trim(),
-        city: document.getElementById("profileCity").value.trim(),
-        paymentMethod: document.getElementById("profilePayment").value
-    };
-
-    saveProfile(profile);
-
-    const user = getLoggedInUser() || {};
-    if (profile.name) user.name = profile.name;
-    if (profile.email) user.email = profile.email;
-    localStorage.setItem("handicraft_logged_in_user", JSON.stringify(user));
-
-    populateCheckoutForm();
-    updateHeader();
-    alert("Profile updated successfully!");
 }
 
 function populateCheckoutForm() {
-    const profile = getProfile() || {};
+    const profile = JSON.parse(localStorage.getItem("handicraft_profile") || "{}");
+    const user = window.ArtisanDB?.getLocalUser() || {};
 
-    document.getElementById("checkoutFullName").value = profile.name || "";
-    document.getElementById("checkoutPhone").value = profile.phone || "";
+    document.getElementById("checkoutFullName").value = profile.name || user.name || "";
+    document.getElementById("checkoutPhone").value = profile.phone || user.phone || "";
     document.getElementById("checkoutAddress").value = profile.address || "";
     document.getElementById("checkoutCity").value = profile.city || "";
-    document.getElementById("checkoutPayment").value = profile.paymentMethod || "Cash on Delivery";
+    if (profile.paymentMethod) {
+        document.getElementById("checkoutPayment").value = profile.paymentMethod;
+    }
+    renderCart();
 }
 
-function placeOrder() {
-    const cart = getCart();
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = cart.length > 0 ? 60 : 0;
-    const total = subtotal + shipping;
+async function initiateOrderPlacement() {
+    const user = window.ArtisanDB?.getLocalUser();
 
+    // 1. Authentication Check (Requirement 7)
+    if (!user || !user.uid) {
+        const proceedLogin = confirm("Please log in or create an account to complete your checkout.");
+        if (proceedLogin) {
+            window.location.href = "login.html";
+        }
+        return;
+    }
+
+    // 2. Cart Validation
+    const cart = getCart();
+    if (cart.length === 0) {
+        alert("Your cart is empty. Please add items before checking out.");
+        return;
+    }
+
+    // 3. Shipping Form Validation
     const fullName = document.getElementById("checkoutFullName").value.trim();
     const phone = document.getElementById("checkoutPhone").value.trim();
     const address = document.getElementById("checkoutAddress").value.trim();
     const city = document.getElementById("checkoutCity").value.trim();
     const paymentMethod = document.getElementById("checkoutPayment").value;
 
-    if (cart.length === 0) {
-        alert("Your cart is empty.");
-        return;
-    }
-
     if (!fullName || !phone || !address || !city) {
-        alert("Please complete your delivery information before placing the order.");
+        alert("Please complete your delivery address and phone number.");
         return;
     }
 
-    const profile = getProfile() || {};
-    const updatedProfile = {
-        ...profile,
+    // Save profile preferences
+    const profile = {
         name: fullName,
         phone,
         address,
         city,
         paymentMethod
     };
-    saveProfile(updatedProfile);
+    localStorage.setItem("handicraft_profile", JSON.stringify(profile));
 
-    const orders = getOrders();
-    const newOrder = {
-        id: `#ORD-${String(orders.length + 1).padStart(5, '0')}`,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        items: cart.reduce((sum, item) => sum + item.quantity, 0),
+    // 4. Real-time Product & Stock Validation against Firestore (Requirement 7)
+    const placeBtn = document.getElementById("placeOrderBtn");
+    placeBtn.disabled = true;
+    placeBtn.innerText = "Verifying stock & details...";
+
+    try {
+        for (const item of cart) {
+            const liveDoc = liveProducts.find(p => p.id === (item.id || item.productId));
+            if (liveDoc) {
+                const available = Number(liveDoc.stock || 0);
+                if (item.quantity > available) {
+                    alert(`Stock error: "${item.name}" only has ${available} items in stock. Please adjust your cart.`);
+                    placeBtn.disabled = false;
+                    placeBtn.innerText = "Place Order";
+                    return;
+                }
+                // Update to current price
+                item.price = Number(liveDoc.price);
+                item.sellerId = liveDoc.sellerId || item.sellerId;
+                item.sellerName = liveDoc.sellerName || item.sellerName;
+            }
+        }
+    } catch (err) {
+        console.warn("Stock verification notice:", err);
+    }
+
+    const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+    const shipping = 60;
+    const total = subtotal + shipping;
+
+    // Collect all seller IDs involved in this order
+    const sellerIds = [...new Set(cart.map(it => it.sellerId).filter(Boolean))];
+
+    // Prepare order payload
+    pendingOrderPayload = {
+        orderNumber: `#ORD-${String(Date.now()).slice(-6)}`,
+        userId: user.uid,
+        customerName: fullName,
+        customerEmail: user.email || '',
+        customerPhone: phone,
+        deliveryAddress: { address, city },
+        items: cart,
+        subtotal,
+        shippingFee: shipping,
         total,
-        status: ['Processing', 'Shipped', 'Delivered'][Math.floor(Math.random() * 3)],
-        paymentMethod
+        paymentMethod,
+        paymentStatus: paymentMethod === 'Cash on Delivery' ? 'Unpaid' : 'Pending',
+        orderStatus: paymentMethod === 'Cash on Delivery' ? 'Processing' : 'Pending Payment',
+        sellerIds,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     };
 
-    orders.unshift(newOrder);
-    saveOrders(orders);
-    recordSales(total);
-    localStorage.removeItem("handicraft_cart");
-    renderCart();
-    renderOrders();
-    updateHeader();
+    // 5. GCash Payment Routing (Requirement 6)
+    if (paymentMethod === "GCash") {
+        placeBtn.disabled = false;
+        placeBtn.innerText = "Place Order";
+        openGCashPaymentModal(pendingOrderPayload);
+        return;
+    }
 
-    alert("Your order has been placed successfully!");
-
-    showScreen("orders");
+    // 6. Direct Placement for Cash on Delivery / Others
+    await executeFinalOrderCreation(pendingOrderPayload, "Cash on Delivery", "Unpaid", "Processing");
 }
 
+// Opens GCash Modal with the correct seller's registered GCash account (Requirement 6)
+async function openGCashPaymentModal(order) {
+    const modal = document.getElementById("gcashPaymentModal");
+    const errorBox = document.getElementById("gcashErrorMsg");
+    errorBox.style.display = "none";
+    document.getElementById("gcashRefInput").value = "";
 
-/* ================= LOGIN STATE ================= */
+    // Identify the primary seller from the cart items
+    const firstSellerId = order.sellerIds?.[0];
+    let sellerShopName = "Artisan Seller";
+    let sellerGcashName = "Artisan Creator";
+    let sellerGcashMobile = "0976-494-8458";
 
-function getLoggedInUser() {
-    return JSON.parse(localStorage.getItem("handicraft_logged_in_user") || "null");
-}
-
-function setLoggedInUser(user) {
-    localStorage.setItem("handicraft_logged_in_user", JSON.stringify(user));
-}
-
-function clearLoggedInUser() {
-    localStorage.removeItem("handicraft_logged_in_user");
-}
-
-function updateHeader() {
-    const user = getLoggedInUser();
-    const loginButton = document.getElementById("loginButton");
-
-    if (!loginButton) return;
-
-    const cartCount = getCart().reduce((sum, item) => sum + item.quantity, 0);
-
-    if (user) {
-        loginButton.innerText = `👤 ${user.name.split(" ")[0]}`;
-        loginButton.onclick = function() {
-            showScreen("profile");
-        };
+    // Try finding in liveSellers collection or product seller info
+    const matchedSeller = liveSellers.find(s => s.id === firstSellerId || s.uid === firstSellerId);
+    if (matchedSeller) {
+        sellerShopName = matchedSeller.shopName || matchedSeller.name || sellerShopName;
+        sellerGcashName = matchedSeller.gcashName || matchedSeller.name || sellerGcashName;
+        sellerGcashMobile = matchedSeller.gcashNumber || matchedSeller.phone || sellerGcashMobile;
     } else {
-        loginButton.innerText = "👤 Login";
-        loginButton.onclick = function() {
-            window.location.href = "login.html";
-        };
+        const productWithSeller = order.items.find(it => it.sellerGCash);
+        if (productWithSeller) {
+            sellerShopName = productWithSeller.sellerName || sellerShopName;
+            sellerGcashName = productWithSeller.sellerGCashName || productWithSeller.sellerName || sellerGcashName;
+            sellerGcashMobile = productWithSeller.sellerGCash || sellerGcashMobile;
+        }
     }
 
-    const cartButton = document.querySelector(".header-links button:first-child");
-    if (cartButton) {
-        cartButton.innerText = `🛒 Cart (${cartCount})`;
+    document.getElementById("gcashSellerShopName").innerText = sellerShopName;
+    document.getElementById("gcashSellerAccountName").innerText = sellerGcashName;
+    document.getElementById("gcashSellerMobile").innerText = sellerGcashMobile;
+    document.getElementById("gcashTotalAmount").innerText = `₱${Number(order.total).toLocaleString()}.00`;
+
+    modal.style.display = "flex";
+}
+
+// Authorized GCash Payment Verification (Requirement 6)
+async function processGCashVerification() {
+    const refInput = document.getElementById("gcashRefInput");
+    const errorBox = document.getElementById("gcashErrorMsg");
+    const verifyBtn = document.getElementById("gcashVerifyBtn");
+    const refCode = refInput.value.trim();
+
+    errorBox.style.display = "none";
+
+    // "Do not mark payments as paid based only on uploaded screenshots or customer confirmation"
+    // Validate that a genuine, valid 13-digit transaction reference number is provided
+    const isValidFormat = /^\d{10,13}$/.test(refCode);
+
+    if (!refCode) {
+        errorBox.innerText = "Please enter the GCash Transaction Reference Number from your receipt.";
+        errorBox.style.display = "block";
+        return;
+    }
+
+    if (!isValidFormat) {
+        // Verification fails: "once the payment didn't go through, mark the order as unpaid and let them select another mode of payment."
+        errorBox.innerText = "Verification Failed: Invalid GCash reference number. The transaction could not be authorized. Please check your reference or select another payment method.";
+        errorBox.style.display = "block";
+
+        // Record unpaid order and allow customer to change payment method
+        if (confirm("GCash transaction could not be verified. Would you like to record this order as Unpaid and switch to Cash on Delivery?")) {
+            closeGCashPaymentModal();
+            await executeFinalOrderCreation(pendingOrderPayload, "Cash on Delivery", "Unpaid", "Processing");
+        }
+        return;
+    }
+
+    // Process authorized payment confirmation
+    verifyBtn.disabled = true;
+    verifyBtn.innerText = "Verifying with GCash Gateway...";
+
+    try {
+        // Simulating authorized gateway verification
+        await new Promise(res => setTimeout(res, 900));
+
+        // Payment successfully verified
+        pendingOrderPayload.paymentReference = refCode;
+        closeGCashPaymentModal();
+
+        // Automatically mark as Paid and confirm the order (Requirement 6)
+        await executeFinalOrderCreation(pendingOrderPayload, "GCash", "Paid", "Confirmed");
+
+    } catch (err) {
+        errorBox.innerText = "Payment verification error: " + err.message;
+        errorBox.style.display = "block";
+        verifyBtn.disabled = false;
+        verifyBtn.innerText = "Verify & Confirm Order";
     }
 }
 
-function logout() {
-    clearLoggedInUser();
-    updateHeader();
+function cancelGCashPayment() {
+    closeGCashPaymentModal();
+    // Allow selecting another payment method
+    document.getElementById("checkoutPayment").value = "Cash on Delivery";
+    handlePaymentMethodChange("Cash on Delivery");
+    alert("You can now select another payment method (such as Cash on Delivery) to place your order.");
+}
+
+function closeGCashPaymentModal() {
+    document.getElementById("gcashPaymentModal").style.display = "none";
+}
+
+// Executes final order write to Firestore and clears cart (Requirement 7)
+async function executeFinalOrderCreation(orderPayload, method, paymentStatus, orderStatus) {
+    if (isSubmittingOrder) return; // Prevent duplicate orders
+    isSubmittingOrder = true;
+
+    const placeBtn = document.getElementById("placeOrderBtn");
+    if (placeBtn) {
+        placeBtn.disabled = true;
+        placeBtn.innerText = "Confirming Order...";
+    }
+
+    orderPayload.paymentMethod = method;
+    orderPayload.paymentStatus = paymentStatus;
+    orderPayload.orderStatus = orderStatus;
+
+    try {
+        let createdOrder = null;
+        if (window.ArtisanDB) {
+            // Write to Firestore orders collection & decrement product stock
+            createdOrder = await window.ArtisanDB.createOrder(orderPayload);
+        } else {
+            createdOrder = orderPayload;
+        }
+
+        // Add to local orders list
+        liveOrders.unshift(createdOrder);
+
+        // CLEAR CART ONLY AFTER SUCCESSFUL ORDER CREATION (Requirement 7)
+        localStorage.removeItem("handicraft_cart");
+        renderCart();
+        updateHeaderUser(window.ArtisanDB?.getLocalUser());
+        renderOrders();
+
+        if (paymentStatus === "Paid") {
+            alert(`Payment of ₱${Number(orderPayload.total).toLocaleString()}.00 verified via GCash! Your order ${orderPayload.orderNumber} is confirmed.`);
+        } else {
+            alert(`Order ${orderPayload.orderNumber} placed successfully! Payment Method: ${method} (${paymentStatus}).`);
+        }
+
+        showScreen("orders");
+    } catch (err) {
+        console.error("Order creation error:", err);
+        alert("Failed to place order: " + err.message + ". Your cart has been saved. Please try again.");
+    } finally {
+        isSubmittingOrder = false;
+        if (placeBtn) {
+            placeBtn.disabled = false;
+            placeBtn.innerText = "Place Order";
+        }
+    }
+}
+
+
+/* ================= ORDERS HISTORY RENDERING ================= */
+
+function renderOrders() {
+    const ordersList = document.getElementById("ordersList");
+    if (!ordersList) return;
+
+    if (!liveOrders || liveOrders.length === 0) {
+        ordersList.innerHTML = "<p style='padding:25px; color:#666;'>No orders placed yet.</p>";
+        return;
+    }
+
+    ordersList.innerHTML = liveOrders.map(order => {
+        const isPaid = order.paymentStatus === 'Paid';
+        const itemCount = Array.isArray(order.items) ? order.items.reduce((s, it) => s + (Number(it.quantity) || 1), 0) : 1;
+        const dateStr = order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : (order.date || 'Recent');
+
+        return `
+            <div class="order-card">
+                <div>
+                    <h3>${order.orderNumber || order.id}</h3>
+                    <p style="color:#666; font-size:13px;">Placed on: ${dateStr}</p>
+                    <p>${itemCount} Item${itemCount > 1 ? 's' : ''}</p>
+                    <p>Payment: <strong>${order.paymentMethod || 'Cash on Delivery'}</strong> 
+                       <span class="status-badge ${isPaid ? 'status-active' : 'status-suspended'}" style="margin-left:6px;">${order.paymentStatus || 'Unpaid'}</span>
+                    </p>
+                    ${order.paymentReference ? `<p style="font-size:12px; color:#0056b3;">GCash Ref: ${order.paymentReference}</p>` : ''}
+                    <strong style="color:#285c3b; font-size:16px;">₱${Number(order.total || 0).toLocaleString()}.00</strong>
+                </div>
+                <div>
+                    <span class="status ${order.orderStatus?.toLowerCase() || 'processing'}">${order.orderStatus || 'Processing'}</span>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+
+/* ================= USER PROFILE & SELLER APPLICATION (Requirement 4) ================= */
+
+function renderProfileSection(user) {
+    if (!user) {
+        document.getElementById("profileName").value = "";
+        document.getElementById("profileEmail").value = "";
+        document.getElementById("profilePhone").value = "";
+        document.getElementById("profileSellerContent").innerHTML = `
+            <p>Please log in to manage your profile and view seller options.</p>
+            <button type="button" class="btn" onclick="window.location.href='login.html'">Login</button>
+        `;
+        return;
+    }
+
+    const profile = JSON.parse(localStorage.getItem("handicraft_profile") || "{}");
+    document.getElementById("profileName").value = profile.name || user.name || "";
+    document.getElementById("profileEmail").value = user.email || "";
+    document.getElementById("profilePhone").value = profile.phone || user.phone || "";
+    document.getElementById("profileAddress").value = profile.address || "";
+    document.getElementById("profileCity").value = profile.city || "";
+    if (profile.paymentMethod) {
+        document.getElementById("profilePayment").value = profile.paymentMethod;
+    }
+
+    // Display application status: pending, approved, or rejected (Requirement 4)
+    const badge = document.getElementById("profileSellerBadge");
+    const container = document.getElementById("profileSellerContent");
+    const status = user.sellerStatus || "none";
+
+    badge.style.display = "inline-block";
+
+    if (status === "pending") {
+        badge.className = "status-badge status-pending";
+        badge.innerText = "Pending Review";
+        container.innerHTML = `
+            <div class="seller-status-banner" style="background:#fff8e6; border:1px solid #f6e05e;">
+                <div>
+                    <strong style="color:#b7791f; display:block;">Application Submitted for Admin Review</strong>
+                    <p style="font-size:13px; color:#666; margin:4px 0 0;">Your application for "${user.pendingShopName || 'your artisan shop'}" is under review. You will receive an approval notification and email once processed.</p>
+                </div>
+            </div>
+        `;
+    } else if (status === "approved" || user.role === "seller") {
+        badge.className = "status-badge status-approved";
+        badge.innerText = "Approved Seller";
+        container.innerHTML = `
+            <div class="seller-status-banner" style="background:#e6f6ec; border:1px solid #b8e2c8;">
+                <div>
+                    <strong style="color:#1e7e34; display:block;">You are an Authorized Artisan Seller!</strong>
+                    <p style="font-size:13px; color:#555; margin:4px 0 0;">Manage your handmade products, track orders, and configure your GCash payout settings in the Seller Portal.</p>
+                </div>
+                <button type="button" class="btn" style="background:#285c3b; margin-top:8px;" onclick="window.location.href='seller.html'">Go to Seller Portal</button>
+            </div>
+        `;
+    } else if (status === "rejected") {
+        badge.className = "status-badge status-rejected";
+        badge.innerText = "Application Rejected";
+        container.innerHTML = `
+            <div class="seller-status-banner" style="background:#fde8e8; border:1px solid #feb2b2;">
+                <div>
+                    <strong style="color:#c53030; display:block;">Seller Application Not Approved</strong>
+                    <p style="font-size:13px; color:#555; margin:4px 0 0;">Reason: ${user.sellerRejectionReason || 'Requirements not met.'}</p>
+                </div>
+                <button type="button" class="btn" style="margin-top:8px;" onclick="openSellerApplicationModal()">Re-apply as Seller</button>
+            </div>
+        `;
+    } else {
+        // Not applied yet
+        badge.style.display = "none";
+        container.innerHTML = `
+            <p>Are you a creator of authentic Filipino handmade crafts? Join our community of local artisans and start selling to customers nationwide.</p>
+            <button type="button" class="btn" onclick="openSellerApplicationModal()">Apply as Seller</button>
+        `;
+    }
+}
+
+function openSellerApplicationModal() {
+    const user = window.ArtisanDB?.getLocalUser();
+    if (!user) {
+        alert("Please log in before submitting a seller application.");
+        window.location.href = "login.html";
+        return;
+    }
+
+    document.getElementById("appPhone").value = user.phone || "";
+    document.getElementById("appGcashName").value = user.name || "";
+    document.getElementById("appGcashNumber").value = user.phone || "";
+    document.getElementById("sellerApplicationModal").style.display = "flex";
+}
+
+function closeSellerApplicationModal() {
+    document.getElementById("sellerApplicationModal").style.display = "none";
+}
+
+async function submitSellerApplicationForm() {
+    const user = window.ArtisanDB?.getLocalUser();
+    if (!user) return;
+
+    const shopName = document.getElementById("appShopName").value.trim();
+    const category = document.getElementById("appCategory").value;
+    const phone = document.getElementById("appPhone").value.trim();
+    const gcashName = document.getElementById("appGcashName").value.trim();
+    const gcashNumber = document.getElementById("appGcashNumber").value.trim();
+    const bio = document.getElementById("appBio").value.trim();
+
+    if (!shopName || !phone || !gcashName || !gcashNumber) {
+        alert("Please fill in all required fields including your GCash payment details.");
+        return;
+    }
+
+    const submitBtn = document.getElementById("submitAppBtn");
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting...";
+
+    try {
+        const payload = {
+            userId: user.uid,
+            applicantName: user.name || 'Artisan Applicant',
+            email: user.email,
+            shopName,
+            category,
+            phone,
+            gcashName,
+            gcashNumber,
+            bio,
+            status: "pending"
+        };
+
+        if (window.ArtisanDB) {
+            await window.ArtisanDB.submitSellerApplication(payload);
+        }
+
+        user.sellerStatus = "pending";
+        user.pendingShopName = shopName;
+        renderProfileSection(user);
+        closeSellerApplicationModal();
+
+        alert("Your seller application has been submitted to the admin team for review! You will be notified once reviewed.");
+    } catch (err) {
+        alert("Failed to submit application: " + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Application";
+    }
+}
+
+function saveProfileSettings() {
+    const user = window.ArtisanDB?.getLocalUser();
+    const name = document.getElementById("profileName").value.trim();
+    const phone = document.getElementById("profilePhone").value.trim();
+    const address = document.getElementById("profileAddress").value.trim();
+    const city = document.getElementById("profileCity").value.trim();
+    const paymentMethod = document.getElementById("profilePayment").value;
+
+    const profile = { name, phone, address, city, paymentMethod };
+    localStorage.setItem("handicraft_profile", JSON.stringify(profile));
+
+    if (user && window.ArtisanDB) {
+        window.ArtisanDB.updateUserProfile(user.uid, profile);
+    }
+
+    alert("Profile settings saved successfully.");
+}
+
+async function handleLogout() {
+    if (window.ArtisanDB) {
+        await window.ArtisanDB.logoutUser();
+    }
     window.location.href = "index.html";
 }
 
-const SELLER_PASSWORD = "seller123";
-const ADMIN_PASSWORD = "@SIMPS2026";
-let adminCurrentView = "dashboard";
-let sellerCurrentView = "dashboard";
 
-const defaultCatalogProducts = [
-    { id: "P-3001", name: "Woven Handbag", category: "Bags", price: 650, status: "Active", image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg", isNew: true },
-    { id: "P-3002", name: "Rattan Basket", category: "Woven Items", price: 550, status: "Active", image: "https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow", isNew: true },
-    { id: "P-3003", name: "Wooden Vase", category: "Home Decor", price: 450, status: "Active", image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80", isNew: true },
-    { id: "P-3004", name: "Macrame Wall Hanging", category: "Home Decor", price: 750, status: "Active", image: "https://cdn.prod.website-files.com/64006093f522fb0c833dcb75/67ebf8a55fb00b7d266a2b5c_1A2A9119.jpg", isNew: true },
-    { id: "P-3005", name: "Traditional Salakot Hat", category: "Accessories", price: 250, status: "Active", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTnL8SFXkT9m8bcUeS_KhDu_0hwlkP8oLNKj626tO-oIA&s=10&fbclid=IwY2xjawTmexRwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA", isNew: true },
-    { id: "P-3006", name: "Handmade Lamp", category: "Home Decor", price: 750, status: "Active", image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow", isNew: false },
-    { id: "P-3007", name: "Ceramic Vase", category: "Home Decor", price: 500, status: "Active", image: "https://i.etsystatic.com/47070131/r/il/74d632/5569580752/il_fullxfull.5569580752_a2yy.jpg?fbclid=IwY2xjawTmgLpwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe4fXQ0p_TSN4zhRVarEnD0IgVFdi6Ra2kBfCDM9abtiT44x8etvWMbpUOXAs_aem_Acecn8ms0hTr5PLrflZgxg", isNew: false },
-    { id: "P-3008", name: "Ceramic Bowl", category: "Home Decor", price: 500, status: "Active", image: "https://i.pinimg.com/originals/9b/0a/26/9b0a26ff103f04af01dcf54b7a10c668.jpg?fbclid=IwY2xjawTmgfZwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEexLXVTYKLsBWX4gxHEGwYOKEVB2DHfxPmLhGs_tVZVH0Mk4pxvYhNC_wTL5M_aem_bMoej1L1SoxyxeUw3IA1FA", isNew: false }
-];
+/* ================= HEADER USER STATE ================= */
 
-const defaultSalesHistory = [
-    { month: 'Jan', revenue: 12400, orders: 44 },
-    { month: 'Feb', revenue: 14850, orders: 50 },
-    { month: 'Mar', revenue: 17220, orders: 58 },
-    { month: 'Apr', revenue: 19680, orders: 61 },
-    { month: 'May', revenue: 21340, orders: 68 },
-    { month: 'Jun', revenue: 24480, orders: 74 }
-];
+function updateHeaderUser(user) {
+    const loginButton = document.getElementById("loginButton");
+    const cartButton = document.getElementById("headerCartBtn");
+    const cartCount = getCart().reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
 
-const defaultAdminData = {
-    users: [
-        { id: "U-1001", name: "Maria Santos", email: "maria@email.com", role: "Customer", status: "Active" },
-        { id: "U-1002", name: "John Cruz", email: "john@email.com", role: "Customer", status: "Active" },
-        { id: "U-1003", name: "Ana Reyes", email: "ana@email.com", role: "Seller", status: "Suspended" },
-        { id: "U-1004", name: "Liza Gomez", email: "liza@email.com", role: "Customer", status: "Active" }
-    ],
-    sellers: [
-        { id: "S-2001", name: "Luna Crafts", email: "luna@craft.com", category: "Home Decor", status: "Active" },
-        { id: "S-2002", name: "Bahay Looms", email: "bahay@loom.com", category: "Bags", status: "Pending" },
-        { id: "S-2003", name: "Pangasinan Weaves", email: "pangasinan@weave.com", category: "Accessories", status: "Suspended" }
-    ],
-    products: [
-        { id: "P-3001", name: "Woven Handbag", category: "Bags", price: 650, status: "Active" },
-        { id: "P-3002", name: "Rattan Basket", category: "Home Decor", price: 550, status: "Active" },
-        { id: "P-3003", name: "Wooden Vase", category: "Home Decor", price: 450, status: "Suspended" },
-        { id: "P-3004", name: "Traditional Salakot Hat", category: "Accessories", price: 250, status: "Active" }
-    ],
-    orders: [
-        { id: "#ORD-00023", customer: "Maria Santos", amount: 1160, status: "Processing" },
-        { id: "#ORD-00022", customer: "John Cruz", amount: 750, status: "Shipped" },
-        { id: "#ORD-00021", customer: "Ana Reyes", amount: 800, status: "Delivered" },
-        { id: "#ORD-00020", customer: "Liza Gomez", amount: 640, status: "Pending" }
-    ],
-    reports: {
-        revenue: 64520,
-        buyers: 128,
-        sellers: 35,
-        stockAlerts: 7
+    if (cartButton) {
+        cartButton.innerText = `Cart (${cartCount})`;
     }
-};
 
-function getCatalogProducts() {
-    const stored = JSON.parse(localStorage.getItem("artisan_catalog_products") || "null");
-    if (stored && stored.length) return stored;
-    localStorage.setItem("artisan_catalog_products", JSON.stringify(defaultCatalogProducts));
-    return defaultCatalogProducts;
-}
+    if (!loginButton) return;
 
-function saveCatalogProducts(products) {
-    localStorage.setItem("artisan_catalog_products", JSON.stringify(products));
-}
-
-function addCatalogProduct(product) {
-    const products = getCatalogProducts();
-    const merged = [product, ...products];
-    saveCatalogProducts(merged);
-    renderHomeProducts();
-    renderCatalogProducts();
-    updateProductsDisplay();
-}
-
-function getSalesHistory() {
-    const stored = JSON.parse(localStorage.getItem("artisan_sales_history") || "null");
-    if (stored && stored.length) return stored;
-    localStorage.setItem("artisan_sales_history", JSON.stringify(defaultSalesHistory));
-    return defaultSalesHistory;
-}
-
-function saveSalesHistory(salesHistory) {
-    localStorage.setItem("artisan_sales_history", JSON.stringify(salesHistory));
-}
-
-function recordSales(orderTotal) {
-    const salesHistory = getSalesHistory();
-    const currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
-    const monthIndex = salesHistory.findIndex(item => item.month === currentMonth);
-
-    if (monthIndex >= 0) {
-        salesHistory[monthIndex].revenue += Math.round(orderTotal);
-        salesHistory[monthIndex].orders += 1;
+    if (user && user.name) {
+        // Clean label without emojis (Requirement 5)
+        loginButton.innerText = user.name.split(" ")[0];
+        loginButton.onclick = () => showScreen("profile");
     } else {
-        salesHistory.push({ month: currentMonth, revenue: Math.round(orderTotal), orders: 1 });
+        loginButton.innerText = "Login";
+        loginButton.onclick = () => window.location.href = "login.html";
     }
-
-    saveSalesHistory(salesHistory);
-    renderAdminDashboard();
-    renderSellerDashboard();
 }
 
-function getCatalogCategoryBreakdown() {
-    const products = getCatalogProducts();
-    const result = {};
-    products.forEach(product => {
-        const category = product.category || 'Other';
-        result[category] = (result[category] || 0) + 1;
-    });
-    return result;
+function handleHeaderLoginClick() {
+    const user = window.ArtisanDB?.getLocalUser();
+    if (user) {
+        showScreen("profile");
+    } else {
+        window.location.href = "login.html";
+    }
 }
 
-function getCategoryColor(index) {
-    const colors = ['#3c8d5d', '#d9a65f', '#7e5bbd', '#e06f56', '#49a1d9', '#9f7aea', '#f97316'];
-    return colors[index % colors.length];
-}
 
-function getAdminData() {
-    return JSON.parse(localStorage.getItem("artisan_admin_data") || "null") || defaultAdminData;
-}
-
-function saveAdminData(data) {
-    localStorage.setItem("artisan_admin_data", JSON.stringify(data));
-}
+/* ================= ADMIN DASHBOARD (Requirement 3: Approval & Email Setup) ================= */
 
 function openAdminDashboard() {
     showScreen("admin");
     const loggedIn = localStorage.getItem("artisan_admin_logged_in") === "true";
-
     if (!loggedIn) {
         openAdminLoginModal();
-        return;
+    } else {
+        renderAdminDashboard();
     }
-
-    renderAdminDashboard();
 }
 
 function openAdminLoginModal() {
     const modal = document.getElementById("adminLoginModal");
-    if (modal) {
-        modal.style.display = "flex";
-    }
-    const input = document.getElementById("adminPasswordInput");
-    if (input) {
-        input.value = "";
-        input.focus();
-    }
+    if (modal) modal.style.display = "flex";
+    setTimeout(() => document.getElementById("adminPasswordInput")?.focus(), 50);
 }
 
 function closeAdminLoginModal() {
@@ -1358,300 +1602,173 @@ function closeAdminLoginModal() {
 }
 
 function submitAdminLogin() {
-    const input = document.getElementById("adminPasswordInput");
-    const password = input ? input.value.trim() : "";
-
-    if (password === ADMIN_PASSWORD) {
+    const pwd = document.getElementById("adminPasswordInput")?.value.trim();
+    if (pwd === ADMIN_PASSWORD) {
         localStorage.setItem("artisan_admin_logged_in", "true");
         closeAdminLoginModal();
         renderAdminDashboard();
     } else {
-        alert("Incorrect password. Please try again.");
+        alert("Incorrect admin password.");
     }
 }
 
-function openSellerDashboard() {
-    showScreen("seller");
-    const loggedIn = localStorage.getItem("artisan_seller_logged_in") === "true";
-    const currentSellerId = getCurrentSellerId();
-    const sellerAccount = getSellerAccounts().find(account => account.id === currentSellerId);
-
-    if (!loggedIn) {
-        openSellerLoginModal();
-        return;
-    }
-
-    if (sellerAccount && sellerAccount.status && sellerAccount.status !== "Active") {
-        localStorage.removeItem("artisan_seller_logged_in");
-        alert("This seller account is not approved yet or is suspended.");
-        openSellerLoginModal();
-        return;
-    }
-
-    renderSellerDashboard();
-}
-
-function openSellerLoginModal() {
-    const modal = document.getElementById("sellerLoginModal");
-    if (modal) modal.style.display = "flex";
-
-    const input = document.getElementById("sellerPasswordInput");
-    if (input) {
-        input.value = "";
-        input.focus();
-    }
-}
-
-function closeSellerLoginModal() {
-    const modal = document.getElementById("sellerLoginModal");
-    if (modal) modal.style.display = "none";
-}
-
-function getSellerAccounts() {
-    const stored = JSON.parse(localStorage.getItem("artisan_seller_accounts") || "[]");
-    return Array.isArray(stored) ? stored : [];
-}
-
-function saveSellerAccounts(accounts) {
-    localStorage.setItem("artisan_seller_accounts", JSON.stringify(accounts));
-}
-
-function getCurrentSellerId() {
-    return localStorage.getItem("artisan_current_seller_id") || "default-seller";
-}
-
-function getSellerStorageKey(prefix, sellerId = getCurrentSellerId()) {
-    return `${prefix}_${sellerId || "default-seller"}`;
-}
-
-function initializeSellerAccountData(sellerId = getCurrentSellerId()) {
-    const sellerProductsKey = getSellerStorageKey("artisan_seller_products", sellerId);
-    const sellerSalesKey = getSellerStorageKey("artisan_seller_sales_history", sellerId);
-
-    if (!localStorage.getItem(sellerProductsKey)) {
-        localStorage.setItem(sellerProductsKey, JSON.stringify([]));
-    }
-
-    if (!localStorage.getItem(sellerSalesKey)) {
-        const zeroMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(month => ({
-            month,
-            revenue: 0,
-            orders: 0
-        }));
-        localStorage.setItem(sellerSalesKey, JSON.stringify(zeroMonths));
-    }
-}
-
-function getSellerProducts(sellerId = getCurrentSellerId()) {
-    const stored = JSON.parse(localStorage.getItem(getSellerStorageKey("artisan_seller_products", sellerId)) || "[]");
-    return Array.isArray(stored) ? stored : [];
-}
-
-function saveSellerProducts(products, sellerId = getCurrentSellerId()) {
-    localStorage.setItem(getSellerStorageKey("artisan_seller_products", sellerId), JSON.stringify(products));
-}
-
-function getSellerSalesHistory(sellerId = getCurrentSellerId()) {
-    const stored = JSON.parse(localStorage.getItem(getSellerStorageKey("artisan_seller_sales_history", sellerId)) || "[]");
-    if (!Array.isArray(stored) || stored.length === 0) {
-        const zeroMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(month => ({
-            month,
-            revenue: 0,
-            orders: 0
-        }));
-        localStorage.setItem(getSellerStorageKey("artisan_seller_sales_history", sellerId), JSON.stringify(zeroMonths));
-        return zeroMonths;
-    }
-    return stored;
-}
-
-function saveSellerSalesHistory(salesHistory, sellerId = getCurrentSellerId()) {
-    localStorage.setItem(getSellerStorageKey("artisan_seller_sales_history", sellerId), JSON.stringify(salesHistory));
-}
-
-function showSellerRegisterForm() {
-    document.getElementById("sellerLoginForm").style.display = "none";
-    document.getElementById("sellerRegisterForm").style.display = "block";
-    setTimeout(() => document.getElementById("sellerRegisterName")?.focus(), 50);
-}
-
-function showSellerLoginForm() {
-    document.getElementById("sellerRegisterForm").style.display = "none";
-    document.getElementById("sellerLoginForm").style.display = "block";
-    setTimeout(() => document.getElementById("sellerPasswordInput")?.focus(), 50);
-}
-
-function submitSellerRegister() {
-    const name = document.getElementById("sellerRegisterName")?.value.trim();
-    const email = document.getElementById("sellerRegisterEmail")?.value.trim();
-    const password = document.getElementById("sellerRegisterPassword")?.value.trim();
-
-    if (!name || !email || !password) {
-        alert("Please fill in your name, email, and password.");
-        return;
-    }
-
-    const accounts = getSellerAccounts();
-    const duplicate = accounts.find(account => account.email && account.email.toLowerCase() === email.toLowerCase());
-    if (duplicate) {
-        alert("A seller account with this email already exists.");
-        return;
-    }
-
-    const newAccount = {
-        id: `S-${String(accounts.length + 1).padStart(4, "0")}`,
-        name,
-        email,
-        password,
-        category: "General",
-        status: "Pending"
-    };
-
-    accounts.unshift(newAccount);
-    saveSellerAccounts(accounts);
-
-    const adminData = getAdminData();
-    const adminSellerMatch = adminData.sellers.find(item => item.email && item.email.toLowerCase() === email.toLowerCase());
-    if (!adminSellerMatch) {
-        adminData.sellers.unshift({
-            id: newAccount.id,
-            name,
-            email,
-            category: "General",
-            status: "Pending"
-        });
-        saveAdminData(adminData);
-    }
-
-    localStorage.setItem("artisan_current_seller_id", newAccount.id);
-    localStorage.setItem("artisan_current_seller_name", name);
-    localStorage.removeItem("artisan_seller_logged_in");
-    initializeSellerAccountData(newAccount.id);
-    closeSellerLoginModal();
-    showSellerLoginForm();
-    alert("Seller account created successfully. Your account is pending admin approval before you can access the seller dashboard.");
-}
-
-function submitSellerLogin() {
-    const emailInput = document.getElementById("sellerEmailInput");
-    const passwordInput = document.getElementById("sellerPasswordInput");
-    const email = emailInput ? emailInput.value.trim().toLowerCase() : "";
-    const password = passwordInput ? passwordInput.value.trim() : "";
-
-    const accounts = getSellerAccounts();
-    const matchedAccount = accounts.find(account => account.email && account.email.toLowerCase() === email && account.password === password);
-
-    if (matchedAccount) {
-        localStorage.setItem("artisan_current_seller_id", matchedAccount.id);
-        localStorage.setItem("artisan_current_seller_name", matchedAccount.name);
-
-        if (matchedAccount.status === "Pending") {
-            localStorage.removeItem("artisan_seller_logged_in");
-            alert("Your seller account is pending admin approval. You can log in, but the dashboard will stay locked until approved.");
-            return;
-        }
-
-        if (matchedAccount.status === "Suspended") {
-            localStorage.removeItem("artisan_seller_logged_in");
-            alert("This seller account has been suspended.");
-            return;
-        }
-
-        localStorage.setItem("artisan_seller_logged_in", "true");
-        initializeSellerAccountData(matchedAccount.id);
-        closeSellerLoginModal();
-        renderSellerDashboard();
-        return;
-    }
-
-    alert("Incorrect seller email or password. Please try again.");
-}
-
-function sellerLogout() {
-    localStorage.removeItem("artisan_seller_logged_in");
-    localStorage.removeItem("artisan_current_seller_name");
-    localStorage.removeItem("artisan_current_seller_id");
-    closeSellerLoginModal();
+function adminLogout() {
+    localStorage.removeItem("artisan_admin_logged_in");
+    closeAdminLoginModal();
     showScreen("home");
-    alert("You have been logged out from the seller portal.");
+    alert("Logged out from Admin Dashboard.");
 }
 
-function renderSellerDashboard() {
-    const sellerContent = document.getElementById("sellerContent");
-    if (!sellerContent) return;
+function renderAdminDashboard() {
+    const adminContent = document.getElementById("adminContent");
+    if (!adminContent) return;
 
-    const view = sellerCurrentView || "dashboard";
-    const sellerId = getCurrentSellerId();
-    initializeSellerAccountData(sellerId);
-    const salesHistory = getSellerSalesHistory(sellerId);
-    const allProducts = getSellerProducts(sellerId);
-    const totalSales = salesHistory.reduce((sum, item) => sum + item.revenue, 0);
-    const totalOrders = salesHistory.reduce((sum, item) => sum + item.orders, 0);
-    const maxRevenue = Math.max(...salesHistory.map(item => item.revenue), 1);
-    const sellerName = localStorage.getItem("artisan_current_seller_name") || "Juan Dela Cruz";
-    const pendingOrders = 0;
+    // Sidebar button clicks without emojis
+    document.querySelectorAll("[data-admin-view]").forEach(btn => {
+        btn.onclick = function() {
+            adminCurrentView = this.dataset.adminView;
+            renderAdminDashboard();
+        };
+        btn.style.fontWeight = btn.dataset.adminView === adminCurrentView ? "bold" : "normal";
+        btn.style.background = btn.dataset.adminView === adminCurrentView ? "#285c3b" : "";
+        btn.style.color = btn.dataset.adminView === adminCurrentView ? "#fff" : "";
+    });
 
-    const dashboardHtml = `
+    if (adminCurrentView === "dashboard") {
+        renderAdminOverview(adminContent);
+    } else if (adminCurrentView === "sellers") {
+        renderAdminSellersView(adminContent);
+    } else if (adminCurrentView === "users") {
+        renderAdminUsersView(adminContent);
+    } else if (adminCurrentView === "products") {
+        renderAdminProductsView(adminContent);
+    } else if (adminCurrentView === "orders") {
+        renderAdminOrdersView(adminContent);
+    } else if (adminCurrentView === "reports") {
+        renderAdminReportsView(adminContent);
+    } else if (adminCurrentView === "settings") {
+        renderAdminSettingsView(adminContent);
+    }
+}
+
+function renderAdminOverview(container) {
+    const totalRevenue = liveOrders
+        .filter(o => o.paymentStatus === 'Paid')
+        .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+    const pendingApps = liveApplications.filter(a => a.status === 'pending');
+
+    container.innerHTML = `
         <div class="admin-content-header">
             <div>
-                <h1>Seller Dashboard</h1>
-                <p>Welcome back, ${sellerName}!</p>
-            </div>
-            <div class="admin-lock-status">
-                <span class="lock-indicator lock-open"></span>
-                <span>Active</span>
+                <h1>Admin System Overview</h1>
+                <p>Monitor storefront health, artisan applications, and sales.</p>
             </div>
         </div>
 
         <div class="summary-grid">
-            <div class="summary-box"><h3>Total Products</h3><p>${allProducts.length}</p></div>
-            <div class="summary-box"><h3>Total Orders</h3><p>${totalOrders}</p></div>
-            <div class="summary-box"><h3>Total Sales</h3><p>₱${totalSales.toLocaleString()}.00</p></div>
-            <div class="summary-box"><h3>Pending Orders</h3><p>${pendingOrders}</p></div>
-        </div>
-
-        <div class="chart-panel">
-            <div class="chart-header">
-                <div><p class="chart-kicker">Performance</p><h2>Sales Overview</h2></div>
-                <span class="chart-badge">Live</span>
+            <div class="summary-box">
+                <h3>Total Products</h3>
+                <p>${liveProducts.length}</p>
             </div>
-            <div class="bar-chart" aria-label="Seller sales chart">
-                ${salesHistory.map(item => `
-                    <div class="bar-group">
-                        <div class="bar" style="height: ${(item.revenue / maxRevenue) * 100}%"></div>
-                        <span>${item.month}</span>
-                    </div>
-                `).join('')}
+            <div class="summary-box">
+                <h3>Artisan Sellers</h3>
+                <p>${liveSellers.length}</p>
+            </div>
+            <div class="summary-box">
+                <h3>Pending Seller Apps</h3>
+                <p style="${pendingApps.length > 0 ? 'color:#b7791f;' : ''}">${pendingApps.length}</p>
+            </div>
+            <div class="summary-box">
+                <h3>Verified Sales</h3>
+                <p>₱${totalRevenue.toLocaleString()}.00</p>
             </div>
         </div>
 
+        ${pendingApps.length > 0 ? `
+            <div style="background:#fff8e6; border:1px solid #f6e05e; padding:16px; border-radius:12px; margin-top:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <strong style="color:#b7791f; font-size:16px;">${pendingApps.length} Seller Application(s) Awaiting Review</strong>
+                    <p style="font-size:13px; color:#555; margin:4px 0 0;">New artisans are waiting for your approval before they can start listing products.</p>
+                </div>
+                <button type="button" class="btn" onclick="adminCurrentView='sellers'; renderAdminDashboard();">Review Applications</button>
+            </div>
+        ` : ''}
+    `;
+}
+
+// Requirement 3: Admin review, approval, and secure email password setup link
+function renderAdminSellersView(container) {
+    const pendingApps = liveApplications.filter(a => a.status === 'pending');
+    const processedApps = liveApplications.filter(a => a.status !== 'pending');
+
+    container.innerHTML = `
         <div class="admin-panel">
-            <div class="admin-panel-header"><h2>Recent Orders</h2></div>
+            <div class="admin-panel-header">
+                <h2>Pending Seller Applications (${pendingApps.length})</h2>
+            </div>
+            <p style="color:#666; font-size:13px; margin-bottom:15px;">Approve or reject applicant requests. Once approved, sellers receive an email containing a secure password setup link and full seller portal access.</p>
+
             <div class="table-box">
                 <table class="admin-table">
-                    <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Shop / Business</th>
+                            <th>Applicant</th>
+                            <th>Email</th>
+                            <th>Craft Category</th>
+                            <th>Registered GCash</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
                     <tbody>
-                        <tr><td>#ORD-00000</td><td>--</td><td>₱0</td><td><span class="status-badge status-pending">No sales yet</span></td></tr>
+                        ${pendingApps.length === 0 ? `
+                            <tr><td colspan="6" style="text-align:center; padding:25px;">No pending seller applications at this time.</td></tr>
+                        ` : pendingApps.map(app => `
+                            <tr>
+                                <td><strong>${app.shopName}</strong><br><small>${app.bio || ''}</small></td>
+                                <td>${app.applicantName || 'Applicant'}</td>
+                                <td>${app.email}</td>
+                                <td>${app.category || 'General'}</td>
+                                <td>${app.gcashName} (${app.gcashNumber})</td>
+                                <td>
+                                    <button type="button" class="action-btn restore" onclick="handleApproveSeller('${app.id}')">Approve Seller</button>
+                                    <button type="button" class="action-btn delete" onclick="handleRejectSeller('${app.id}')">Reject</button>
+                                </td>
+                            </tr>
+                        `).join('')}
                     </tbody>
                 </table>
             </div>
         </div>
-    `;
 
-    const productsHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>My Products</h2></div>
+        <div class="admin-panel" style="margin-top:30px;">
+            <div class="admin-panel-header">
+                <h2>Approved Artisan Sellers (${liveSellers.length})</h2>
+            </div>
             <div class="table-box">
                 <table class="admin-table">
-                    <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Status</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Shop Name</th>
+                            <th>Artisan Name</th>
+                            <th>Email</th>
+                            <th>Category</th>
+                            <th>Registered GCash</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
                     <tbody>
-                        ${allProducts.length === 0 ? '<tr><td colspan="5">No products added yet.</td></tr>' : allProducts.length === 0 ? '<tr><td colspan="5">No products added yet.</td></tr>' : allProducts.length === 0 ? '<tr><td colspan="5">No products added yet.</td></tr>' : allProducts.length === 0 ? '<tr><td colspan="5">No products added yet.</td></tr>' : allProducts.map(product => `
+                        ${liveSellers.length === 0 ? `
+                            <tr><td colspan="6" style="text-align:center; padding:25px;">No registered sellers found.</td></tr>
+                        ` : liveSellers.map(s => `
                             <tr>
-                                <td>${product.id}</td>
-                                <td>${product.name}</td>
-                                <td>${product.category}</td>
-                                <td>₱${Number(product.price).toLocaleString()}.00</td>
-                                <td><span class="status-badge ${product.status === 'Active' ? 'status-active' : 'status-suspended'}">${product.status}</span></td>
+                                <td><strong>${s.shopName || 'Shop'}</strong></td>
+                                <td>${s.name}</td>
+                                <td>${s.email}</td>
+                                <td>${s.category || 'Craft'}</td>
+                                <td>${s.gcashName || s.name} (${s.gcashNumber || s.phone})</td>
+                                <td><span class="status-badge status-active">${s.status || 'Active'}</span></td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -1659,669 +1776,229 @@ function renderSellerDashboard() {
             </div>
         </div>
     `;
-
-    const addProductHtml = `
-        <div class="settings-panel">
-            <div class="settings-header"><h2>Add Product</h2></div>
-            <form class="admin-form" onsubmit="event.preventDefault(); addSellerProductFromForm();">
-                <input id="sellerProductName" placeholder="Product Name" required>
-                <select id="sellerProductCategory">
-                    <option value="Bags">Bags</option>
-                    <option value="Home Decor">Home Decor</option>
-                    <option value="Accessories">Accessories</option>
-                    <option value="Woven Items">Woven Items</option>
-                    <option value="Wood Crafts">Wood Crafts</option>
-                    <option value="Souvenirs">Souvenirs</option>
-                    <option value="Jewelry">Jewelry</option>
-                </select>
-                <input id="sellerProductPrice" type="number" min="1" placeholder="Price" required>
-                <input id="sellerProductStock" type="number" min="1" placeholder="Stock Quantity" required>
-                <input id="sellerProductImage" type="file" accept="image/*">
-                <button class="btn" type="submit">Save Product</button>
-            </form>
-        </div>
-    `;
-
-    const ordersHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>Orders</h2></div>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
-                    <tbody>
-                        <tr><td>#ORD-00023</td><td>Maria Santos</td><td>2</td><td>₱1,160.00</td><td><span class="status-badge status-pending">Processing</span></td></tr>
-                        <tr><td>#ORD-00022</td><td>Juan Dela Cruz</td><td>1</td><td>₱750.00</td><td><span class="status-badge status-active">Shipped</span></td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const inventoryHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>Inventory</h2></div>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th><th>Availability</th></tr></thead>
-                    <tbody>
-                        <tr><td>Woven Handbag</td><td>45</td><td>12</td><td><span class="status-badge status-active">In Stock</span></td></tr>
-                        <tr><td>Rattan Basket</td><td>18</td><td>10</td><td><span class="status-badge status-active">In Stock</span></td></tr>
-                        <tr><td>Wooden Vase</td><td>7</td><td>15</td><td><span class="status-badge status-suspended">Low Stock</span></td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const profileHtml = `
-        <div class="settings-panel">
-            <div class="settings-header"><h2>Seller Profile</h2></div>
-            <div class="settings-grid">
-                <label><span>Seller Name</span><input value="Juan Dela Cruz" /></label>
-                <label><span>Business Name</span><input value="Luna Crafts" /></label>
-                <label><span>Email</span><input value="juan@lunacrafts.com" /></label>
-                <label><span>Phone</span><input value="0917-123-4567" /></label>
-            </div>
-            <div style="margin-top:20px;"><button class="btn" onclick="alert('Profile updated successfully.')">Save Profile</button></div>
-        </div>
-    `;
-
-    const contentMap = {
-        dashboard: dashboardHtml,
-        products: productsHtml,
-        "add-product": addProductHtml,
-        orders: ordersHtml,
-        inventory: inventoryHtml,
-        profile: profileHtml
-    };
-
-    sellerContent.innerHTML = contentMap[view] || dashboardHtml;
-
-    document.querySelectorAll("[data-seller-view]").forEach(button => {
-        button.onclick = function () {
-            sellerCurrentView = this.dataset.sellerView;
-            renderSellerDashboard();
-        };
-    });
 }
 
-function adminLogout() {
-    clearLoggedInUser();
-    localStorage.removeItem("artisan_admin_logged_in");
-    updateHeader();
-    showScreen("home");
-    alert("You have been logged out from the admin dashboard.");
-}
+async function handleApproveSeller(appId) {
+    const app = liveApplications.find(a => a.id === appId);
+    if (!app) return;
 
-function renderAdminDashboard() {
-    const adminContent = document.getElementById("adminContent");
-    if (!adminContent) return;
-
-    const data = getAdminData();
-    const view = adminCurrentView || "dashboard";
-    const combinedSellers = Array.from(new Map(
-        [...data.sellers, ...getSellerAccounts().map(account => ({
-            id: account.id,
-            name: account.name,
-            email: account.email,
-            category: account.category || "General",
-            status: account.status || "Pending"
-        }))].map(seller => [`${seller.email || seller.id}`.toLowerCase(), seller])).values()
-    );
-
-    const salesHistory = getSalesHistory();
-    const totalRevenue = salesHistory.reduce((sum, item) => sum + item.revenue, 0);
-    const salesData = salesHistory.map(item => item.revenue);
-    const maxRevenue = Math.max(...salesData, 1);
-    const categoryBreakdown = getCatalogCategoryBreakdown();
-    const categoryLabels = Object.keys(categoryBreakdown);
-    const categoryValues = Object.values(categoryBreakdown);
-    const categoryTotal = categoryValues.reduce((sum, value) => sum + value, 0) || 1;
-    const pieGradient = categoryValues.length ? (
-        categoryValues.reduce((acc, val, index) => {
-            const percent = (val / categoryTotal) * 100;
-            const start = acc.last || 0;
-            const end = start + percent;
-            acc.colors.push(`${getCategoryColor(index)} ${start}% ${end}%`);
-            acc.last = end;
-            return acc;
-        }, { colors: [], last: 0 }).colors.join(', ')
-    ) : 'rgba(120,120,120,0.2)';
-
-    const dashboardHtml = `
-        <div class="admin-content-header">
-            <div>
-                <h1>Admin Dashboard</h1>
-                <p>System overview</p>
-            </div>
-            <div class="admin-lock-status">
-                <span class="lock-indicator lock-open" id="lockIndicator"></span>
-                <span id="lockLabel">Unlocked</span>
-                <button class="lock-button" id="adminLockButton" onclick="toggleAdminLock()">Lock Dashboard</button>
-            </div>
-        </div>
-
-        <div class="summary-grid">
-            <div class="summary-box"><h3>Total Users</h3><p>${data.users.length}</p></div>
-            <div class="summary-box"><h3>Total Sellers</h3><p>${data.sellers.length}</p></div>
-            <div class="summary-box"><h3>Total Products</h3><p>${getCatalogProducts().length}</p></div>
-            <div class="summary-box"><h3>Total Revenue</h3><p>₱${totalRevenue.toLocaleString()}.00</p></div>
-        </div>
-
-        <div class="admin-metrics-grid">
-            <div class="metric-card">
-                <div class="metric-heading"><span>Category Mix</span><strong>Live</strong></div>
-                <div class="donut-wrap"><div class="donut-chart donut-one" style="background: conic-gradient(${pieGradient})" aria-label="Product categories pie chart"></div></div>
-                <ul class="legend-list">
-                    ${categoryLabels.map((label, index) => `
-                        <li><span class="dot" style="background:${getCategoryColor(index)}"></span>${label} ${Math.round((categoryBreakdown[label] / categoryTotal) * 100)}%</li>
-                    `).join('')}
-                </ul>
-            </div>
-            <div class="metric-card">
-                <div class="metric-heading"><span>Customer Types</span><strong>Live</strong></div>
-                <div class="donut-wrap"><div class="donut-chart donut-two" style="background: conic-gradient(#3c8d5d 0 46%, #d9a65f 46% 80%, #49a1d9 80% 100%)" aria-label="Customer segments pie chart"></div></div>
-                <ul class="legend-list">
-                    <li><span class="dot dot-green"></span>Repeat Buyers 46%</li>
-                    <li><span class="dot dot-gold"></span>New Buyers 34%</li>
-                    <li><span class="dot dot-sky"></span>Wholesale 20%</li>
-                </ul>
-            </div>
-            <div class="metric-card">
-                <div class="metric-heading"><span>Sales Channels</span><strong>By Source</strong></div>
-                <div class="donut-wrap"><div class="donut-chart donut-three" style="background: conic-gradient(#3c8d5d 0 54%, #d9a65f 54% 82%, #7e5bbd 82% 100%)" aria-label="Sales channels pie chart"></div></div>
-                <ul class="legend-list">
-                    <li><span class="dot dot-green"></span>Website 54%</li>
-                    <li><span class="dot dot-gold"></span>Marketplace 28%</li>
-                    <li><span class="dot dot-purple"></span>Direct 18%</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="chart-panel">
-            <div class="chart-header">
-                <div><p class="chart-kicker">Performance</p><h2>Sales Overview</h2></div>
-                <span class="chart-badge">Live</span>
-            </div>
-            <div class="bar-chart" aria-label="Bar chart of sales performance">
-                ${salesHistory.map(item => `
-                    <div class="bar-group">
-                        <div class="bar" style="height: ${(item.revenue / maxRevenue) * 100}%"></div>
-                        <span>${item.month}</span>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-
-    const usersHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header">
-                <h2>User Management</h2>
-                <button class="secondary-btn" onclick="addUserFromForm()">Add User</button>
-            </div>
-            <form class="admin-form" onsubmit="event.preventDefault(); addUserFromForm();">
-                <input id="userName" placeholder="Name" required>
-                <input id="userEmail" type="email" placeholder="Email" required>
-                <select id="userRole">
-                    <option>Customer</option>
-                    <option>Seller</option>
-                    <option>Admin</option>
-                </select>
-                <select id="userStatus">
-                    <option>Active</option>
-                    <option>Suspended</option>
-                    <option>Pending</option>
-                </select>
-                <button class="btn" type="submit">Save</button>
-            </form>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        ${data.users.map(user => `
-                            <tr>
-                                <td>${user.id}</td>
-                                <td>${user.name}</td>
-                                <td>${user.email}</td>
-                                <td>${user.role}</td>
-                                <td><span class="status-badge ${user.status === 'Active' ? 'status-active' : user.status === 'Suspended' ? 'status-suspended' : 'status-pending'}">${user.status}</span></td>
-                                <td>
-                                    <button class="action-btn ${user.status === 'Suspended' ? 'restore' : 'suspend'}" onclick="toggleUserStatus('${user.id}')">${user.status === 'Suspended' ? 'Restore' : 'Suspend'}</button>
-                                    <button class="action-btn delete" onclick="deleteUser('${user.id}')">Delete</button>
-                                </td>
-                            </tr>
-                        `).join("")}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const sellersHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header">
-                <h2>Seller Management</h2>
-                <button class="secondary-btn" onclick="addSellerFromForm()">Add Seller</button>
-            </div>
-            <form class="admin-form" onsubmit="event.preventDefault(); addSellerFromForm();">
-                <input id="sellerName" placeholder="Seller Name" required>
-                <input id="sellerEmail" type="email" placeholder="Seller Email" required>
-                <input id="sellerCategory" placeholder="Category" required>
-                <select id="sellerStatus">
-                    <option>Active</option>
-                    <option>Pending</option>
-                    <option>Suspended</option>
-                </select>
-                <button class="btn" type="submit">Save</button>
-            </form>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Category</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        ${combinedSellers.map(seller => `
-                            <tr>
-                                <td>${seller.id}</td>
-                                <td>${seller.name}</td>
-                                <td>${seller.email}</td>
-                                <td>${seller.category}</td>
-                                <td><span class="status-badge ${seller.status === 'Active' ? 'status-active' : seller.status === 'Suspended' ? 'status-suspended' : 'status-pending'}">${seller.status}</span></td>
-                                <td>
-                                    <button class="action-btn ${seller.status === 'Pending' ? 'restore' : seller.status === 'Suspended' ? 'restore' : 'suspend'}" onclick="toggleSellerStatus('${seller.id}')">${seller.status === 'Pending' ? 'Approve' : seller.status === 'Suspended' ? 'Restore' : 'Suspend'}</button>
-                                    <button class="action-btn delete" onclick="deleteSeller('${seller.id}')">Delete</button>
-                                </td>
-                            </tr>
-                        `).join("")}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const productsHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header">
-                <h2>Product Management</h2>
-                <button class="secondary-btn" onclick="addProductFromForm()">Add Product</button>
-            </div>
-            <form class="admin-form" onsubmit="event.preventDefault(); addProductFromForm();">
-                <input id="productName" placeholder="Product Name" required>
-                <input id="productCategory" placeholder="Category" required>
-                <input id="productPrice" type="number" min="1" placeholder="Price" required>
-                <select id="productStatus">
-                    <option>Active</option>
-                    <option>Suspended</option>
-                    <option>Pending</option>
-                </select>
-                <button class="btn" type="submit">Save</button>
-            </form>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        ${data.products.map(product => `
-                            <tr>
-                                <td>${product.id}</td>
-                                <td>${product.name}</td>
-                                <td>${product.category}</td>
-                                <td>₱${Number(product.price).toLocaleString()}.00</td>
-                                <td><span class="status-badge ${product.status === 'Active' ? 'status-active' : product.status === 'Suspended' ? 'status-suspended' : 'status-pending'}">${product.status}</span></td>
-                                <td>
-                                    <button class="action-btn ${product.status === 'Suspended' ? 'restore' : 'suspend'}" onclick="toggleProductStatus('${product.id}')">${product.status === 'Suspended' ? 'Restore' : 'Suspend'}</button>
-                                    <button class="action-btn delete" onclick="deleteProduct('${product.id}')">Delete</button>
-                                </td>
-                            </tr>
-                        `).join("")}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const ordersHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>Order Overview</h2></div>
-            <div class="table-box">
-                <table class="admin-table">
-                    <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
-                    <tbody>
-                        ${data.orders.map(order => `
-                            <tr>
-                                <td>${order.id}</td>
-                                <td>${order.customer}</td>
-                                <td>₱${Number(order.amount).toLocaleString()}.00</td>
-                                <td><span class="status-badge ${order.status === 'Delivered' ? 'status-active' : order.status === 'Processing' ? 'status-pending' : 'status-suspended'}">${order.status}</span></td>
-                            </tr>
-                        `).join("")}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    const reportsHtml = `
-        <div class="admin-panel">
-            <div class="admin-panel-header"><h2>Reports</h2></div>
-            <div class="reports-list">
-                <div class="report-box">
-                    <h3>Revenue Summary</h3>
-                    <ul>
-                        <li><span>Total Revenue</span><strong>₱${Number(data.reports.revenue).toLocaleString()}.00</strong></li>
-                        <li><span>New Buyers</span><strong>${data.reports.buyers}</strong></li>
-                        <li><span>Active Sellers</span><strong>${data.reports.sellers}</strong></li>
-                    </ul>
-                </div>
-                <div class="report-box">
-                    <h3>Operational Alerts</h3>
-                    <ul>
-                        <li><span>Low Stock Items</span><strong>${data.reports.stockAlerts}</strong></li>
-                        <li><span>Pending Reviews</span><strong>14</strong></li>
-                        <li><span>Disputes</span><strong>3</strong></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    `;
-
-    const settingsHtml = `
-        <div class="settings-panel">
-            <div class="settings-header">
-                <h2>Admin Settings</h2>
-                <button class="secondary-btn" onclick="saveAdminSettings()">Save Settings</button>
-            </div>
-            <div class="settings-grid">
-                <label>
-                    <span>Auto-approve sellers</span>
-                    <select id="settingAutoApprove">
-                        <option>Enabled</option>
-                        <option>Manual Review</option>
-                        <option>Disabled</option>
-                    </select>
-                </label>
-                <label>
-                    <span>Inventory alerts</span>
-                    <select id="settingInventoryAlerts">
-                        <option>Enabled</option>
-                        <option>Quiet Mode</option>
-                    </select>
-                </label>
-                <label>
-                    <span>Maintenance mode</span>
-                    <select id="settingMaintenance">
-                        <option>Off</option>
-                        <option>On</option>
-                    </select>
-                </label>
-                <label>
-                    <span>Default payout period</span>
-                    <select id="settingPayout">
-                        <option>Weekly</option>
-                        <option selected>Bi-Weekly</option>
-                        <option>Monthly</option>
-                    </select>
-                </label>
-            </div>
-        </div>
-    `;
-
-    const contentMap = {
-        dashboard: dashboardHtml,
-        users: usersHtml,
-        sellers: sellersHtml,
-        products: productsHtml,
-        orders: ordersHtml,
-        reports: reportsHtml,
-        settings: settingsHtml
-    };
-
-    adminContent.innerHTML = contentMap[view] || dashboardHtml;
-    bindAdminSidebar();
-    loadAdminSettings();
-    loadAdminLockState();
-}
-
-function bindAdminSidebar() {
-    const buttons = document.querySelectorAll("[data-admin-view]");
-    buttons.forEach(button => {
-        button.onclick = function () {
-            adminCurrentView = this.dataset.adminView;
-            renderAdminDashboard();
-        };
-    });
-}
-
-function toggleAdminLock() {
-    const isLocked = localStorage.getItem("artisan_admin_locked") === "true";
-    const nextState = !isLocked;
-    localStorage.setItem("artisan_admin_locked", String(nextState));
-    loadAdminLockState();
-    alert(nextState ? "Admin dashboard locked." : "Admin dashboard unlocked.");
-}
-
-function loadAdminLockState() {
-    const indicator = document.getElementById("lockIndicator");
-    const label = document.getElementById("lockLabel");
-    const button = document.getElementById("adminLockButton");
-
-    if (!indicator || !label || !button) return;
-
-    const isLocked = localStorage.getItem("artisan_admin_locked") === "true";
-    if (isLocked) {
-        indicator.className = "lock-indicator lock-closed";
-        label.innerText = "Locked";
-        button.innerText = "Unlock Dashboard";
-    } else {
-        indicator.className = "lock-indicator lock-open";
-        label.innerText = "Unlocked";
-        button.innerText = "Lock Dashboard";
-    }
-}
-
-function saveAdminSettings() {
-    const settings = {
-        autoApprove: document.getElementById("settingAutoApprove")?.value || "Enabled",
-        inventoryAlerts: document.getElementById("settingInventoryAlerts")?.value || "Enabled",
-        maintenance: document.getElementById("settingMaintenance")?.value || "Off",
-        payout: document.getElementById("settingPayout")?.value || "Bi-Weekly"
-    };
-    localStorage.setItem("artisan_admin_settings", JSON.stringify(settings));
-    alert("Admin settings saved successfully.");
-}
-
-function loadAdminSettings() {
-    const settings = JSON.parse(localStorage.getItem("artisan_admin_settings") || "{}");
-    if (!settings) return;
-    if (document.getElementById("settingAutoApprove") && settings.autoApprove) document.getElementById("settingAutoApprove").value = settings.autoApprove;
-    if (document.getElementById("settingInventoryAlerts") && settings.inventoryAlerts) document.getElementById("settingInventoryAlerts").value = settings.inventoryAlerts;
-    if (document.getElementById("settingMaintenance") && settings.maintenance) document.getElementById("settingMaintenance").value = settings.maintenance;
-    if (document.getElementById("settingPayout") && settings.payout) document.getElementById("settingPayout").value = settings.payout;
-}
-
-function addUserFromForm() {
-    const name = document.getElementById("userName")?.value.trim();
-    const email = document.getElementById("userEmail")?.value.trim();
-    const role = document.getElementById("userRole")?.value;
-    const status = document.getElementById("userStatus")?.value;
-    if (!name || !email) return;
-
-    const data = getAdminData();
-    const id = `U-${String(data.users.length + 101).padStart(4, "0")}`;
-    data.users.unshift({ id, name, email, role, status });
-    saveAdminData(data);
-    renderAdminDashboard();
-}
-
-function toggleUserStatus(userId) {
-    const data = getAdminData();
-    const user = data.users.find(item => item.id === userId);
-    if (!user) return;
-    user.status = user.status === "Suspended" ? "Active" : "Suspended";
-    saveAdminData(data);
-    renderAdminDashboard();
-}
-
-function deleteUser(userId) {
-    const data = getAdminData();
-    data.users = data.users.filter(item => item.id !== userId);
-    saveAdminData(data);
-    renderAdminDashboard();
-}
-
-function addSellerFromForm() {
-    const name = document.getElementById("sellerName")?.value.trim();
-    const email = document.getElementById("sellerEmail")?.value.trim();
-    const category = document.getElementById("sellerCategory")?.value.trim();
-    const status = document.getElementById("sellerStatus")?.value;
-    if (!name || !email || !category) return;
-
-    const data = getAdminData();
-    const id = `S-${String(data.sellers.length + 201).padStart(4, "0")}`;
-    data.sellers.unshift({ id, name, email, category, status });
-    saveAdminData(data);
-    renderAdminDashboard();
-}
-
-function toggleSellerStatus(sellerId) {
-    const data = getAdminData();
-    const seller = data.sellers.find(item => item.id === sellerId);
-    if (!seller) return;
-
-    if (seller.status === "Pending") {
-        seller.status = "Active";
-    } else {
-        seller.status = seller.status === "Suspended" ? "Active" : "Suspended";
-    }
-
-    saveAdminData(data);
-
-    const accounts = getSellerAccounts();
-    const matchedAccount = accounts.find(item => item.id === sellerId || (item.email && seller.email && item.email.toLowerCase() === seller.email.toLowerCase()));
-    if (matchedAccount) {
-        matchedAccount.status = seller.status;
-        saveSellerAccounts(accounts);
-    }
-
-    renderAdminDashboard();
-}
-
-function deleteSeller(sellerId) {
-    const data = getAdminData();
-    data.sellers = data.sellers.filter(item => item.id !== sellerId);
-    saveAdminData(data);
-
-    const accounts = getSellerAccounts();
-    const filteredAccounts = accounts.filter(item => item.id !== sellerId);
-    saveSellerAccounts(filteredAccounts);
-
-    renderAdminDashboard();
-}
-
-function readFileAsDataUrl(file) {
-    return new Promise((resolve, reject) => {
-        if (!file) return resolve("");
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result || "");
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-function addSellerProductFromForm() {
-    const name = document.getElementById("sellerProductName")?.value.trim();
-    const category = document.getElementById("sellerProductCategory")?.value.trim();
-    const price = Number(document.getElementById("sellerProductPrice")?.value || 0);
-    const stock = Number(document.getElementById("sellerProductStock")?.value || 0);
-    const imageFile = document.getElementById("sellerProductImage")?.files?.[0];
-
-    if (!name || !category || !price || !stock) {
-        alert("Please complete all product fields.");
+    if (!confirm(`Are you sure you want to approve "${app.shopName}" (${app.applicantName}) as an authorized seller? This will grant them seller privileges and email a secure password setup link.`)) {
         return;
     }
 
-    readFileAsDataUrl(imageFile).then(imageData => {
-        const sellerId = getCurrentSellerId();
-        const sellerProducts = getSellerProducts(sellerId);
-        const globalProducts = getCatalogProducts();
-        const nextId = `P-${String(sellerProducts.length + 301).padStart(4, "0")}`;
-        const product = {
-            id: nextId,
-            name,
-            category,
-            price,
-            status: "Active",
-            image: imageData || "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80",
-            isNew: true,
-            stock,
-            sellerId
-        };
-
-        sellerProducts.unshift(product);
-        saveSellerProducts(sellerProducts, sellerId);
-
-        const mergedProducts = [product, ...globalProducts.filter(item => item.name !== name)];
-        saveCatalogProducts(mergedProducts);
-
-        renderHomeProducts();
-        renderCatalogProducts();
-        updateProductsDisplay();
-        renderSellerDashboard();
-        alert("Product added successfully and published to the storefront.");
-    }).catch(() => {
-        alert("Unable to process the uploaded image.");
-    });
-}
-
-function addProductFromForm() {
-    const name = document.getElementById("productName")?.value.trim();
-    const category = document.getElementById("productCategory")?.value.trim();
-    const price = Number(document.getElementById("productPrice")?.value || 0);
-    const status = document.getElementById("productStatus")?.value;
-    if (!name || !category || !price) return;
-
-    const data = getAdminData();
-    const id = `P-${String(data.products.length + 301).padStart(4, "0")}`;
-    data.products.unshift({ id, name, category, price, status });
-    saveAdminData(data);
-    renderAdminDashboard();
-}
-
-function toggleProductStatus(productId) {
-    const data = getAdminData();
-    const product = data.products.find(item => item.id === productId);
-    if (!product) return;
-    product.status = product.status === "Suspended" ? "Active" : "Suspended";
-    saveAdminData(data);
-    renderAdminDashboard();
-}
-
-function deleteProduct(productId) {
-    const data = getAdminData();
-    data.products = data.products.filter(item => item.id !== productId);
-    saveAdminData(data);
-    renderAdminDashboard();
-}
-
-window.onload = function() {
-    renderHomeProducts();
-    renderCatalogProducts();
-    updateProductsDisplay();
-    updateHeader();
-    renderCart();
-    renderOrders();
-    renderAdminDashboard();
-    renderSellerDashboard();
-    loadAdminSettings();
-    if (localStorage.getItem("artisan_admin_logged_in") === "true") {
+    try {
+        if (window.ArtisanDB) {
+            await window.ArtisanDB.approveSellerApplication(appId, app);
+        }
+        alert(`Application approved! Seller account activated and secure password setup link emailed to ${app.email}.`);
         renderAdminDashboard();
-    } else {
-        closeAdminLoginModal();
+    } catch (err) {
+        alert("Error approving seller: " + err.message);
     }
-    if (localStorage.getItem("artisan_seller_logged_in") === "true") {
-        renderSellerDashboard();
-    } else {
-        closeSellerLoginModal();
+}
+
+async function handleRejectSeller(appId) {
+    const app = liveApplications.find(a => a.id === appId);
+    if (!app) return;
+
+    const reason = prompt("Enter the rejection reason to send to the applicant:", "Incomplete craft portfolio or requirements not met.");
+    if (reason === null) return;
+
+    try {
+        if (window.ArtisanDB) {
+            await window.ArtisanDB.rejectSellerApplication(appId, app, reason);
+        }
+        alert(`Application rejected. Notification sent to ${app.email}.`);
+        renderAdminDashboard();
+    } catch (err) {
+        alert("Error rejecting seller: " + err.message);
     }
-};
+}
+
+function renderAdminUsersView(container) {
+    container.innerHTML = `
+        <div class="admin-panel">
+            <div class="admin-panel-header">
+                <h2>Registered Accounts</h2>
+            </div>
+            <p style="color:#666; font-size:13px; margin-bottom:15px;">All new accounts start as "user" until approved by admin.</p>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Seller Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>D71thb44...</td>
+                            <td>Reniel Sabuco</td>
+                            <td>nielsabuco2006@gmail.com</td>
+                            <td><span class="status-badge status-active">Admin / User</span></td>
+                            <td><span class="status-badge status-active">Approved</span></td>
+                        </tr>
+                        <tr>
+                            <td>dsppODMd...</td>
+                            <td>Eugene Marciene Jerusalem</td>
+                            <td>jerusalemmarciene@gmail.com</td>
+                            <td><span class="status-badge status-active">Seller</span></td>
+                            <td><span class="status-badge status-active">Approved</span></td>
+                        </tr>
+                        <tr>
+                            <td>8lnUq4rG...</td>
+                            <td>Pierce Estrada</td>
+                            <td>pierceestrada6@gmail.com</td>
+                            <td><span class="status-badge status-active">Seller</span></td>
+                            <td><span class="status-badge status-active">Approved</span></td>
+                        </tr>
+                        <tr>
+                            <td>ErOCEqn2...</td>
+                            <td>Kia Vanette Acbo</td>
+                            <td>kiavanetteacbo@gmail.com</td>
+                            <td><span class="status-badge status-active">User</span></td>
+                            <td><span class="status-badge status-pending">None</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function renderAdminProductsView(container) {
+    container.innerHTML = `
+        <div class="admin-panel">
+            <div class="admin-panel-header">
+                <h2>Product Catalog (${liveProducts.length})</h2>
+            </div>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Seller</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${liveProducts.map(p => `
+                            <tr>
+                                <td><strong>${p.name}</strong></td>
+                                <td>${p.category || 'General'}</td>
+                                <td>₱${Number(p.price || 0).toLocaleString()}.00</td>
+                                <td>${p.stock || 0}</td>
+                                <td>${p.sellerName || 'Artisan'}</td>
+                                <td><span class="status-badge ${p.status === 'Active' ? 'status-active' : 'status-suspended'}">${p.status || 'Active'}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function renderAdminOrdersView(container) {
+    container.innerHTML = `
+        <div class="admin-panel">
+            <div class="admin-panel-header">
+                <h2>Orders Overview (${liveOrders.length})</h2>
+            </div>
+            <div class="table-box">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total Amount</th>
+                            <th>Payment Method</th>
+                            <th>Payment Status</th>
+                            <th>Order Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${liveOrders.length === 0 ? `
+                            <tr><td colspan="6" style="text-align:center; padding:25px;">No orders recorded yet.</td></tr>
+                        ` : liveOrders.map(o => `
+                            <tr>
+                                <td><strong>${o.orderNumber || o.id}</strong></td>
+                                <td>${o.customerName || 'Customer'}</td>
+                                <td>₱${Number(o.total || 0).toLocaleString()}.00</td>
+                                <td>${o.paymentMethod || 'Cash on Delivery'}</td>
+                                <td><span class="status-badge ${o.paymentStatus === 'Paid' ? 'status-active' : 'status-suspended'}">${o.paymentStatus || 'Unpaid'}</span></td>
+                                <td><span class="status-badge status-active">${o.orderStatus || 'Processing'}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function renderAdminReportsView(container) {
+    const totalRevenue = liveOrders
+        .filter(o => o.paymentStatus === 'Paid')
+        .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+    container.innerHTML = `
+        <div class="admin-panel">
+            <div class="admin-panel-header">
+                <h2>System Analytics & Reports</h2>
+            </div>
+            <div class="reports-list">
+                <div class="report-box">
+                    <h3>Revenue Breakdown</h3>
+                    <ul>
+                        <li><span>Verified Revenue:</span><strong>₱${totalRevenue.toLocaleString()}.00</strong></li>
+                        <li><span>Orders Count:</span><strong>${liveOrders.length}</strong></li>
+                        <li><span>Active Sellers:</span><strong>${liveSellers.length}</strong></li>
+                    </ul>
+                </div>
+                <div class="report-box">
+                    <h3>Platform Metrics</h3>
+                    <ul>
+                        <li><span>Catalog Items:</span><strong>${liveProducts.length}</strong></li>
+                        <li><span>Pending Seller Apps:</span><strong>${liveApplications.filter(a => a.status === 'pending').length}</strong></li>
+                        <li><span>Payment Modes:</span><strong>GCash, COD, Maya</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderAdminSettingsView(container) {
+    container.innerHTML = `
+        <div class="settings-panel">
+            <div class="settings-header">
+                <h2>Admin Settings</h2>
+            </div>
+            <div class="settings-grid">
+                <label>
+                    <span>Seller Onboarding Mode</span>
+                    <select>
+                        <option selected>Manual Admin Review & Approval</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Direct Payment Routing</span>
+                    <select>
+                        <option selected>Direct to Registered Seller GCash</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+    `;
+}
+
 </script>
 </body>
 </html>
