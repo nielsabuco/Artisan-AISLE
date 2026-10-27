@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupExportButtons();
   setupAdminTrackingModal();
   setupAdminPromotionModal();
+  setupAdminProductManagement();
 });
 
 function initAdminAuth() {
@@ -179,10 +180,16 @@ function renderApplicationsTable(apps) {
     // Attach actions
     if (isPending) {
       tr.querySelector('.approve-btn')?.addEventListener('click', async () => {
-        if (confirm(`Approve seller application for "${app.shopName}"?\n\nThis will elevate their account to Seller, activate their shop profile, and dispatch an account password setup link to ${app.email}.`)) {
+        if (confirm(`Approve seller application for "${app.shopName}"?\n\nThis will elevate their account to Seller and activate their shop profile.`)) {
           try {
-            await ArtisanDB.approveSellerApplication(app.id, app);
-            alert(`Application for "${app.shopName}" has been approved! Password reset setup link dispatched.`);
+            const res = await ArtisanDB.approveSellerApplication(app.id, app);
+            let msg = `Application for "${app.shopName}" has been APPROVED!\n\nStatus: Seller account is now ACTIVE.\n\nIMPORTANT: The applicant can access the Seller Portal immediately with their current password or Google account!`;
+            if (res.emailSent) {
+              msg += `\n\nA password reset email was dispatched to ${app.email} (advise applicant to check Spam/Junk folder if not in inbox).`;
+            } else if (res.emailError) {
+              msg += `\n\n(Note: Automated email was not sent by Firebase: ${res.emailError}. The seller can log in directly with their current account credentials).`;
+            }
+            alert(msg);
           } catch (e) {
             alert('Approval error: ' + e.message);
           }
@@ -275,10 +282,23 @@ function renderUsersTable(users) {
 
 function renderProductsTable(products) {
   const tbody = document.getElementById('productsTableBody');
+  const countBadge = document.getElementById('adminProductCountBadge');
   if (!tbody) return;
 
+  if (countBadge) {
+    countBadge.textContent = `Showing ${products ? products.length : 0} catalog item${products && products.length === 1 ? '' : 's'}`;
+  }
+
   if (!products || products.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="loading-td">No products listed in catalog.</td></tr>';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 36px 16px;">
+          <p style="font-size: 15px; color: #555; margin-bottom: 14px;">No products found in Firestore catalog.</p>
+          <button type="button" class="btn-seed-catalog" id="seedCatalogEmptyBtn">Seed Initial Artisan Catalog (8 Products)</button>
+        </td>
+      </tr>
+    `;
+    document.getElementById('seedCatalogEmptyBtn')?.addEventListener('click', seedDefaultCatalog);
     return;
   }
 
@@ -291,19 +311,22 @@ function renderProductsTable(products) {
           <img src="${p.image || 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=100&q=80'}" alt="${p.name}" class="table-prod-img" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=100&q=80'">
           <div>
             <strong>${p.name}</strong><br>
-            <small>${p.id || '-'}</small>
+            <small style="color:#777;">ID: ${p.id || '-'}</small>
           </div>
         </div>
       </td>
       <td><span class="category-pill">${p.category || 'General'}</span></td>
-      <td>₱${Number(p.price || 0).toFixed(2)}</td>
+      <td><strong>₱${Number(p.price || 0).toFixed(2)}</strong></td>
       <td>
-        <input type="number" class="inline-stock-input" value="${Number(p.stock) || 0}" min="0" data-id="${p.id}">
+        <input type="number" class="inline-stock-input" value="${Number(p.stock) || 0}" min="0" data-id="${p.id}" title="Edit stock in real-time">
       </td>
       <td>${p.sellerName || 'Artisan Seller'}</td>
       <td><span class="status-badge ${p.status === 'Active' ? 'delivered' : 'unpaid-badge'}">${p.status || 'Active'}</span></td>
       <td>
         <div class="table-actions-cluster">
+          <button type="button" class="action-btn edit-prod-btn" style="background:#f1ebd8; color:#285c3b; border:1px solid #dcd1be;">
+            Edit
+          </button>
           <button type="button" class="action-btn toggle-status-btn" data-id="${p.id}" data-status="${p.status}">
             ${p.status === 'Active' ? 'Hide' : 'Activate'}
           </button>
@@ -311,6 +334,11 @@ function renderProductsTable(products) {
         </div>
       </td>
     `;
+
+    // Edit product in modal
+    tr.querySelector('.edit-prod-btn')?.addEventListener('click', () => {
+      openAdminProductModal(p);
+    });
 
     // Inline stock change
     tr.querySelector('.inline-stock-input')?.addEventListener('change', async (e) => {
@@ -781,4 +809,263 @@ function openAdminPromotionModal(user) {
   tierSelect.dispatchEvent(new Event('change'));
   modal.style.display = 'flex';
 }
+
+/* ================= CATALOG MANAGEMENT & SEEDING ================= */
+
+const DEFAULT_CATALOG_SEEDS = [
+  {
+    name: "Handcrafted Abaca Tote Bag",
+    category: "Bags",
+    price: 850,
+    stock: 15,
+    status: "Active",
+    image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg",
+    sellerName: "Bicol Heritage Weavers",
+    sellerGCash: "09764948458",
+    sellerGCashName: "Eugene Marciene Jerusalem",
+    description: "Handcrafted from native pandan and abaca fibers by local artisans in Bicol. Durable, lightweight, eco-friendly, and perfect for everyday use."
+  },
+  {
+    name: "Woven Rattan Planter Basket",
+    category: "Woven Items",
+    price: 550,
+    stock: 12,
+    status: "Active",
+    image: "https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
+    sellerName: "Samar Community Crafters",
+    sellerGCash: "09764948458",
+    sellerGCashName: "Maer Jerusalem",
+    description: "Handcrafted rattan basket woven with care for plant storage, interior decor, and sustainable home organization."
+  },
+  {
+    name: "Hand-Carved Wooden Spoon Set",
+    category: "Wood Crafts",
+    price: 380,
+    stock: 20,
+    status: "Active",
+    image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80",
+    sellerName: "Cordillera Wood Carvers",
+    sellerGCash: "09853551524",
+    sellerGCashName: "Reniel Sabuco",
+    description: "Solid hardwood kitchen utensils hand-carved by indigenous artisans in Benguet. Coated with organic food-safe beeswax."
+  },
+  {
+    name: "Bamboo & Capiz Ambient Lamp",
+    category: "Home Decor",
+    price: 750,
+    stock: 10,
+    status: "Active",
+    image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
+    sellerName: "Panay Shell & Woodworks",
+    sellerGCash: "09764948458",
+    sellerGCashName: "Marciene Jerusalem",
+    description: "Warm atmospheric ambient lamp made from harvested bamboo slats and shimmering Capiz shell accents from Roxas City."
+  },
+  {
+    name: "Handwoven Native Accented Wallet",
+    category: "Accessories",
+    price: 240,
+    stock: 18,
+    status: "Active",
+    image: "https://nphikwtyvmrlvudxmdre.supabase.co/storage/v1/object/public/product-images/products/f39bb4c2-806b-4c50-bb61-f9606b2a6ebd.webp",
+    sellerName: "Mindanao Artisan Collective",
+    sellerGCash: "09175551234",
+    sellerGCashName: "Pierce Estrada",
+    description: "Handcrafted compact bifold wallet with traditional geometric weave patterns and genuine local leather trimming."
+  },
+  {
+    name: "Yakan Weave Table Runner",
+    category: "Woven Items",
+    price: 1250,
+    stock: 8,
+    status: "Active",
+    image: "https://images.unsplash.com/photo-1606744824163-985d376605aa?auto=format&fit=crop&w=500&q=80",
+    sellerName: "Basilan Yakan Weavers",
+    sellerGCash: "09764948458",
+    sellerGCashName: "Marciene Jerusalem",
+    description: "Vibrant table runner featuring authentic Yakan Seputangan weave patterns passed down through generations of Zamboanga artisans."
+  },
+  {
+    name: "Capiz Shell Chime & Suncatcher",
+    category: "Home Decor",
+    price: 420,
+    stock: 25,
+    status: "Active",
+    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=500&q=80",
+    sellerName: "Visayan Coastal Crafts",
+    sellerGCash: "09853551524",
+    sellerGCashName: "Reniel Sabuco",
+    description: "Iridescent Capiz shells that produce a soothing melody in the breeze. Perfect for balconies, gardens, and windows."
+  },
+  {
+    name: "Terracotta Clay Pottery Planter",
+    category: "Home Decor",
+    price: 540,
+    stock: 14,
+    status: "Active",
+    image: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=500&q=80",
+    sellerName: "Vigan Burnay Pottery",
+    sellerGCash: "09175551234",
+    sellerGCashName: "Pierce Estrada",
+    description: "Traditional kiln-fired terracotta clay pot molded by master potters using time-honored artisanal pottery wheels."
+  }
+];
+
+function setupAdminProductManagement() {
+  const modal = document.getElementById('adminProductModal');
+  const openBtn = document.getElementById('openAddProductModalBtn');
+  const closeBtn = document.getElementById('closeAdminProductModalBtn');
+  const cancelBtn = document.getElementById('cancelAdminProdBtn');
+  const saveBtn = document.getElementById('saveAdminProdBtn');
+  const seedBtn = document.getElementById('seedCatalogBtn');
+  const searchInput = document.getElementById('adminProductSearch');
+
+  openBtn?.addEventListener('click', () => {
+    openAdminProductModal(null);
+  });
+
+  closeBtn?.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  cancelBtn?.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) modal.style.display = 'none';
+  });
+
+  seedBtn?.addEventListener('click', seedDefaultCatalog);
+
+  searchInput?.addEventListener('input', (e) => {
+    const query = e.target.value.trim().toLowerCase();
+    if (!query) {
+      renderProductsTable(allProducts);
+      return;
+    }
+    const filtered = allProducts.filter(p => {
+      const text = `${p.name || ''} ${p.category || ''} ${p.sellerName || ''} ${p.id || ''}`.toLowerCase();
+      return text.includes(query);
+    });
+    renderProductsTable(filtered);
+  });
+
+  saveBtn?.addEventListener('click', async () => {
+    const id = document.getElementById('adminProdId').value;
+    const name = document.getElementById('adminProdName').value.trim();
+    const category = document.getElementById('adminProdCategory').value;
+    const price = Number(document.getElementById('adminProdPrice').value) || 0;
+    const stock = Number(document.getElementById('adminProdStock').value) || 0;
+    const status = document.getElementById('adminProdStatus').value;
+    const image = document.getElementById('adminProdImage').value.trim();
+    const sellerName = document.getElementById('adminProdSellerName').value.trim();
+    const description = document.getElementById('adminProdDesc').value.trim();
+
+    if (!name) {
+      alert('Please enter a product title.');
+      return;
+    }
+    if (price <= 0) {
+      alert('Please enter a valid price.');
+      return;
+    }
+
+    const payload = {
+      name,
+      category,
+      price,
+      stock,
+      status,
+      image: image || 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80',
+      sellerName: sellerName || currentAdmin?.name || 'Artisan Marketplace',
+      sellerId: currentAdmin?.uid || 'admin-catalog',
+      description: description || 'Handcrafted by skilled Filipino artisans using traditional techniques.'
+    };
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    try {
+      if (id) {
+        await ArtisanDB.updateProduct(id, payload);
+        alert(`Product "${name}" updated successfully.`);
+      } else {
+        await ArtisanDB.addProduct(payload);
+        alert(`Product "${name}" added to marketplace catalog!`);
+      }
+      modal.style.display = 'none';
+    } catch (err) {
+      alert('Failed to save product: ' + err.message);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save Product';
+    }
+  });
+}
+
+function openAdminProductModal(product = null) {
+  const modal = document.getElementById('adminProductModal');
+  const title = document.getElementById('adminProductModalTitle');
+  if (!modal) return;
+
+  if (product) {
+    title.textContent = 'Edit Catalog Product';
+    document.getElementById('adminProdId').value = product.id || '';
+    document.getElementById('adminProdName').value = product.name || '';
+    document.getElementById('adminProdCategory').value = product.category || 'Bags';
+    document.getElementById('adminProdPrice').value = product.price || '';
+    document.getElementById('adminProdStock').value = product.stock ?? 0;
+    document.getElementById('adminProdStatus').value = product.status || 'Active';
+    document.getElementById('adminProdImage').value = product.image || '';
+    document.getElementById('adminProdSellerName').value = product.sellerName || '';
+    document.getElementById('adminProdDesc').value = product.description || '';
+  } else {
+    title.textContent = 'Add New Product to Catalog';
+    document.getElementById('adminProdId').value = '';
+    document.getElementById('adminProdName').value = '';
+    document.getElementById('adminProdCategory').value = 'Bags';
+    document.getElementById('adminProdPrice').value = '';
+    document.getElementById('adminProdStock').value = 10;
+    document.getElementById('adminProdStatus').value = 'Active';
+    document.getElementById('adminProdImage').value = '';
+    document.getElementById('adminProdSellerName').value = currentAdmin?.name || 'Artisan Creator';
+    document.getElementById('adminProdDesc').value = '';
+  }
+
+  modal.style.display = 'flex';
+}
+
+async function seedDefaultCatalog() {
+  if (!confirm('Seed the 8 authentic Philippine handicrafts into the Firestore catalog?\n\nThis will populate products with high-resolution imagery, artisan bios, stock, and descriptions.')) {
+    return;
+  }
+
+  const seedBtn = document.getElementById('seedCatalogBtn');
+  if (seedBtn) {
+    seedBtn.disabled = true;
+    seedBtn.textContent = 'Seeding...';
+  }
+
+  let addedCount = 0;
+  try {
+    for (const item of DEFAULT_CATALOG_SEEDS) {
+      // Check if product with this name already exists in current list
+      const exists = allProducts.some(p => (p.name || '').toLowerCase() === item.name.toLowerCase());
+      if (!exists) {
+        await ArtisanDB.addProduct(item);
+        addedCount++;
+      }
+    }
+    alert(`Catalog Seeding Complete!\n\nAdded ${addedCount} new handcrafted products directly to Firestore.`);
+  } catch (err) {
+    alert('Seeding error: ' + err.message);
+  } finally {
+    if (seedBtn) {
+      seedBtn.disabled = false;
+      seedBtn.textContent = 'Seed Default Catalog';
+    }
+  }
+}
+
 

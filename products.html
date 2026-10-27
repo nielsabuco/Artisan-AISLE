@@ -65,6 +65,63 @@
         </div>
     </main>
 
+    <!-- Product Quick-View Modal -->
+    <div id="productQuickViewModal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card product-quickview-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <span id="quickViewCategory" class="detail-category-pill">Handicraft</span>
+          <button type="button" class="close-modal-btn" id="closeQuickViewModalBtn" aria-label="Close modal">✕</button>
+        </div>
+        
+        <div class="quickview-grid">
+          <div class="quickview-img-wrap">
+            <img id="quickViewImage" src="" alt="Handmade Craft">
+          </div>
+
+          <div class="detail-info">
+            <h2 id="quickViewName" style="font-family:'Cinzel', serif; font-size:24px; color:#1e3d29; margin:0 0 10px;">Product Name</h2>
+            <div class="detail-rating">★★★★★ <span style="color:#666; font-size:13px;">(Artisan Verified)</span></div>
+            <div id="quickViewPrice" class="detail-price">₱0.00</div>
+
+            <div class="detail-seller-card">
+              <div class="detail-seller-avatar" id="quickViewSellerInitial">A</div>
+              <div class="detail-seller-meta">
+                <h4 id="quickViewSellerName">Artisan Partner</h4>
+                <p>Verified Community Artisan</p>
+              </div>
+            </div>
+
+            <div class="detail-desc-box" id="quickViewDesc">
+              Authentic Filipino handcrafted masterpiece created using traditional materials.
+            </div>
+
+            <div id="quickViewStockIndicator" class="detail-stock-indicator" style="color: green;">
+              In Stock
+            </div>
+
+            <div class="detail-quantity-cluster">
+              <label style="font-weight:600; font-size:14px; color:#444;">Quantity:</label>
+              <div class="quantity-picker">
+                <button type="button" id="quickViewQtyMinus">−</button>
+                <span id="quickViewQuantity">1</span>
+                <button type="button" id="quickViewQtyPlus">+</button>
+              </div>
+            </div>
+
+            <div class="detail-action-buttons">
+              <button type="button" class="btn-add-cart" id="quickViewAddCartBtn">Add to Cart</button>
+              <button type="button" class="btn-buy-now" id="quickViewBuyNowBtn">Buy Now</button>
+            </div>
+
+            <div class="detail-trust-badges">
+              <div class="detail-trust-item">🚚 Fast Regional Shipping</div>
+              <div class="detail-trust-item">🛡️ Direct GCash & COD</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <footer>
         <p>© 2026 ArtisanAisle | Supporting Local Filipino Artisans & Communities</p>
     </footer>

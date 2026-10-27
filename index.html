@@ -153,84 +153,149 @@
 <!-- ================= PRODUCT DETAILS ================= -->
 
 <section id="details" class="screen">
+    <div class="detail-nav-bar">
+        <button type="button" class="back-to-store-btn" onclick="showScreen('home')">
+            ← Back to Front Page
+        </button>
+        <button type="button" class="back-to-store-btn" style="margin-left: 8px;" onclick="window.location.href='products.html'">
+            Browse All Products →
+        </button>
+    </div>
 
     <div class="product-detail">
-
-        <img id="detailImage"
-        src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80"
-        alt="Product detail">
+        <div class="product-detail-media">
+            <img id="detailImage"
+            src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80"
+            alt="Product detail">
+        </div>
 
         <div class="detail-info">
+            <div class="detail-tag-cluster">
+                <span id="detailCategory" class="detail-category-pill">HANDICRAFT</span>
+                <span id="detailBadgeStatus" class="detail-category-pill" style="background:#fef3c7; color:#92400e;">Authentic Philippine Craft</span>
+            </div>
 
             <h1 id="detailName">
                 Product Name
             </h1>
 
-            <div id="detailReviews" class="rating">
-                ★★★★★ (Artisan Verified)
+            <div id="detailReviews" class="detail-rating">
+                ★★★★★ <span style="color:#666; font-size:13px;">(Artisan Verified)</span>
             </div>
 
             <p class="detail-price">
                 ₱<span id="detailPrice">0.00</span>
             </p>
 
-            <button id="detailSellerButton" class="seller-name" type="button" onclick="toggleSellerInfo()">View seller information</button>
-            <p id="detailSeller" class="seller-name" hidden></p>
-
-            <div id="productReviews" class="product-reviews"></div>
-
-            <p id="detailDescription">
-                Handmade craft made by local artisans. Durable, unique and perfect for everyday use.
-            </p>
-
-            <div id="detailSellerInfo" style="margin-top:10px; font-size:14px; color:#285c3b; font-weight:600;">
-                Artisan Seller: <span id="detailSellerName">Local Creator</span>
+            <div class="detail-seller-card">
+                <div class="detail-seller-avatar" id="detailSellerInitial">A</div>
+                <div class="detail-seller-meta">
+                    <h4 id="detailSellerName">Artisan Partner</h4>
+                    <p>Verified Community Weaver / Craftsman</p>
+                </div>
             </div>
 
-            <p style="margin-top:15px;">
+            <div class="detail-desc-box">
+                <p id="detailDescription" style="margin:0;">
+                    Handmade craft made by local artisans. Durable, unique and perfect for everyday use.
+                </p>
+            </div>
+
+            <div class="detail-stock-indicator">
                 <b>Stock Status:</b>
-                <span id="detailStockStatus" style="color:green; font-weight:bold;">
+                <span id="detailStockStatus" style="color:green; font-weight:bold; margin-left:6px;">
                     In Stock
                 </span>
-            </p>
-
-            <div class="quantity">
-
-                <button type="button" onclick="changeQuantity(-1)">
-                    −
-                </button>
-
-                <span id="quantity">
-                    1
-                </span>
-
-                <button type="button" onclick="changeQuantity(1)">
-                    +
-                </button>
-
             </div>
 
-            <div style="display:flex; gap:12px; margin-top:15px; flex-wrap:wrap;">
-                <button type="button" id="addToCartBtn" class="btn" onclick="addToCart()">
+            <div class="detail-quantity-cluster">
+                <label style="font-weight:600; font-size:14px; color:#444;">Quantity:</label>
+                <div class="quantity-picker">
+                    <button type="button" onclick="changeQuantity(-1)">−</button>
+                    <span id="quantity">1</span>
+                    <button type="button" onclick="changeQuantity(1)">+</button>
+                </div>
+            </div>
+
+            <div class="detail-action-buttons">
+                <button type="button" id="addToCartBtn" class="btn-add-cart" onclick="addToCart()">
                     Add to Cart
                 </button>
 
-                <button type="button" class="btn" style="background:#1e472d;" onclick="buyNow()">
+                <button type="button" class="btn-buy-now" onclick="buyNow()">
                     Buy Now
                 </button>
             </div>
 
-            <hr style="margin:25px 0;">
-
-            <p>🚚 Fast shipping & careful artisan packaging</p>
-            <p>🛡️ Secure GCash & Cash on Delivery available</p>
-            <p>⭐ 100% Filipino handmade quality</p>
+            <div class="detail-trust-badges">
+                <div class="detail-trust-item">🚚 Fast regional courier shipping</div>
+                <div class="detail-trust-item">🛡️ Secure direct GCash & COD</div>
+                <div class="detail-trust-item">⭐ 100% Filipino handmade quality</div>
+            </div>
 
         </div>
 
     </div>
 
 </section>
+
+<!-- Product Quick-View Modal -->
+<div id="productQuickViewModal" class="modal-backdrop" style="display: none;" onclick="if(event.target===this)closeProductQuickView()">
+  <div class="modal-card product-quickview-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <span id="quickViewCategory" class="detail-category-pill">Handicraft</span>
+      <button type="button" class="close-modal-btn" onclick="closeProductQuickView()" aria-label="Close modal">✕</button>
+    </div>
+    
+    <div class="quickview-grid">
+      <div class="quickview-img-wrap">
+        <img id="quickViewImage" src="" alt="Handmade Craft" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80'">
+      </div>
+
+      <div class="detail-info">
+        <h2 id="quickViewName" style="font-family:'Cinzel', serif; font-size:24px; color:#1e3d29; margin:0 0 10px;">Product Name</h2>
+        <div class="detail-rating">★★★★★ <span style="color:#666; font-size:13px;">(Artisan Verified)</span></div>
+        <div id="quickViewPrice" class="detail-price">₱0.00</div>
+
+        <div class="detail-seller-card">
+          <div class="detail-seller-avatar" id="quickViewSellerInitial">A</div>
+          <div class="detail-seller-meta">
+            <h4 id="quickViewSellerName">Artisan Partner</h4>
+            <p>Verified Community Artisan</p>
+          </div>
+        </div>
+
+        <div class="detail-desc-box" id="quickViewDesc">
+          Authentic Filipino handcrafted masterpiece created using traditional materials.
+        </div>
+
+        <div id="quickViewStockIndicator" class="detail-stock-indicator" style="color: green;">
+          In Stock
+        </div>
+
+        <div class="detail-quantity-cluster">
+          <label style="font-weight:600; font-size:14px; color:#444;">Quantity:</label>
+          <div class="quantity-picker">
+            <button type="button" onclick="changeQuickViewQty(-1)">−</button>
+            <span id="quickViewQuantity">1</span>
+            <button type="button" onclick="changeQuickViewQty(1)">+</button>
+          </div>
+        </div>
+
+        <div class="detail-action-buttons">
+          <button type="button" class="btn-add-cart" id="quickViewAddCartBtn" onclick="quickViewAddToCart()">Add to Cart</button>
+          <button type="button" class="btn-buy-now" onclick="quickViewBuyNow()">Buy Now</button>
+        </div>
+
+        <div class="detail-trust-badges">
+          <div class="detail-trust-item">🚚 Fast Regional Shipping</div>
+          <div class="detail-trust-item">🛡️ Direct GCash & COD</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 <!-- ================= CART ================= -->
@@ -881,7 +946,7 @@ function createProductCardHtml(product) {
     const isOut = stock <= 0;
 
     return `
-        <div class="product-card" data-category="${product.category || 'Craft'}">
+        <div class="product-card" data-category="${product.category || 'Craft'}" onclick="openProductQuickView('${product.id}')" style="cursor: pointer;">
             ${product.isNew ? '<span class="product-badge">New</span>' : ''}
             ${isOut ? '<span class="product-badge" style="background:#c53030;">Out of Stock</span>' : ''}
             <img src="${image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80'" />
@@ -889,7 +954,10 @@ function createProductCardHtml(product) {
                 <h3>${product.name}</h3>
                 <p class="price">₱${price}.00</p>
                 <div class="rating">★★★★★ <small style="color:#666;">(${stock > 0 ? stock + ' left' : 'Sold out'})</small></div>
-                <button type="button" class="card-btn" onclick="showProduct('${product.id}')">View Details</button>
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                    <button type="button" class="card-btn" style="flex:1;" onclick="event.stopPropagation(); openProductQuickView('${product.id}')">View Details</button>
+                    <button type="button" class="card-btn" style="background:#f1ebd8; color:#285c3b; border:1px solid #dcd1be; padding:10px 14px;" onclick="event.stopPropagation(); showProduct('${product.id}')" title="Full Details Page">↗</button>
+                </div>
             </div>
         </div>
     `;
@@ -906,6 +974,81 @@ function searchProducts() {
     showScreen("products");
 }
 
+let quickViewProduct = null;
+let quickViewQty = 1;
+
+function openProductQuickView(productId) {
+    const product = liveProducts.find(p => p.id === productId || p.name === productId);
+    if (!product) return;
+
+    quickViewProduct = product;
+    quickViewQty = 1;
+
+    document.getElementById("quickViewName").innerText = product.name;
+    document.getElementById("quickViewPrice").innerText = `₱${Number(product.price || 0).toLocaleString()}.00`;
+    document.getElementById("quickViewImage").src = product.image || "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80";
+    document.getElementById("quickViewDesc").innerText = product.description || "Authentic Filipino handcrafted masterpiece created using traditional materials.";
+    document.getElementById("quickViewSellerName").innerText = product.sellerName || "Artisan Partner";
+    document.getElementById("quickViewSellerInitial").innerText = (product.sellerName || "A").charAt(0).toUpperCase();
+    document.getElementById("quickViewCategory").innerText = (product.category || "Handicraft").toUpperCase();
+    document.getElementById("quickViewQuantity").innerText = quickViewQty;
+
+    const stock = Number(product.stock || 0);
+    const stockEl = document.getElementById("quickViewStockIndicator");
+    const addBtn = document.getElementById("quickViewAddCartBtn");
+
+    if (stock <= 0) {
+        stockEl.innerText = "Out of Stock";
+        stockEl.style.color = "#c53030";
+        if (addBtn) {
+            addBtn.disabled = true;
+            addBtn.innerText = "Sold Out";
+        }
+    } else {
+        stockEl.innerText = `In Stock (${stock} items available)`;
+        stockEl.style.color = "green";
+        if (addBtn) {
+            addBtn.disabled = false;
+            addBtn.innerText = "Add to Cart";
+        }
+    }
+
+    document.getElementById("productQuickViewModal").style.display = "flex";
+}
+
+function closeProductQuickView() {
+    const modal = document.getElementById("productQuickViewModal");
+    if (modal) modal.style.display = "none";
+}
+
+function changeQuickViewQty(amount) {
+    const stock = Number(quickViewProduct?.stock || 99);
+    quickViewQty += amount;
+    if (quickViewQty < 1) quickViewQty = 1;
+    if (quickViewQty > stock) {
+        quickViewQty = stock;
+        alert(`Only ${stock} items available in stock.`);
+    }
+    document.getElementById("quickViewQuantity").innerText = quickViewQty;
+}
+
+function quickViewAddToCart() {
+    if (!quickViewProduct) return;
+    selectedProduct = quickViewProduct;
+    quantity = quickViewQty;
+    addToCart();
+    closeProductQuickView();
+}
+
+function quickViewBuyNow() {
+    if (!quickViewProduct) return;
+    selectedProduct = quickViewProduct;
+    quantity = quickViewQty;
+    addToCart();
+    closeProductQuickView();
+    showScreen("checkout");
+}
+
 function showProduct(productId) {
     const product = liveProducts.find(p => p.id === productId || p.name === productId);
     if (!product) return;
@@ -918,6 +1061,8 @@ function showProduct(productId) {
     document.getElementById("detailImage").src = product.image || "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80";
     document.getElementById("detailDescription").innerText = product.description || "Handcrafted by local Filipino artisans. Durable, unique and perfect for everyday use.";
     document.getElementById("detailSellerName").innerText = product.sellerName || "Artisan Creator";
+    document.getElementById("detailSellerInitial").innerText = (product.sellerName || "A").charAt(0).toUpperCase();
+    document.getElementById("detailCategory").innerText = (product.category || "Handicraft").toUpperCase();
     document.getElementById("quantity").innerText = quantity;
 
     const stock = Number(product.stock || 0);
@@ -934,6 +1079,7 @@ function showProduct(productId) {
         if (addBtn) addBtn.disabled = false;
     }
 
+    closeProductQuickView();
     showScreen("details");
 }
 
@@ -949,6 +1095,7 @@ function changeQuantity(amount) {
 
     document.getElementById("quantity").innerText = quantity;
 }
+
 
 /* ================= CART & CHECKOUT ================= */
 

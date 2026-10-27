@@ -209,6 +209,12 @@
             <p>Products listed by all approved artisans in the marketplace.</p>
           </div>
           <div class="export-btn-cluster">
+            <button type="button" class="primary-btn" id="openAddProductModalBtn" style="padding: 8px 14px; font-size: 13px; font-weight: 600; white-space: nowrap;">
+              + Add New Product
+            </button>
+            <button type="button" class="btn-seed-catalog" id="seedCatalogBtn">
+              Seed Default Catalog
+            </button>
             <button type="button" class="btn-export-excel" id="exportProductsExcelBtn">
               Export Catalog (Excel)
             </button>
@@ -216,6 +222,11 @@
               Export Catalog (Word)
             </button>
           </div>
+        </div>
+
+        <div style="margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <input type="search" id="adminProductSearch" placeholder="Search catalog by title, category, or seller..." style="padding: 9px 14px; border: 1px solid #dcd1be; border-radius: 8px; width: 100%; max-width: 380px; font-size: 13px;">
+          <span id="adminProductCountBadge" style="font-size: 13px; color: #666; font-weight: 500;"></span>
         </div>
 
         <div class="table-wrap">
@@ -401,6 +412,79 @@
           <button type="button" class="secondary-btn" id="cancelPromoBtn">Cancel</button>
           <button type="button" class="primary-btn" id="savePromoBtn">Grant Admin Position</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Add / Edit Product Modal -->
+  <div id="adminProductModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 600px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h2 id="adminProductModalTitle" style="margin: 0; font-size: 20px; color: #285c3b;">Add New Product to Catalog</h2>
+        <button type="button" class="close-modal-btn" id="closeAdminProductModalBtn" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+      </div>
+      <p style="color: #666; font-size: 13px; margin-bottom: 16px;">
+        Publish an authentic handcrafted product directly to the platform marketplace.
+      </p>
+
+      <input type="hidden" id="adminProdId">
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Product Title *</label>
+        <input type="text" id="adminProdName" placeholder="e.g. Handcrafted Abaca Tote Bag" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div class="form-group">
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Category *</label>
+          <select id="adminProdCategory" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+            <option value="Bags">Bags & Purses</option>
+            <option value="Home Decor">Home Decor & Lamps</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Woven Items">Woven Items & Baskets</option>
+            <option value="Wood Crafts">Wood Crafts & Carvings</option>
+            <option value="Souvenirs">Traditional Souvenirs</option>
+            <option value="Jewelry">Handmade Jewelry</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Price (PHP ₱) *</label>
+          <input type="number" id="adminProdPrice" placeholder="e.g. 850" min="1" step="0.01" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div class="form-group">
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Stock Inventory *</label>
+          <input type="number" id="adminProdStock" placeholder="e.g. 15" min="0" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+        </div>
+        <div class="form-group">
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Status</label>
+          <select id="adminProdStatus" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+            <option value="Active">Active (Visible)</option>
+            <option value="Hidden">Hidden (Draft)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Image URL</label>
+        <input type="url" id="adminProdImage" placeholder="https://..." style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Artisan Creator / Shop Name</label>
+        <input type="text" id="adminProdSellerName" placeholder="e.g. Bicol Heritage Weavers" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Product Description</label>
+        <textarea id="adminProdDesc" rows="3" placeholder="Describe the materials, origin, and craft story..." style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;"></textarea>
+      </div>
+
+      <div class="modal-actions-row">
+        <button type="button" class="secondary-btn" id="cancelAdminProdBtn">Cancel</button>
+        <button type="button" class="primary-btn" id="saveAdminProdBtn">Save Product</button>
       </div>
     </div>
   </div>

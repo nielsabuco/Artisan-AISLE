@@ -76,6 +76,7 @@ function renderProducts() {
     const imageUrl = product.image || defaultImage;
     const priceFormatted = `₱${Number(product.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
+    card.style.cursor = 'pointer';
     card.innerHTML = `
       <div class="product-thumb-wrap">
         <img src="${imageUrl}" alt="${product.name}" loading="lazy" onerror="this.src='${defaultImage}'">
@@ -88,18 +89,28 @@ function renderProducts() {
         <div class="product-card-pricing">
           <span class="price-val">${priceFormatted}</span>
         </div>
-        <div class="product-card-actions">
-          <button type="button" class="primary-btn add-to-cart-btn" ${isOutOfStock ? 'disabled' : ''}>
+        <div class="product-card-actions" style="display:flex; gap:8px;">
+          <button type="button" class="action-btn view-details-btn" style="flex:1; background:#f1ebd8; color:#285c3b; border:1px solid #dcd1be; padding:10px 14px; border-radius:8px; font-weight:600; cursor:pointer;">
+            View Details
+          </button>
+          <button type="button" class="primary-btn add-to-cart-btn" style="flex:1;" ${isOutOfStock ? 'disabled' : ''}>
             ${isOutOfStock ? 'Sold Out' : 'Add to Cart'}
           </button>
         </div>
       </div>
     `;
 
+    // Click card or view details to open modal
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.add-to-cart-btn')) return;
+      openQuickView(product);
+    });
+
     // Add to Cart Action
     const addBtn = card.querySelector('.add-to-cart-btn');
     if (addBtn && !isOutOfStock) {
-      addBtn.addEventListener('click', () => {
+      addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         handleAddToCart(product, 1);
         addBtn.textContent = 'Added!';
         setTimeout(() => {
@@ -110,6 +121,110 @@ function renderProducts() {
 
     grid.appendChild(card);
   });
+}
+
+let activeModalProduct = null;
+let activeModalQty = 1;
+
+function setupQuickViewModal() {
+  const modal = document.getElementById('productQuickViewModal');
+  const closeBtn = document.getElementById('closeQuickViewModalBtn');
+  const minusBtn = document.getElementById('quickViewQtyMinus');
+  const plusBtn = document.getElementById('quickViewQtyPlus');
+  const addCartBtn = document.getElementById('quickViewAddCartBtn');
+  const buyNowBtn = document.getElementById('quickViewBuyNowBtn');
+
+  if (!modal) return;
+
+  const closeModal = () => {
+    modal.style.display = 'none';
+  };
+
+  closeBtn?.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  minusBtn?.addEventListener('click', () => {
+    if (activeModalQty > 1) {
+      activeModalQty--;
+      document.getElementById('quickViewQuantity').textContent = activeModalQty;
+    }
+  });
+
+  plusBtn?.addEventListener('click', () => {
+    const stock = Number(activeModalProduct?.stock || 99);
+    if (activeModalQty < stock) {
+      activeModalQty++;
+      document.getElementById('quickViewQuantity').textContent = activeModalQty;
+    } else {
+      alert(`Only ${stock} items available in stock.`);
+    }
+  });
+
+  addCartBtn?.addEventListener('click', () => {
+    if (!activeModalProduct) return;
+    handleAddToCart(activeModalProduct, activeModalQty);
+    addCartBtn.textContent = 'Added to Cart!';
+    setTimeout(() => {
+      addCartBtn.textContent = 'Add to Cart';
+      closeModal();
+    }, 1000);
+  });
+
+  buyNowBtn?.addEventListener('click', () => {
+    if (!activeModalProduct) return;
+    handleAddToCart(activeModalProduct, activeModalQty);
+    window.location.href = 'cart.html';
+  });
+}
+
+function openQuickView(product) {
+  const modal = document.getElementById('productQuickViewModal');
+  if (!modal || !product) return;
+
+  activeModalProduct = product;
+  activeModalQty = 1;
+
+  document.getElementById('quickViewName').textContent = product.name;
+  document.getElementById('quickViewPrice').textContent = `₱${Number(product.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  document.getElementById('quickViewCategory').textContent = (product.category || 'Handicrafts').toUpperCase();
+  document.getElementById('quickViewDesc').textContent = product.description || 'Authentic handcrafted item created by dedicated local artisans.';
+  document.getElementById('quickViewSellerName').textContent = product.sellerName || 'Artisan Partner';
+  document.getElementById('quickViewSellerInitial').textContent = (product.sellerName || 'A').charAt(0).toUpperCase();
+  document.getElementById('quickViewQuantity').textContent = activeModalQty;
+
+  const defaultImg = 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80';
+  const imgEl = document.getElementById('quickViewImage');
+  if (imgEl) {
+    imgEl.src = product.image || defaultImg;
+    imgEl.onerror = () => { imgEl.src = defaultImg; };
+  }
+
+  const stock = Number(product.stock) || 0;
+  const stockIndicator = document.getElementById('quickViewStockIndicator');
+  const addCartBtn = document.getElementById('quickViewAddCartBtn');
+  const buyNowBtn = document.getElementById('quickViewBuyNowBtn');
+
+  if (stock <= 0) {
+    stockIndicator.textContent = 'Out of Stock';
+    stockIndicator.style.color = '#c53030';
+    if (addCartBtn) {
+      addCartBtn.disabled = true;
+      addCartBtn.textContent = 'Sold Out';
+    }
+    if (buyNowBtn) buyNowBtn.disabled = true;
+  } else {
+    stockIndicator.textContent = `In Stock (${stock} available)`;
+    stockIndicator.style.color = 'green';
+    if (addCartBtn) {
+      addCartBtn.disabled = false;
+      addCartBtn.textContent = 'Add to Cart';
+    }
+    if (buyNowBtn) buyNowBtn.disabled = false;
+  }
+
+  modal.style.display = 'flex';
 }
 
 function setupCategoryFilters() {
@@ -128,3 +243,9 @@ function setupSearch() {
   document.getElementById('searchButton')?.addEventListener('click', renderProducts);
   searchInput?.addEventListener('input', renderProducts);
 }
+
+// Hook setupQuickViewModal on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  setupQuickViewModal();
+});
+

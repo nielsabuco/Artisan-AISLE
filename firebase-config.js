@@ -518,6 +518,17 @@ export const ArtisanDB = {
     });
   },
 
+  async sendPasswordReset(email) {
+    const cleanEmail = (email || '').trim().toLowerCase();
+    if (!cleanEmail) throw new Error('Please enter a valid email address.');
+    const actionCodeSettings = {
+      url: `${window.location.origin}/login.html?email=${encodeURIComponent(cleanEmail)}`,
+      handleCodeInApp: false
+    };
+    await sendPasswordResetEmail(auth, cleanEmail, actionCodeSettings);
+    return { success: true };
+  },
+
   async approveSellerApplication(appId, application) {
     // 1. Update application doc
     await updateDoc(doc(db, 'seller_applications', appId), {
@@ -526,6 +537,7 @@ export const ArtisanDB = {
     });
 
     const userId = application.userId;
+    const cleanEmail = (application.email || '').trim().toLowerCase();
 
     // 2. Register/activate in sellers collection
     const sellerPayload = {
@@ -534,7 +546,7 @@ export const ArtisanDB = {
       name: application.applicantName || application.name || 'Artisan Seller',
       shopName: application.shopName || 'Artisan Shop',
       category: application.category || 'General',
-      email: application.email,
+      email: cleanEmail,
       phone: application.phone || '',
       gcashName: application.gcashName || application.applicantName || '',
       gcashNumber: application.gcashNumber || application.phone || '',
@@ -543,9 +555,18 @@ export const ArtisanDB = {
     };
     await setDoc(doc(db, 'sellers', userId), sellerPayload);
 
-    // 3. Update user role to seller and sellerStatus to approved
+    // 3. Update user role and sellerStatus to approved
+    // If the user already has an admin role or master admin email, retain admin privilege
+    let targetRole = 'seller';
+    try {
+      const existingProfile = await this.getUserProfile(userId);
+      if (existingProfile && (existingProfile.role === 'admin' || this.isEmailAdmin(cleanEmail))) {
+        targetRole = 'admin';
+      }
+    } catch (e) {}
+
     await updateDoc(doc(db, 'users', userId), {
-      role: 'seller',
+      role: targetRole,
       sellerStatus: 'approved',
       shopName: application.shopName || 'Artisan Shop',
       sellerId: userId,
@@ -554,27 +575,33 @@ export const ArtisanDB = {
 
     // 4. Send official password setup / reset email via Firebase Auth
     let emailSent = false;
-    if (application.email) {
+    let emailError = null;
+    if (cleanEmail) {
       try {
-        await sendPasswordResetEmail(auth, application.email);
+        const actionCodeSettings = {
+          url: `${window.location.origin}/login.html?email=${encodeURIComponent(cleanEmail)}`,
+          handleCodeInApp: false
+        };
+        await sendPasswordResetEmail(auth, cleanEmail, actionCodeSettings);
         emailSent = true;
       } catch (emailErr) {
-        console.warn('Password setup email dispatch info:', emailErr.message);
+        emailError = emailErr.message || emailErr.code;
+        console.warn('Password setup email dispatch info:', emailErr);
       }
     }
 
-    // 5. Send notification to the user
+    // 5. Send notification to the user in Firestore
     await addDoc(collection(db, 'notifications'), {
       userId,
-      recipientEmail: application.email,
+      recipientEmail: cleanEmail,
       title: 'Seller Application Approved!',
-      message: `Congratulations! Your seller application for "${application.shopName}" has been approved. A secure password setup link has been emailed to ${application.email}. Log in to access your Seller Portal.`,
+      message: `Congratulations! Your seller application for "${application.shopName}" has been approved. Your seller portal is now active. You can log in immediately with your current password or Google account${emailSent ? ', or use the password setup link sent to your email (check Spam/Junk folder if not in inbox).' : '.'}`,
       type: 'seller_approval',
       read: false,
       createdAt: serverTimestamp()
-    });
+    }).catch(() => {});
 
-    return { success: true, emailSent };
+    return { success: true, emailSent, emailError };
   },
 
   async rejectSellerApplication(appId, application, reason) {

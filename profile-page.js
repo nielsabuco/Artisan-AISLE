@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initProfileAuth();
   setupEditModal();
   setupSellerAppModal();
+  setupPasswordResetBtn();
 });
 
 function initProfileAuth() {
@@ -86,11 +87,14 @@ function renderSellerStatusCard(user) {
         <div class="banner-icon">✓</div>
         <div class="banner-text">
           <h3>Your Seller Account is Active</h3>
-          <p>You can manage your products, add new handcrafted inventory, inspect incoming customer orders, and update your GCash credentials in your Seller Portal.</p>
+          <p>Congratulations! Your seller application has been approved. You can now manage your catalog, list new handcrafted items, and fulfill incoming orders.</p>
+          <div style="background: #e7eee8; padding: 10px 14px; border-radius: 8px; margin-top: 10px; font-size: 13px; color: #285c3b;">
+            <strong>Immediate Access:</strong> You can enter the Seller Portal right now using your current password or Google login! (You do not need to change your password to start selling).
+          </div>
         </div>
       </div>
-      <div class="seller-actions-row">
-        <a href="seller.html" class="primary-btn">Open Seller Portal</a>
+      <div class="seller-actions-row" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <a href="seller.html" class="primary-btn" style="text-decoration: none;">Open Seller Portal</a>
       </div>
     `;
   } else if (status === 'pending') {
@@ -101,7 +105,7 @@ function renderSellerStatusCard(user) {
         <div class="banner-icon">⏳</div>
         <div class="banner-text">
           <h3>Application Pending Administrator Review</h3>
-          <p>Your application for <strong>"${user.pendingShopName || 'your artisan shop'}"</strong> has been received. Our administrative team will review your submitted credentials. You will receive an approval notification and password setup email once confirmed.</p>
+          <p>Your application for <strong>"${user.pendingShopName || 'your artisan shop'}"</strong> has been received. Our administrative team will review your submitted credentials. Once approved, you can immediately access the Seller Portal using your current login credentials!</p>
         </div>
       </div>
       <p class="helper-text">Privileges are restricted until administrator approval is granted.</p>
@@ -372,4 +376,29 @@ function loadProfileOrders(userId) {
     });
   });
 }
+
+function setupPasswordResetBtn() {
+  const resetBtn = document.getElementById('sendProfilePasswordResetBtn');
+  resetBtn?.addEventListener('click', async () => {
+    const email = currentUser?.email;
+    if (!email) {
+      alert('No email address associated with your current session.');
+      return;
+    }
+
+    resetBtn.disabled = true;
+    resetBtn.textContent = 'Sending link...';
+
+    try {
+      await ArtisanDB.sendPasswordReset(email);
+      alert(`Password setup link has been sent to ${email}!\n\nIMPORTANT: If you do not see it in your Inbox within a minute, please check your SPAM, JUNK, or PROMOTIONS folder.`);
+    } catch (err) {
+      alert('Could not dispatch password reset: ' + err.message);
+    } finally {
+      resetBtn.disabled = false;
+      resetBtn.textContent = 'Send Password Reset Link to Email';
+    }
+  });
+}
+
 

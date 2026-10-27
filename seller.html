@@ -189,9 +189,11 @@
         const profile = await window.ArtisanDB.getUserProfile(user.uid);
         currentSellerProfile = profile || user;
 
-        // Strict Enforcement: Never grant seller privileges before admin approval
-        const isApproved = (profile && profile.role === 'seller' && profile.sellerStatus === 'approved') ||
-                           (profile && profile.role === 'seller' && profile.sellerStatus !== 'pending' && profile.sellerStatus !== 'rejected');
+        // Strict Enforcement: Grant access if approved, role is seller, or user is platform admin
+        const isApproved = (profile && profile.sellerStatus === 'approved') ||
+                           (profile && profile.role === 'seller') ||
+                           (profile && profile.role === 'admin') ||
+                           (user.email && window.ArtisanDB?.isEmailAdmin && window.ArtisanDB.isEmailAdmin(user.email));
 
         if (!isApproved) {
           const statusText = profile?.sellerStatus === 'pending'
