@@ -154,6 +154,14 @@ export const ArtisanDB = {
       if (this.isEmailAdmin(userOrUid.email)) return true;
     }
 
+    // 5. Check pre-authorized admin records
+    if (email) {
+      try {
+        const authSnap = await getDoc(doc(db, 'admin_authorizations', email.toLowerCase().trim()));
+        if (authSnap.exists()) return true;
+      } catch (e) {}
+    }
+
     return false;
   },
 
@@ -796,6 +804,123 @@ export const ArtisanDB = {
     const updates = { role, updatedAt: serverTimestamp() };
     if (sellerStatus) updates.sellerStatus = sellerStatus;
     await updateDoc(doc(db, 'users', uid), updates);
+  },
+
+  async promoteUserToAdmin(targetUid, { adminRole = 'super_admin', title, notes, promotedByAdmin } = {}) {
+    if (!targetUid) throw new Error("Target user ID is required.");
+
+    const roleTitles = {
+      super_admin: 'Super Administrator',
+      operations_admin: 'Operations & Logistics Admin',
+      moderator_admin: 'Catalog & Artisan Moderator',
+      finance_admin: 'Finance & Sales Auditor'
+    };
+
+    const finalTitle = title || roleTitles[adminRole] || 'Platform Administrator';
+    const promoterName = promotedByAdmin?.name || promotedByAdmin?.email || 'Platform Master Admin';
+
+    const updates = {
+      role: 'admin',
+      isAdmin: true,
+      adminRole: adminRole,
+      adminTitle: finalTitle,
+      adminPromotedBy: promoterName,
+      adminPromotedByEmail: promotedByAdmin?.email || '',
+      adminPromotionNotes: notes || '',
+      adminPromotedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+
+    await setDoc(doc(db, 'users', targetUid), updates, { merge: true });
+
+    // Send in-app notification to the newly appointed administrator
+    await this.addNotification(targetUid, {
+      title: 'Appointed to Administrative Position',
+      message: `You have been appointed as ${finalTitle} by ${promoterName}. You now have administrative access to ArtisanAisle.`,
+      type: 'admin_promotion'
+    }).catch(() => {});
+
+    return updates;
+  },
+
+  async demoteAdminToUser(targetUid, newRole = 'user', demotedByAdmin) {
+    if (!targetUid) throw new Error("Target user ID is required.");
+
+    // Guard: Prevent demoting primary platform seed admins
+    const targetDoc = await this.getUserProfile(targetUid);
+    if (targetDoc && this.isEmailAdmin(targetDoc.email)) {
+      throw new Error(`Cannot revoke admin status for primary platform owner (${targetDoc.email}).`);
+    }
+
+    const demoterName = demotedByAdmin?.name || demotedByAdmin?.email || 'Administrator';
+    const updates = {
+      role: newRole,
+      isAdmin: false,
+      adminRole: null,
+      adminTitle: null,
+      adminDemotedAt: serverTimestamp(),
+      adminDemotedBy: demoterName,
+      updatedAt: serverTimestamp()
+    };
+
+    await setDoc(doc(db, 'users', targetUid), updates, { merge: true });
+
+    await this.addNotification(targetUid, {
+      title: 'Administrative Access Updated',
+      message: `Your administrator privileges were changed to ${newRole.toUpperCase()} by ${demoterName}.`,
+      type: 'admin_demotion'
+    }).catch(() => {});
+
+    return updates;
+  },
+
+  async findUserByEmail(email) {
+    if (!email) return null;
+    const cleanEmail = email.trim().toLowerCase();
+    const q = query(collection(db, 'users'), where('email', '==', cleanEmail));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      return { id: snap.docs[0].id, uid: snap.docs[0].id, ...snap.docs[0].data() };
+    }
+    return null;
+  },
+
+  async promoteUserByEmail(email, promotionData) {
+    if (!email) throw new Error("Email address is required.");
+    const existing = await this.findUserByEmail(email);
+    if (existing) {
+      return await this.promoteUserToAdmin(existing.id || existing.uid, promotionData);
+    }
+
+    // Pre-authorize admin account if they haven't registered yet
+    const cleanEmail = email.trim().toLowerCase();
+    const authDocRef = doc(db, 'admin_authorizations', cleanEmail);
+    await setDoc(authDocRef, {
+      email: cleanEmail,
+      adminRole: promotionData.adminRole || 'super_admin',
+      adminTitle: promotionData.title || 'Platform Administrator',
+      notes: promotionData.notes || '',
+      authorizedBy: promotionData.promotedByAdmin?.email || 'Admin',
+      createdAt: serverTimestamp()
+    });
+
+    return { preAuthorized: true, email: cleanEmail };
+  },
+
+  async addNotification(userId, { title, message, type = 'info' }) {
+    if (!userId) return;
+    try {
+      await addDoc(collection(db, 'notifications'), {
+        userId,
+        title,
+        message,
+        type,
+        read: false,
+        createdAt: serverTimestamp()
+      });
+    } catch (e) {
+      console.warn('Failed to add notification:', e);
+    }
   },
 
   // --- Image Optimization & Upload Helper ---

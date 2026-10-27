@@ -167,10 +167,13 @@
       <section id="tab-users" class="admin-tab-section" style="display: none;">
         <div class="section-header-row">
           <div>
-            <h1>Registered User Accounts</h1>
-            <p>All customers and sellers registered on the platform.</p>
+            <h1>Registered User Accounts & Admin Access</h1>
+            <p>Manage customer accounts, appoint administrators, and delegate platform privileges.</p>
           </div>
           <div class="export-btn-cluster">
+            <button type="button" class="primary-btn" id="openAddAdminBtn" style="padding: 8px 14px; font-size: 13px; font-weight: 600; white-space: nowrap;">
+              + Appoint Admin by Email
+            </button>
             <button type="button" class="btn-export-excel" id="exportUsersExcelBtn">
               Export Users (Excel)
             </button>
@@ -186,9 +189,9 @@
               <tr>
                 <th>Name / Email</th>
                 <th>Phone</th>
-                <th>Role</th>
+                <th>Role & Admin Position</th>
                 <th>Seller Status</th>
-                <th>Actions</th>
+                <th>Admin Role Control</th>
               </tr>
             </thead>
             <tbody id="usersTableBody">
@@ -336,6 +339,68 @@
       <div class="modal-actions-row">
         <button type="button" class="secondary-btn" id="cancelAdminTrackBtn">Cancel</button>
         <button type="button" class="primary-btn" id="saveAdminTrackBtn">Save & Broadcast Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Promotion & Role Delegation Modal -->
+  <div id="adminPromotionModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 580px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h2 style="margin: 0; font-size: 20px; color: #285c3b;">Admin Position & Role Delegation</h2>
+        <button type="button" class="close-modal-btn" id="closeAdminPromoModalBtn" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+      </div>
+      <p style="color: #666; font-size: 13px; margin-bottom: 16px;">
+        Control administrative positions, delegate specific platform permissions, and manage co-administrator accounts.
+      </p>
+
+      <input type="hidden" id="promoUserId">
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">User Email Address *</label>
+        <input type="email" id="promoUserEmail" placeholder="user@example.com" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">User Display Name</label>
+        <input type="text" id="promoUserName" placeholder="Full Name" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Administrative Position / Privilege Level *</label>
+        <select id="promoAdminTier" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #285c3b; font-size: 13px; font-weight: 600; background: #fdfcf9; font-family: inherit;">
+          <option value="super_admin">⭐ Super Administrator (Full Unrestricted Master Platform Control)</option>
+          <option value="operations_admin">📦 Operations & Logistics Admin (Order Fulfillment & Courier Tracking)</option>
+          <option value="moderator_admin">🎨 Catalog & Artisan Moderator (Product Approvals & Seller Onboarding)</option>
+          <option value="finance_admin">📊 Finance & Sales Auditor (Dashboard Metrics & Report Exports)</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Custom Title / Department</label>
+        <input type="text" id="promoCustomTitle" placeholder="e.g. Lead Operations Manager" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+      </div>
+
+      <div style="background: #f7f3eb; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; font-size: 12px;">
+        <strong style="color: #285c3b; display: block; margin-bottom: 4px;">Position Scope & Responsibilities:</strong>
+        <div id="promoPrivilegesDescription" style="color: #555; line-height: 1.4;">
+          Full platform privileges including user promotion, seller applications, financial audit, and catalog moderation.
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Promotion Justification / Notes</label>
+        <textarea id="promoNotes" rows="2" placeholder="e.g. Authorized to oversee fulfillment logistics and dispatch tracking." style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;"></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 10px;">
+        <button type="button" class="action-btn delete" id="demoteUserBtn" style="display: none; padding: 8px 14px; border-radius: 8px; background: #c53030; color: white; border: none; cursor: pointer; font-weight: 600; font-size: 13px;">
+          Revoke Admin Position
+        </button>
+        <div style="display: flex; gap: 10px; margin-left: auto;">
+          <button type="button" class="secondary-btn" id="cancelPromoBtn">Cancel</button>
+          <button type="button" class="primary-btn" id="savePromoBtn">Grant Admin Position</button>
+        </div>
       </div>
     </div>
   </div>

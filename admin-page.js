@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSidebarNav();
   setupExportButtons();
   setupAdminTrackingModal();
+  setupAdminPromotionModal();
 });
 
 function initAdminAuth() {
@@ -218,7 +219,36 @@ function renderUsersTable(users) {
   users.forEach(u => {
     const tr = document.createElement('tr');
     const roleClass = String(u.role || 'user').toLowerCase();
-    const isAdmin = roleClass === 'admin' || (ArtisanDB.isEmailAdmin && ArtisanDB.isEmailAdmin(u.email));
+    const isMasterEmail = ArtisanDB.isEmailAdmin && ArtisanDB.isEmailAdmin(u.email);
+    const isAdmin = roleClass === 'admin' || isMasterEmail;
+
+    // Badges for specific admin tier
+    let badgeHtml = '';
+    if (isAdmin) {
+      const tier = u.adminRole || (isMasterEmail ? 'super_admin' : 'super_admin');
+      if (tier === 'super_admin') {
+        badgeHtml = `<span style="background: #285c3b; color: white; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; display: inline-block;">⭐ SUPER ADMIN</span>`;
+      } else if (tier === 'operations_admin') {
+        badgeHtml = `<span style="background: #185abd; color: white; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; display: inline-block;">📦 OPERATIONS ADMIN</span>`;
+      } else if (tier === 'moderator_admin') {
+        badgeHtml = `<span style="background: #d97706; color: white; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; display: inline-block;">🎨 MODERATOR ADMIN</span>`;
+      } else if (tier === 'finance_admin') {
+        badgeHtml = `<span style="background: #0f766e; color: white; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; display: inline-block;">📊 FINANCE AUDITOR</span>`;
+      } else {
+        badgeHtml = `<span class="role-badge admin">ADMIN</span>`;
+      }
+
+      if (u.adminTitle) {
+        badgeHtml += `<br><small style="color: #285c3b; font-weight: 600;">${u.adminTitle}</small>`;
+      }
+      if (u.adminPromotedBy) {
+        badgeHtml += `<br><small style="color: #777;">by ${u.adminPromotedBy}</small>`;
+      }
+    } else if (roleClass === 'seller' || u.sellerStatus === 'approved') {
+      badgeHtml = `<span class="role-badge seller">ARTISAN SELLER</span>`;
+    } else {
+      badgeHtml = `<span class="role-badge user">CUSTOMER</span>`;
+    }
 
     tr.innerHTML = `
       <td>
@@ -226,21 +256,17 @@ function renderUsersTable(users) {
         <small>${u.email || '-'}</small>
       </td>
       <td>${u.phone || 'None'}</td>
-      <td><span class="role-badge ${roleClass}">${(u.role || 'user').toUpperCase()}</span></td>
-      <td><span class="status-badge">${u.sellerStatus || 'none'}</span></td>
+      <td>${badgeHtml}</td>
+      <td><span class="status-badge ${(u.sellerStatus || 'none').toLowerCase()}">${u.sellerStatus || 'none'}</span></td>
       <td>
-        <button type="button" class="action-btn toggle-role-btn" data-uid="${u.id || u.uid}" data-isadmin="${isAdmin}">
-          ${isAdmin ? 'Demote to User' : 'Promote to Admin'}
+        <button type="button" class="action-btn manage-promo-btn" style="background: ${isAdmin ? '#185abd' : '#285c3b'}; color: white; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; white-space: nowrap;">
+          ${isAdmin ? 'Manage Admin Rights' : 'Promote to Admin'}
         </button>
       </td>
     `;
 
-    tr.querySelector('.toggle-role-btn')?.addEventListener('click', async () => {
-      const targetRole = isAdmin ? 'user' : 'admin';
-      if (confirm(`Change role for ${u.name || u.email} to ${targetRole.toUpperCase()}?`)) {
-        await ArtisanDB.updateUserRole(u.id || u.uid, targetRole);
-        alert(`User role updated to ${targetRole}.`);
-      }
+    tr.querySelector('.manage-promo-btn')?.addEventListener('click', () => {
+      openAdminPromotionModal(u);
     });
 
     tbody.appendChild(tr);
@@ -593,3 +619,166 @@ function setupExportButtons() {
   document.getElementById('exportAppsExcelBtn')?.addEventListener('click', exportAppsExcel);
   document.getElementById('exportAppsWordBtn')?.addEventListener('click', exportAppsWord);
 }
+
+function setupAdminPromotionModal() {
+  const modal = document.getElementById('adminPromotionModal');
+  const closeBtn = document.getElementById('closeAdminPromoModalBtn');
+  const cancelBtn = document.getElementById('cancelPromoBtn');
+  const saveBtn = document.getElementById('savePromoBtn');
+  const demoteBtn = document.getElementById('demoteUserBtn');
+  const tierSelect = document.getElementById('promoAdminTier');
+  const descEl = document.getElementById('promoPrivilegesDescription');
+
+  const tierDescriptions = {
+    super_admin: 'Full unrestricted master platform control: user role delegation, seller verification, order tracking, financial audits, and platform configuration.',
+    operations_admin: 'Operations & logistics management: order fulfillment updates, courier assignment, live delivery tracking, and buyer notifications.',
+    moderator_admin: 'Catalog & artisan community moderation: reviewing handcrafted product listings, approving/rejecting seller applications, and inventory supervision.',
+    finance_admin: 'Finance & sales analytics: viewing platform revenue, order transaction audits, and downloading executive financial reports (Excel / Word).'
+  };
+
+  tierSelect?.addEventListener('change', () => {
+    const val = tierSelect.value;
+    if (descEl) descEl.textContent = tierDescriptions[val] || tierDescriptions.super_admin;
+  });
+
+  closeBtn?.addEventListener('click', () => { modal.style.display = 'none'; });
+  cancelBtn?.addEventListener('click', () => { modal.style.display = 'none'; });
+
+  document.getElementById('openAddAdminBtn')?.addEventListener('click', () => {
+    openAdminPromotionModal(null);
+  });
+
+  saveBtn?.addEventListener('click', async () => {
+    const uid = document.getElementById('promoUserId').value;
+    const email = document.getElementById('promoUserEmail').value.trim();
+    const adminTier = document.getElementById('promoAdminTier').value;
+    const customTitle = document.getElementById('promoCustomTitle').value.trim();
+    const notes = document.getElementById('promoNotes').value.trim();
+
+    if (!email) {
+      alert('Please enter a valid user email address.');
+      return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Granting Access...';
+
+    try {
+      if (uid) {
+        await ArtisanDB.promoteUserToAdmin(uid, {
+          adminRole: adminTier,
+          title: customTitle,
+          notes: notes,
+          promotedByAdmin: currentAdmin
+        });
+        alert(`User (${email}) has been successfully appointed to ${customTitle || adminTier.toUpperCase()}!`);
+      } else {
+        const res = await ArtisanDB.promoteUserByEmail(email, {
+          adminRole: adminTier,
+          title: customTitle,
+          notes: notes,
+          promotedByAdmin: currentAdmin
+        });
+        if (res.preAuthorized) {
+          alert(`Account for "${email}" has been pre-authorized as an Administrator! When they register or sign in with Google, they will immediately receive full administrative privileges.`);
+        } else {
+          alert(`User (${email}) has been successfully appointed as ${customTitle || adminTier.toUpperCase()}!`);
+        }
+      }
+      modal.style.display = 'none';
+    } catch (err) {
+      alert('Promotion error: ' + err.message);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Grant Admin Position';
+    }
+  });
+
+  demoteBtn?.addEventListener('click', async () => {
+    const uid = document.getElementById('promoUserId').value;
+    const email = document.getElementById('promoUserEmail').value.trim();
+    if (!uid) return;
+
+    if (currentAdmin && (currentAdmin.uid === uid || currentAdmin.id === uid)) {
+      alert('Safety Lockout Prevention: You cannot revoke your own administrator account.');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to revoke administrator privileges for "${email}"? They will return to a standard user account.`)) {
+      return;
+    }
+
+    demoteBtn.disabled = true;
+    demoteBtn.textContent = 'Revoking...';
+
+    try {
+      await ArtisanDB.demoteAdminToUser(uid, 'user', currentAdmin);
+      alert(`Administrator privileges for ${email} have been revoked.`);
+      modal.style.display = 'none';
+    } catch (err) {
+      alert('Demotion error: ' + err.message);
+    } finally {
+      demoteBtn.disabled = false;
+      demoteBtn.textContent = 'Revoke Admin Position';
+    }
+  });
+}
+
+function openAdminPromotionModal(user) {
+  const modal = document.getElementById('adminPromotionModal');
+  if (!modal) return;
+
+  const uidInput = document.getElementById('promoUserId');
+  const emailInput = document.getElementById('promoUserEmail');
+  const nameInput = document.getElementById('promoUserName');
+  const tierSelect = document.getElementById('promoAdminTier');
+  const titleInput = document.getElementById('promoCustomTitle');
+  const notesInput = document.getElementById('promoNotes');
+  const demoteBtn = document.getElementById('demoteUserBtn');
+  const saveBtn = document.getElementById('savePromoBtn');
+
+  if (user) {
+    uidInput.value = user.id || user.uid || '';
+    emailInput.value = user.email || '';
+    emailInput.readOnly = true;
+    emailInput.style.background = '#f5f5f5';
+    nameInput.value = user.name || '';
+    nameInput.readOnly = true;
+    nameInput.style.background = '#f5f5f5';
+
+    tierSelect.value = user.adminRole || 'super_admin';
+    titleInput.value = user.adminTitle || '';
+    notesInput.value = user.adminPromotionNotes || '';
+
+    const roleClass = String(user.role || 'user').toLowerCase();
+    const isAdmin = roleClass === 'admin' || (ArtisanDB.isEmailAdmin && ArtisanDB.isEmailAdmin(user.email));
+
+    if (isAdmin) {
+      demoteBtn.style.display = 'inline-block';
+      saveBtn.textContent = 'Update Admin Position';
+    } else {
+      demoteBtn.style.display = 'none';
+      saveBtn.textContent = 'Grant Admin Position';
+    }
+  } else {
+    // New Admin Appointment by Email
+    uidInput.value = '';
+    emailInput.value = '';
+    emailInput.readOnly = false;
+    emailInput.style.background = '#ffffff';
+    nameInput.value = '';
+    nameInput.readOnly = false;
+    nameInput.style.background = '#ffffff';
+
+    tierSelect.value = 'super_admin';
+    titleInput.value = '';
+    notesInput.value = '';
+    demoteBtn.style.display = 'none';
+    saveBtn.textContent = 'Grant Admin Position';
+  }
+
+  // Trigger description update
+  tierSelect.dispatchEvent(new Event('change'));
+  modal.style.display = 'flex';
+}
+
