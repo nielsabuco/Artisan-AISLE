@@ -7,7 +7,9 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 import {
   getFirestore,
@@ -104,6 +106,54 @@ export const ArtisanDB = {
     };
     this._saveLocalSession(sessionData);
     return sessionData;
+  },
+
+  async loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const cred = await signInWithPopup(auth, provider);
+    const user = cred.user;
+
+    // Check if user profile already exists in Firestore
+    let profile = await this.getUserProfile(user.uid);
+    if (!profile) {
+      // First-time Google login: create profile document
+      const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Artisan Customer');
+      profile = {
+        uid: user.uid,
+        name: displayName,
+        email: (user.email || '').trim().toLowerCase(),
+        phone: user.phoneNumber || '',
+        avatar: user.photoURL || '',
+        role: 'user', // Default account role MUST be user
+        sellerStatus: 'none', // none | pending | approved | rejected
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      try {
+        await setDoc(doc(db, 'users', user.uid), profile);
+      } catch (err) {
+        console.warn('Firestore set user warning on Google login:', err.message);
+      }
+    } else {
+      // Existing profile: update avatar if available and not set
+      if (!profile.avatar && user.photoURL) {
+        try {
+          await updateDoc(doc(db, 'users', user.uid), {
+            avatar: user.photoURL,
+            updatedAt: serverTimestamp()
+          });
+          profile.avatar = user.photoURL;
+        } catch (e) {}
+      }
+    }
+
+    this._saveLocalSession(profile);
+    return profile;
+  },
+
+  async signInWithGoogle() {
+    return this.loginWithGoogle();
   },
 
   async logoutUser() {
