@@ -705,6 +705,14 @@ export const ArtisanDB = {
     await updateDoc(doc(db, 'orders', orderId), updates);
   },
 
+  async updateOrder(orderId, updateFields) {
+    if (!orderId) return;
+    await updateDoc(doc(db, 'orders', orderId), {
+      ...updateFields,
+      updatedAt: serverTimestamp()
+    });
+  },
+
   // --- Users Management for Admin ---
   subscribeAllUsers(callback) {
     return onSnapshot(collection(db, 'users'), (snap) => {

@@ -17,7 +17,8 @@ export default defineConfig({
         artisans: resolve(import.meta.dirname, 'artisans.html'),
         categories: resolve(import.meta.dirname, 'categories.html'),
         contact: resolve(import.meta.dirname, 'contact.html'),
-        review: resolve(import.meta.dirname, 'review.html')
+        review: resolve(import.meta.dirname, 'review.html'),
+        gcashCheckout: resolve(import.meta.dirname, 'gcash-checkout.html')
       }
     }
   }

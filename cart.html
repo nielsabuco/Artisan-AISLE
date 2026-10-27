@@ -125,32 +125,18 @@
             </div>
 
             <!-- GCash Direct Seller Panel (shown when GCash selected) -->
-            <div id="gcashDirectDetailsPanel" class="gcash-seller-box" style="display: none;">
-              <h3>Artisan Seller GCash Details</h3>
-              <p class="gcash-instruction">Please transfer the exact total amount to the seller's registered GCash account below:</p>
-              
-              <div class="gcash-credentials-card">
-                <div class="gcash-row">
-                  <span class="gcash-label">Account Name:</span>
-                  <strong class="gcash-val" id="gcashAccountNameDisplay">Loading...</strong>
-                </div>
-                <div class="gcash-row">
-                  <span class="gcash-label">GCash Mobile Number:</span>
-                  <div class="gcash-number-copy-wrap">
-                    <strong class="gcash-val highlight" id="gcashMobileNumberDisplay">Loading...</strong>
-                    <button type="button" class="copy-small-btn" id="copyGcashNumberBtn">Copy</button>
-                  </div>
-                </div>
-                <div id="gcashQrContainer" class="gcash-qr-preview-wrap" style="display: none;">
-                  <img id="gcashQrImage" src="" alt="Seller GCash QR Code">
-                  <span class="qr-caption">Scan to pay via GCash App</span>
-                </div>
+            <div id="gcashDirectDetailsPanel" class="gcash-seller-box" style="display: none; background: #f0f7ff; border: 1.5px solid #b8daff; border-radius: 12px; padding: 20px;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="background: #007DFE; color: white; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 6px;">GCash</span>
+                <h3 style="margin: 0; color: #0056b3; font-size: 17px;">Seamless GCash Mobile Checkout</h3>
               </div>
-
-              <div class="form-group gcash-ref-group">
-                <label for="gcashReferenceInput">Enter 13-Digit GCash Transaction Reference Number *</label>
-                <input type="text" id="gcashReferenceInput" maxlength="13" placeholder="e.g. 1002345678912">
-                <small class="helper-text">You can find this 13-digit reference number in your GCash SMS confirmation or App receipt.</small>
+              <p style="color: #495057; font-size: 14px; margin-bottom: 12px; line-height: 1.5;">
+                When you click <strong>Proceed to GCash Payment</strong>, you will be securely redirected to GCash to authorize and pay your balance. Once complete, you will automatically return to ArtisanAisle and your order will be verified and marked as <strong>PAID</strong>.
+              </p>
+              <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #0056b3; font-weight: 600;">
+                <span>✓ Instant automated verification</span>
+                <span>✓ No receipt uploads required</span>
+                <span>✓ Encrypted transaction</span>
               </div>
             </div>
           </div>
@@ -205,12 +191,12 @@
     </div>
   </main>
 
-  <!-- Order Success Modal -->
+  <!-- Order Success / Payment Verified Modal -->
   <div id="orderSuccessModal" class="modal-backdrop" style="display: none;">
     <div class="modal-card">
       <div class="success-icon-badge">✓</div>
-      <h2>Order Successfully Placed!</h2>
-      <p>Thank you for supporting our local artisans. Your order details have been recorded.</p>
+      <h2 id="successModalTitle">Order Successfully Placed!</h2>
+      <p id="successModalSubtitle">Thank you for supporting our local artisans. Your order details have been recorded.</p>
       
       <div class="order-receipt-summary">
         <div class="receipt-row">
@@ -220,6 +206,10 @@
         <div class="receipt-row">
           <span>Payment Method:</span>
           <strong id="receiptPaymentMethod">Cash on Delivery</strong>
+        </div>
+        <div class="receipt-row" id="receiptGcashRefRow" style="display: none;">
+          <span>GCash Ref No:</span>
+          <strong id="receiptGcashRef" style="color: #007DFE;">-</strong>
         </div>
         <div class="receipt-row">
           <span>Payment Status:</span>
@@ -234,6 +224,46 @@
       <div class="modal-actions-row">
         <button type="button" class="secondary-btn" id="successViewOrdersBtn">View My Orders</button>
         <button type="button" class="primary-btn" id="successContinueShoppingBtn">Continue Shopping</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GCash Payment Incomplete / Choice Modal -->
+  <div id="paymentFailedModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="alert-icon-badge" style="background:#fde8e8; color:#e74c3c; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:bold; margin:0 auto 16px;">!</div>
+      <h2>GCash Payment Incomplete</h2>
+      <p id="paymentFailedMessage">Your GCash transaction was not completed or was cancelled. Don't worry, your order has been saved!</p>
+      
+      <div class="order-receipt-summary">
+        <div class="receipt-row">
+          <span>Order Number:</span>
+          <strong id="failedReceiptOrderNumber">#ORD-000000</strong>
+        </div>
+        <div class="receipt-row">
+          <span>Total Amount:</span>
+          <strong id="failedReceiptAmount">₱0.00</strong>
+        </div>
+        <div class="receipt-row">
+          <span>Current Status:</span>
+          <span class="status-badge-inline" style="background:#fff3cd; color:#856404;">Pending Payment</span>
+        </div>
+      </div>
+
+      <div style="margin: 20px 0 10px; text-align: left;">
+        <label style="font-weight: 700; font-size: 14px; color: #2c3e50; display: block; margin-bottom: 6px;">Select Another Payment Option:</label>
+      </div>
+
+      <div class="payment-choice-actions" style="display: flex; flex-direction: column; gap: 10px;">
+        <button type="button" class="primary-btn" id="switchToCodBtn" style="background: #285c3b; color: white; width: 100%; padding: 13px; font-size: 15px; border-radius: 10px; font-weight: 700; cursor: pointer;">
+          Switch to Cash on Delivery (COD)
+        </button>
+        <button type="button" class="primary-btn" id="retryGcashBtn" style="background: #007DFE; color: white; width: 100%; padding: 13px; font-size: 15px; border-radius: 10px; font-weight: 700; cursor: pointer;">
+          Retry GCash Payment
+        </button>
+        <button type="button" class="secondary-btn" id="cancelFailedOrderBtn" style="background: #f1f2f6; color: #57606f; width: 100%; padding: 10px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; margin-top: 4px;">
+          Cancel Order
+        </button>
       </div>
     </div>
   </div>

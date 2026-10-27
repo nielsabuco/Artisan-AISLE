@@ -2,7 +2,6 @@ import { ArtisanDB } from './firebase-config.js';
 import { updateHeaderAuth } from './header-auth.js';
 
 let isSubmitting = false;
-let currentSellersCache = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
   initTabs();
@@ -10,6 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupPaymentListener();
   setupPlaceOrder();
   loadSavedShipping();
+  await checkPaymentCallback();
 
   // Listen to external cart updates
   window.addEventListener('artisan-cart-updated', () => {
@@ -98,179 +98,130 @@ function switchTab(tab) {
 async function renderCart() {
   const cart = ArtisanDB.getCart();
   const emptyState = document.getElementById('emptyCartState');
-  const activeContent = document.getElementById('activeCartContent');
-  const listEl = document.getElementById('cartItemsList');
-  const countTitle = document.getElementById('cartCountTitle');
+  const cartGrid = document.getElementById('cartActiveGrid');
+  const cartItemsList = document.getElementById('cartItemsList');
+  const cartItemCount = document.getElementById('cartItemCount');
 
-  const totalCount = cart.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
-  if (countTitle) countTitle.textContent = totalCount;
+  updateHeaderAuth();
 
   if (!cart || cart.length === 0) {
     if (emptyState) emptyState.style.display = 'block';
-    if (activeContent) activeContent.style.display = 'none';
+    if (cartGrid) cartGrid.style.display = 'none';
+    if (cartItemCount) cartItemCount.textContent = '(0 items)';
     return;
   }
 
   if (emptyState) emptyState.style.display = 'none';
-  if (activeContent) activeContent.style.display = 'grid';
+  if (cartGrid) cartGrid.style.display = 'grid';
 
-  if (!listEl) return;
-  listEl.innerHTML = '';
+  const totalCount = cart.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+  if (cartItemCount) cartItemCount.textContent = `(${totalCount} item${totalCount > 1 ? 's' : ''})`;
 
-  let subtotal = 0;
+  // Render Cart Item Cards
+  if (cartItemsList) {
+    cartItemsList.innerHTML = '';
+    cart.forEach(item => {
+      const price = Number(item.price) || 0;
+      const qty = Number(item.quantity) || 1;
+      const lineTotal = price * qty;
+      const stock = Number(item.stock) || 99;
 
-  cart.forEach(item => {
-    const qty = Number(item.quantity) || 1;
-    const price = Number(item.price) || 0;
-    const lineTotal = price * qty;
-    subtotal += lineTotal;
+      const itemCard = document.createElement('div');
+      itemCard.className = 'cart-item-card';
+      itemCard.dataset.id = item.productId || item.id;
 
-    const itemRow = document.createElement('div');
-    itemRow.className = 'cart-item-row';
-    itemRow.innerHTML = `
-      <img class="cart-item-thumb" src="${item.image || 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=400&q=80'}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=400&q=80'">
-      <div class="cart-item-details">
-        <h4 class="cart-item-name">${item.name}</h4>
-        <div class="cart-item-meta">
-          <span>Seller: <strong>${item.sellerName || 'Artisan Partner'}</strong></span>
-          <span>Category: ${item.category || 'Handicrafts'}</span>
+      itemCard.innerHTML = `
+        <div class="cart-item-thumb">
+          <img src="${item.image || 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=300&q=80'}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=300&q=80'">
         </div>
-        <div class="cart-item-price-unit">₱${price.toFixed(2)} each</div>
-      </div>
-      <div class="cart-item-controls">
-        <div class="qty-pill">
-          <button type="button" class="qty-btn dec-btn" data-id="${item.id}">-</button>
-          <span class="qty-val">${qty}</span>
-          <button type="button" class="qty-btn inc-btn" data-id="${item.id}">+</button>
+        <div class="cart-item-details">
+          <div class="cart-item-header">
+            <div>
+              <h3 class="cart-item-title">${item.name}</h3>
+              <span class="cart-item-seller">Artisan: ${item.sellerName || 'Verified Guild Member'}</span>
+            </div>
+            <button type="button" class="cart-item-remove-btn" title="Remove item">&times;</button>
+          </div>
+          <div class="cart-item-footer">
+            <div class="cart-qty-control">
+              <button type="button" class="qty-btn dec-btn" ${qty <= 1 ? 'disabled' : ''}>-</button>
+              <input type="number" class="qty-input" value="${qty}" min="1" max="${stock}" readonly>
+              <button type="button" class="qty-btn inc-btn" ${qty >= stock ? 'disabled' : ''}>+</button>
+            </div>
+            <div class="cart-item-pricing">
+              <span class="unit-price">₱${price.toFixed(2)} each</span>
+              <strong class="line-total">₱${lineTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+            </div>
+          </div>
         </div>
-        <div class="cart-item-line-total">₱${lineTotal.toFixed(2)}</div>
-        <button type="button" class="item-delete-btn" data-id="${item.id}" title="Remove item">Remove</button>
-      </div>
-    `;
+      `;
 
-    listEl.appendChild(itemRow);
-  });
+      // Event Listeners for Item Actions
+      const removeBtn = itemCard.querySelector('.cart-item-remove-btn');
+      const decBtn = itemCard.querySelector('.dec-btn');
+      const incBtn = itemCard.querySelector('.inc-btn');
 
-  // Calculate Shipping and Grand Total
-  const shipping = subtotal >= 1000 ? 0 : (subtotal > 0 ? 50 : 0);
+      removeBtn.addEventListener('click', () => {
+        ArtisanDB.removeFromCart(item.productId || item.id);
+        renderCart();
+      });
+
+      decBtn.addEventListener('click', () => {
+        if (qty > 1) {
+          ArtisanDB.updateCartQuantity(item.productId || item.id, qty - 1);
+          renderCart();
+        }
+      });
+
+      incBtn.addEventListener('click', () => {
+        if (qty < stock) {
+          ArtisanDB.updateCartQuantity(item.productId || item.id, qty + 1);
+          renderCart();
+        } else {
+          alert(`Maximum available stock reached for ${item.name} (${stock} units).`);
+        }
+      });
+
+      cartItemsList.appendChild(itemCard);
+    });
+  }
+
+  // Update Summary Sidebar
+  const subtotal = cart.reduce((acc, i) => acc + (Number(i.price) * Number(i.quantity)), 0);
+  const shipping = subtotal >= 1000 ? 0 : 50;
   const grandTotal = subtotal + shipping;
 
-  document.getElementById('summarySubtotal').textContent = `₱${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-  document.getElementById('summaryShipping').textContent = shipping === 0 ? 'FREE' : `₱${shipping.toFixed(2)}`;
-  document.getElementById('summaryGrandTotal').textContent = `₱${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  const subtotalEl = document.getElementById('summarySubtotal');
+  const shippingEl = document.getElementById('summaryShipping');
+  const grandTotalEl = document.getElementById('summaryGrandTotal');
 
-  // Attach quantity and delete event listeners
-  listEl.querySelectorAll('.dec-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      const item = cart.find(i => i.id === id);
-      if (item && item.quantity > 1) {
-        ArtisanDB.updateCartQuantity(id, item.quantity - 1);
-      } else {
-        ArtisanDB.removeFromCart(id);
-      }
-    });
-  });
-
-  listEl.querySelectorAll('.inc-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      const item = cart.find(i => i.id === id);
-      if (item) {
-        ArtisanDB.updateCartQuantity(id, item.quantity + 1);
-      }
-    });
-  });
-
-  listEl.querySelectorAll('.item-delete-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      ArtisanDB.removeFromCart(id);
-    });
-  });
-
-  // If GCash is selected, refresh the seller payment card
-  const selectedPayment = document.querySelector('input[name="paymentOption"]:checked')?.value;
-  if (selectedPayment === 'GCash') {
-    updateGcashSellerDetails();
-  }
+  if (subtotalEl) subtotalEl.textContent = `₱${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  if (shippingEl) shippingEl.textContent = shipping === 0 ? 'FREE' : `₱${shipping.toFixed(2)}`;
+  if (grandTotalEl) grandTotalEl.textContent = `₱${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 }
 
 function setupPaymentListener() {
   const radios = document.querySelectorAll('input[name="paymentOption"]');
   const gcashPanel = document.getElementById('gcashDirectDetailsPanel');
+  const submitBtn = document.getElementById('placeOrderSubmitBtn');
 
   radios.forEach(radio => {
     radio.addEventListener('change', () => {
       if (radio.value === 'GCash') {
         if (gcashPanel) gcashPanel.style.display = 'block';
-        updateGcashSellerDetails();
+        if (submitBtn) {
+          submitBtn.querySelector('.btn-text').textContent = 'Proceed to GCash Payment →';
+          submitBtn.style.background = '#007DFE';
+        }
       } else {
         if (gcashPanel) gcashPanel.style.display = 'none';
+        if (submitBtn) {
+          submitBtn.querySelector('.btn-text').textContent = 'Place Order (Cash on Delivery)';
+          submitBtn.style.background = '#285c3b';
+        }
       }
     });
   });
-
-  // Copy button for GCash number
-  document.getElementById('copyGcashNumberBtn')?.addEventListener('click', () => {
-    const num = document.getElementById('gcashMobileNumberDisplay')?.textContent || '';
-    if (num && num !== 'Loading...') {
-      navigator.clipboard.writeText(num).then(() => {
-        const btn = document.getElementById('copyGcashNumberBtn');
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
-      });
-    }
-  });
-}
-
-async function updateGcashSellerDetails() {
-  const cart = ArtisanDB.getCart();
-  if (!cart.length) return;
-
-  const firstItem = cart[0];
-  const sellerId = firstItem.sellerId;
-
-  const nameDisplay = document.getElementById('gcashAccountNameDisplay');
-  const numberDisplay = document.getElementById('gcashMobileNumberDisplay');
-  const qrWrap = document.getElementById('gcashQrContainer');
-  const qrImg = document.getElementById('gcashQrImage');
-
-  if (sellerId && currentSellersCache[sellerId]) {
-    const s = currentSellersCache[sellerId];
-    nameDisplay.textContent = s.gcashName || s.name || 'Artisan Seller Official';
-    numberDisplay.textContent = s.gcashNumber || s.phone || '09123456789';
-    if (s.gcashQr) {
-      qrImg.src = s.gcashQr;
-      qrWrap.style.display = 'block';
-    } else {
-      qrWrap.style.display = 'none';
-    }
-    return;
-  }
-
-  // Fetch seller details from Firestore
-  try {
-    const seller = await ArtisanDB.getSeller(sellerId);
-    if (seller) {
-      currentSellersCache[sellerId] = seller;
-      nameDisplay.textContent = seller.gcashName || seller.name || 'Artisan Seller Official';
-      numberDisplay.textContent = seller.gcashNumber || seller.phone || '09123456789';
-      if (seller.gcashQr) {
-        qrImg.src = seller.gcashQr;
-        qrWrap.style.display = 'block';
-      } else {
-        qrWrap.style.display = 'none';
-      }
-    } else {
-      nameDisplay.textContent = firstItem.sellerName || 'Artisan Guild of the Philippines';
-      numberDisplay.textContent = '0917-889-4455';
-      qrWrap.style.display = 'none';
-    }
-  } catch (err) {
-    nameDisplay.textContent = firstItem.sellerName || 'Artisan Seller Official';
-    numberDisplay.textContent = '0917-889-4455';
-  }
 }
 
 function loadSavedShipping(user) {
@@ -331,24 +282,13 @@ function setupPlaceOrder() {
     }
 
     const paymentMethod = document.querySelector('input[name="paymentOption"]:checked')?.value || 'Cash on Delivery';
-    let gcashRef = '';
-    let paymentStatus = paymentMethod === 'Cash on Delivery' ? 'Due on delivery' : 'Pending Verification';
-    let orderStatus = 'Processing';
-
-    if (paymentMethod === 'GCash') {
-      gcashRef = document.getElementById('gcashReferenceInput').value.trim();
-      if (!gcashRef || gcashRef.length < 9) {
-        showError('Please provide your valid GCash transaction reference number (9-13 digits) to confirm payment.');
-        return;
-      }
-      paymentStatus = 'Paid';
-      orderStatus = 'Confirmed';
-    }
+    let paymentStatus = paymentMethod === 'Cash on Delivery' ? 'Due on delivery' : 'Pending Payment';
+    let orderStatus = paymentMethod === 'Cash on Delivery' ? 'Processing' : 'Awaiting Payment';
 
     // Set Loading State
     isSubmitting = true;
     submitBtn.disabled = true;
-    submitBtn.querySelector('.btn-text').textContent = 'Processing Order...';
+    submitBtn.querySelector('.btn-text').textContent = paymentMethod === 'GCash' ? 'Redirecting to GCash...' : 'Processing Order...';
     submitBtn.querySelector('.btn-spinner').style.display = 'inline-block';
 
     try {
@@ -381,7 +321,6 @@ function setupPlaceOrder() {
         paymentMethod,
         paymentStatus,
         orderStatus,
-        paymentReference: gcashRef,
         subtotal,
         shipping,
         total
@@ -390,15 +329,24 @@ function setupPlaceOrder() {
       // 3. Write to Firestore via ArtisanDB
       const createdOrder = await ArtisanDB.createOrder(orderPayload);
 
-      // 4. Clear cart on verified success
+      // 4. Clear cart on verified creation
       ArtisanDB.clearCart();
       updateHeaderAuth();
 
-      // 5. Show Success Modal
+      // 5. IF GCASH: Redirect immediately to GCash payment gateway
+      if (paymentMethod === 'GCash') {
+        window.location.href = `gcash-checkout.html?orderId=${createdOrder.id}`;
+        return;
+      }
+
+      // 6. IF COD: Show Success Modal
+      document.getElementById('successModalTitle').textContent = 'Order Successfully Placed!';
+      document.getElementById('successModalSubtitle').textContent = 'Thank you for supporting our local artisans. Your order details have been recorded.';
       document.getElementById('receiptOrderNumber').textContent = createdOrder.orderNumber;
       document.getElementById('receiptPaymentMethod').textContent = paymentMethod;
       document.getElementById('receiptPaymentStatus').textContent = paymentStatus;
       document.getElementById('receiptTotalAmount').textContent = `₱${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      document.getElementById('receiptGcashRefRow').style.display = 'none';
       document.getElementById('orderSuccessModal').style.display = 'flex';
 
     } catch (err) {
@@ -407,7 +355,7 @@ function setupPlaceOrder() {
     } finally {
       isSubmitting = false;
       submitBtn.disabled = false;
-      submitBtn.querySelector('.btn-text').textContent = 'Place Order Now';
+      submitBtn.querySelector('.btn-text').textContent = paymentMethod === 'GCash' ? 'Proceed to GCash Payment →' : 'Place Order Now';
       submitBtn.querySelector('.btn-spinner').style.display = 'none';
     }
   });
@@ -421,6 +369,92 @@ function setupPlaceOrder() {
     } else {
       alert(msg);
     }
+  }
+}
+
+async function checkPaymentCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const paymentState = params.get('payment');
+  const orderId = params.get('orderId');
+  const ref = params.get('ref');
+
+  if (!paymentState || !orderId) return;
+
+  try {
+    const order = await ArtisanDB.getOrder(orderId);
+    if (!order) return;
+
+    if (paymentState === 'success') {
+      // 1. Success verification from GCash
+      document.getElementById('successModalTitle').textContent = 'GCash Payment Verified!';
+      document.getElementById('successModalSubtitle').textContent = 'Your GCash transaction went through successfully. Your order is confirmed and marked as PAID.';
+      document.getElementById('receiptOrderNumber').textContent = order.orderNumber || orderId;
+      document.getElementById('receiptPaymentMethod').textContent = 'GCash';
+      
+      const refRow = document.getElementById('receiptGcashRefRow');
+      const refVal = document.getElementById('receiptGcashRef');
+      if (refRow && refVal) {
+        refVal.textContent = ref || order.paymentReference || 'VERIFIED';
+        refRow.style.display = 'flex';
+      }
+
+      document.getElementById('receiptPaymentStatus').textContent = 'Paid';
+      document.getElementById('receiptPaymentStatus').className = 'status-badge-inline delivered';
+      document.getElementById('receiptTotalAmount').textContent = `₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      
+      document.getElementById('orderSuccessModal').style.display = 'flex';
+      history.replaceState(null, null, window.location.pathname);
+
+    } else if (paymentState === 'failed') {
+      // 2. Failed / Cancelled flow with alternative choices
+      document.getElementById('failedReceiptOrderNumber').textContent = order.orderNumber || orderId;
+      document.getElementById('failedReceiptAmount').textContent = `₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+      const modal = document.getElementById('paymentFailedModal');
+      modal.style.display = 'flex';
+
+      // Choice 1: Switch to COD
+      document.getElementById('switchToCodBtn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('switchToCodBtn');
+        btn.disabled = true;
+        btn.textContent = 'Updating Payment Method...';
+        try {
+          await ArtisanDB.updateOrder(orderId, {
+            paymentMethod: 'Cash on Delivery',
+            paymentStatus: 'Due on delivery',
+            orderStatus: 'Confirmed'
+          });
+          alert('Payment method switched to Cash on Delivery (COD)! Your order is now confirmed.');
+          modal.style.display = 'none';
+          switchTab('orders');
+        } catch (e) {
+          alert('Failed to update payment method: ' + e.message);
+          btn.disabled = false;
+          btn.textContent = 'Switch to Cash on Delivery (COD)';
+        }
+      });
+
+      // Choice 2: Retry GCash
+      document.getElementById('retryGcashBtn')?.addEventListener('click', () => {
+        window.location.href = `gcash-checkout.html?orderId=${orderId}`;
+      });
+
+      // Choice 3: Cancel Order
+      document.getElementById('cancelFailedOrderBtn')?.addEventListener('click', async () => {
+        if (confirm('Are you sure you want to cancel this order?')) {
+          await ArtisanDB.updateOrder(orderId, {
+            orderStatus: 'Cancelled',
+            paymentStatus: 'Cancelled'
+          });
+          modal.style.display = 'none';
+          switchTab('orders');
+        }
+      });
+
+      history.replaceState(null, null, window.location.pathname);
+    }
+  } catch (err) {
+    console.error('Payment callback check error:', err);
   }
 }
 
@@ -445,7 +479,11 @@ function loadUserOrders(userId) {
     orders.forEach(order => {
       const dateStr = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently';
       const statusClass = (order.orderStatus || 'processing').toLowerCase();
-      const paymentBadgeClass = order.paymentStatus === 'Paid' ? 'paid-badge' : 'unpaid-badge';
+      const isPaid = order.paymentStatus === 'Paid';
+      const paymentBadgeClass = isPaid ? 'paid-badge' : 'unpaid-badge';
+
+      // If unpaid GCash order, show Pay Now button
+      const canPayGcash = !isPaid && order.paymentMethod === 'GCash' && order.orderStatus !== 'Cancelled';
 
       const card = document.createElement('div');
       card.className = 'user-order-card';
@@ -476,9 +514,17 @@ function loadUserOrders(userId) {
         <div class="order-card-footer">
           <div class="order-shipping-summary">
             <strong>Delivery to:</strong> ${order.customerName || 'Customer'} • ${order.shippingAddress || 'Standard Delivery'}
+            ${order.paymentReference ? `<br><small style="color:#007DFE; font-weight:600;">GCash Ref: ${order.paymentReference}</small>` : ''}
           </div>
-          <div class="order-total-highlight">
-            Total: <strong>₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="order-total-highlight">
+              Total: <strong>₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+            </div>
+            ${canPayGcash ? `
+              <a href="gcash-checkout.html?orderId=${order.id}" class="action-btn" style="background:#007DFE; color:white; padding:8px 14px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:700; white-space:nowrap;">
+                Pay with GCash
+              </a>
+            ` : ''}
           </div>
         </div>
       `;

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GCash Payment Gateway | ArtisanAisle</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body.gcash-theme-body {
+      background: #f0f4f9;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .gcash-header {
+      background: #007DFE;
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0, 125, 254, 0.25);
+    }
+    .gcash-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+    }
+    .gcash-logo-icon {
+      width: 38px;
+      height: 38px;
+      background: white;
+      color: #007DFE;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 22px;
+    }
+    .gcash-secure-pill {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .gcash-main-wrap {
+      max-width: 480px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    .gcash-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+    .gcash-merchant-banner {
+      background: #f7faff;
+      border-bottom: 1px solid #e3edf9;
+      padding: 20px 24px;
+      text-align: center;
+    }
+    .gcash-merchant-name {
+      font-size: 14px;
+      color: #6c7a89;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    .gcash-amount-huge {
+      font-size: 36px;
+      font-weight: 800;
+      color: #007DFE;
+      margin: 8px 0 4px;
+    }
+    .gcash-order-tag {
+      font-size: 13px;
+      color: #8fa1b3;
+    }
+    .gcash-form-body {
+      padding: 28px 24px;
+    }
+    .gcash-step-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .gcash-step-badge {
+      width: 22px;
+      height: 22px;
+      background: #007DFE;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .gcash-input-group {
+      margin-bottom: 22px;
+    }
+    .gcash-input-wrap {
+      display: flex;
+      align-items: center;
+      border: 1.5px solid #d0dbe7;
+      border-radius: 10px;
+      padding: 4px 14px;
+      background: #fcfdfe;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .gcash-input-wrap:focus-within {
+      border-color: #007DFE;
+      box-shadow: 0 0 0 3px rgba(0, 125, 254, 0.15);
+    }
+    .gcash-input-prefix {
+      font-weight: 600;
+      color: #555;
+      margin-right: 10px;
+    }
+    .gcash-input-field {
+      border: none !important;
+      outline: none !important;
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      width: 100% !important;
+      padding: 10px 0 !important;
+      margin-bottom: 0 !important;
+      background: transparent !important;
+    }
+    .gcash-pay-btn {
+      width: 100%;
+      background: #007DFE;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background-color 0.2s, transform 0.15s ease;
+      box-shadow: 0 4px 14px rgba(0, 125, 254, 0.35);
+    }
+    .gcash-pay-btn:hover {
+      background: #0066cc;
+      transform: translateY(-1px);
+    }
+    .gcash-pay-btn:disabled {
+      background: #9ac7fa;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .gcash-cancel-link {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: #7f8c8d;
+      font-size: 14px;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .gcash-cancel-link:hover {
+      color: #e74c3c;
+      text-decoration: underline;
+    }
+    .gcash-status-overlay {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 16px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      text-align: center;
+      z-index: 10;
+    }
+    .gcash-spinner-pulse {
+      width: 56px;
+      height: 56px;
+      border: 4px solid #e3edf9;
+      border-top-color: #007DFE;
+      border-radius: 50%;
+      animation: gcashSpin 0.9s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes gcashSpin {
+      to { transform: rotate(360deg); }
+    }
+    .gcash-footer-notes {
+      text-align: center;
+      font-size: 12px;
+      color: #95a5a6;
+      margin-top: 24px;
+      line-height: 1.5;
+    }
+    .gcash-test-actions {
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+    .gcash-test-btn {
+      background: transparent;
+      border: 1px dashed #bdc3c7;
+      color: #7f8c8d;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .gcash-test-btn:hover {
+      border-color: #e74c3c;
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body class="gcash-theme-body">
+
+  <header class="gcash-header">
+    <div class="gcash-brand">
+      <div class="gcash-logo-icon">G</div>
+      <span>GCash Checkout</span>
+    </div>
+    <div class="gcash-secure-pill">
+      🔒 256-bit Encrypted
+    </div>
+  </header>
+
+  <main class="gcash-main-wrap">
+    <div class="gcash-card" style="position: relative;">
+      
+      <!-- Processing Overlay -->
+      <div id="gcashProcessingOverlay" class="gcash-status-overlay">
+        <div class="gcash-spinner-pulse"></div>
+        <h3 id="gcashProcessingTitle" style="color:#007DFE; margin:0 0 8px;">Connecting to GCash...</h3>
+        <p id="gcashProcessingMsg" style="color:#666; font-size:14px; margin:0;">Authorizing deduction from your GCash account...</p>
+      </div>
+
+      <!-- Merchant & Amount Banner -->
+      <div class="gcash-merchant-banner">
+        <div class="gcash-merchant-name" id="gcashMerchantName">ArtisanAisle Philippines</div>
+        <div class="gcash-amount-huge" id="gcashTotalAmountDisplay">₱0.00</div>
+        <div class="gcash-order-tag" id="gcashOrderNumberTag">Order Reference: Loading...</div>
+      </div>
+
+      <!-- Payment Form -->
+      <div class="gcash-form-body">
+        
+        <!-- Step 1: Mobile Number -->
+        <div class="gcash-input-group">
+          <div class="gcash-step-title">
+            <span class="gcash-step-badge">1</span>
+            <span>GCash Mobile Number</span>
+          </div>
+          <div class="gcash-input-wrap">
+            <span class="gcash-input-prefix">+63</span>
+            <input type="tel" id="gcashPhoneInput" class="gcash-input-field" placeholder="9XXXXXXXXX" maxlength="10" required />
+          </div>
+          <small style="color:#8fa1b3; font-size:12px; margin-top:4px; display:block;">Enter your 10-digit GCash mobile number (e.g. 9171234567)</small>
+        </div>
+
+        <!-- Step 2: MPIN Authorization -->
+        <div class="gcash-input-group">
+          <div class="gcash-step-title">
+            <span class="gcash-step-badge">2</span>
+            <span>4-Digit MPIN</span>
+          </div>
+          <div class="gcash-input-wrap">
+            <input type="password" id="gcashMpinInput" class="gcash-input-field" placeholder="••••" maxlength="4" style="letter-spacing: 6px; font-size: 20px !important;" required />
+          </div>
+          <small style="color:#8fa1b3; font-size:12px; margin-top:4px; display:block;">Enter your MPIN to authorize payment of the balance</small>
+        </div>
+
+        <!-- Error notification -->
+        <div id="gcashErrorBanner" style="display:none; background:#fde8e8; color:#c0392b; padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:16px;"></div>
+
+        <!-- Pay Button -->
+        <button type="button" id="gcashConfirmPayBtn" class="gcash-pay-btn">
+          <span>Authorize & Pay</span>
+          <span id="gcashBtnAmount">₱0.00</span>
+        </button>
+
+        <!-- Cancel / Alternative link -->
+        <a id="gcashCancelBtn" class="gcash-cancel-link">Cancel and choose another payment method</a>
+
+        <div class="gcash-test-actions">
+          <button type="button" id="gcashSimulateFailBtn" class="gcash-test-btn">Simulate Decline / Insufficient Balance</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="gcash-footer-notes">
+      Official GCash Direct Transfer for ArtisanAisle Philippine Artisans.<br>
+      Licensed by the Bangko Sentral ng Pilipinas (BSP).
+    </div>
+  </main>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="gcash-checkout.js"></script>
+</body>
+</html>
