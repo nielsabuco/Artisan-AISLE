@@ -485,6 +485,15 @@ function loadUserOrders(userId) {
       // If unpaid GCash order, show Pay Now button
       const canPayGcash = !isPaid && order.paymentMethod === 'GCash' && order.orderStatus !== 'Cancelled';
 
+      // Calculate tracking step
+      let currentStep = 1;
+      const s = String(order.orderStatus || '').toLowerCase();
+      if (s === 'delivered') currentStep = 5;
+      else if (s === 'out for delivery') currentStep = 4;
+      else if (s === 'shipped') currentStep = 3;
+      else if (s === 'packed') currentStep = 3;
+      else if (s === 'processing' || s === 'confirmed') currentStep = 2;
+
       const card = document.createElement('div');
       card.className = 'user-order-card';
       card.innerHTML = `
@@ -509,6 +518,58 @@ function loadUserOrders(userId) {
               </div>
             </div>
           `).join('')}
+        </div>
+
+        <!-- Live Order Tracking Stepper -->
+        <div class="order-tracking-stepper-box">
+          <div class="tracking-stepper">
+            <div class="step-point ${currentStep >= 1 ? (currentStep > 1 ? 'completed' : 'active') : ''}">
+              <div class="circle">${currentStep > 1 ? '✓' : '1'}</div>
+              <span>Placed</span>
+            </div>
+            <div class="step-line ${currentStep >= 2 ? 'completed' : ''}"></div>
+            <div class="step-point ${currentStep >= 2 ? (currentStep > 2 ? 'completed' : 'active') : ''}">
+              <div class="circle">${currentStep > 2 ? '✓' : '2'}</div>
+              <span>Processing</span>
+            </div>
+            <div class="step-line ${currentStep >= 3 ? 'completed' : ''}"></div>
+            <div class="step-point ${currentStep >= 3 ? (currentStep > 3 ? 'completed' : 'active') : ''}">
+              <div class="circle">${currentStep > 3 ? '✓' : '3'}</div>
+              <span>Shipped</span>
+            </div>
+            <div class="step-line ${currentStep >= 4 ? 'completed' : ''}"></div>
+            <div class="step-point ${currentStep >= 4 ? (currentStep > 4 ? 'completed' : 'active') : ''}">
+              <div class="circle">${currentStep > 4 ? '✓' : '4'}</div>
+              <span>Out for Delivery</span>
+            </div>
+            <div class="step-line ${currentStep >= 5 ? 'completed' : ''}"></div>
+            <div class="step-point ${currentStep >= 5 ? 'completed' : ''}">
+              <div class="circle">${currentStep >= 5 ? '✓' : '5'}</div>
+              <span>Delivered</span>
+            </div>
+          </div>
+
+          <div class="tracking-live-info">
+            <div class="tracking-info-grid">
+              <div>
+                <small>Courier</small>
+                <strong>${order.courier || 'Artisan Direct / Local Logistics'}</strong>
+              </div>
+              <div>
+                <small>Tracking Reference</small>
+                <strong>${order.trackingNumber ? `<code>${order.trackingNumber}</code>` : 'Pending Pickup'}</strong>
+              </div>
+              <div>
+                <small>Current Location</small>
+                <strong>${order.currentLocation || 'Artisan Workshop'}</strong>
+              </div>
+            </div>
+            ${order.trackingNotes ? `
+              <div class="tracking-note-banner">
+                <small><strong>Latest Tracking Update:</strong></small> ${order.trackingNotes}
+              </div>
+            ` : ''}
+          </div>
         </div>
 
         <div class="order-card-footer">

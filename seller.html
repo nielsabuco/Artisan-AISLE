@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Seller Portal | ArtisanAisle</title>
   <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="export-utils.js"></script>
 </head>
 <body class="seller-portal-body">
 
@@ -79,6 +80,72 @@
       <div style="display:flex; gap:10px; margin-top:15px;">
         <button class="btn" style="flex:1;" onclick="submitStockUpdate()">Save Stock</button>
         <button class="secondary-btn" style="flex:1;" onclick="closeStockModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seller Order Tracking Modal -->
+  <div id="sellerTrackingModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 540px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h2 style="margin: 0; font-size: 20px; color: #285c3b;">Update Order Tracking & Delivery</h2>
+        <button type="button" class="close-modal-btn" onclick="closeSellerTrackingModal()">&times;</button>
+      </div>
+      <p style="color: #666; font-size: 13px; margin-bottom: 16px;">
+        Update live shipment tracking so the customer can see where their handcrafted item is at each milestone.
+      </p>
+
+      <input type="hidden" id="sellerTrackOrderId">
+
+      <div style="background: #f7f3eb; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">
+        <strong>Order:</strong> <span id="sellerTrackOrderNum">-</span> • 
+        <strong>Customer:</strong> <span id="sellerTrackCustomer">-</span>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Fulfillment Status *</label>
+        <select id="sellerTrackStatus" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit;">
+          <option value="Processing">Processing</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Packed">Packed & Ready</option>
+          <option value="Shipped">Shipped / In Transit</option>
+          <option value="Out for Delivery">Out for Delivery</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div class="form-group">
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Courier Service</label>
+          <select id="sellerTrackCourier" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit;">
+            <option value="J&T Express">J&T Express</option>
+            <option value="LBC Express">LBC Express</option>
+            <option value="Flash Express">Flash Express</option>
+            <option value="Ninja Van">Ninja Van</option>
+            <option value="2GO Express">2GO Express</option>
+            <option value="Artisan Local Logistics">Artisan Local Logistics</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Tracking Number / Waybill</label>
+          <input type="text" id="sellerTrackNumber" placeholder="e.g. JNT-8819401" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Current Hub / Location</label>
+        <input type="text" id="sellerTrackLocation" placeholder="e.g. Paete Laguna Workshop or Sorting Hub" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Tracking Notes for Customer</label>
+        <textarea id="sellerTrackNotes" rows="2" placeholder="e.g. Handcrafted item boxed securely with banana fiber packaging and picked up by courier." style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;"></textarea>
+      </div>
+
+      <div class="modal-actions-row">
+        <button type="button" class="secondary-btn" onclick="closeSellerTrackingModal()">Cancel</button>
+        <button type="button" class="primary-btn" id="saveSellerTrackBtn" onclick="submitSellerTrackingUpdate()">Save Tracking & Broadcast</button>
       </div>
     </div>
   </div>
@@ -207,10 +274,18 @@
       const lowStockCount = sellerProducts.filter(p => (Number(p.stock) || 0) < 5).length;
 
       container.innerHTML = `
-        <div class="admin-content-header">
+        <div class="admin-content-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div>
             <h1>Shop Dashboard</h1>
             <p>Welcome back, ${currentSellerProfile?.name || 'Artisan'}! Here is your live shop performance.</p>
+          </div>
+          <div class="export-btn-cluster">
+            <button type="button" class="btn-export-excel" onclick="exportSellerSales('excel')">
+              Export Sales (Excel)
+            </button>
+            <button type="button" class="btn-export-word" onclick="exportSellerSales('word')">
+              Export Report (Word)
+            </button>
           </div>
         </div>
 
@@ -274,9 +349,17 @@
     function renderProductsView(container) {
       container.innerHTML = `
         <div class="admin-panel">
-          <div class="admin-panel-header">
+          <div class="admin-panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
             <h2>My Products (${sellerProducts.length})</h2>
-            <button class="btn" onclick="setSellerView('add-product')">Add New Product</button>
+            <div class="export-btn-cluster">
+              <button type="button" class="btn-export-excel" onclick="exportSellerProducts('excel')">
+                Export Catalog (Excel)
+              </button>
+              <button type="button" class="btn-export-word" onclick="exportSellerProducts('word')">
+                Export Catalog (Word)
+              </button>
+              <button type="button" class="btn" onclick="setSellerView('add-product')">Add New Product</button>
+            </div>
           </div>
           <div class="table-box">
             <table class="admin-table">
@@ -380,8 +463,16 @@
     function renderOrdersView(container) {
       container.innerHTML = `
         <div class="admin-panel">
-          <div class="admin-panel-header">
+          <div class="admin-panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
             <h2>Orders Received (${sellerOrders.length})</h2>
+            <div class="export-btn-cluster">
+              <button type="button" class="btn-export-excel" onclick="exportSellerSales('excel')">
+                Export Orders (Excel)
+              </button>
+              <button type="button" class="btn-export-word" onclick="exportSellerSales('word')">
+                Export Orders (Word)
+              </button>
+            </div>
           </div>
           <div class="table-box">
             <table class="admin-table">
@@ -393,20 +484,24 @@
                   <th>Total Amount</th>
                   <th>Payment Method</th>
                   <th>Payment Status</th>
+                  <th>Tracking / Courier</th>
                   <th>Fulfillment Status</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 ${sellerOrders.length === 0 ? `
-                  <tr><td colspan="8" style="text-align:center; padding:30px;">No customer orders received yet.</td></tr>
-                ` : sellerOrders.map(o => `
+                  <tr><td colspan="9" style="text-align:center; padding:30px;">No customer orders received yet.</td></tr>
+                ` : sellerOrders.map(o => {
+                  const s = String(o.orderStatus || '').toLowerCase();
+                  const trackingClass = s === 'delivered' ? 'status-active' : s === 'shipped' || s === 'out for delivery' ? 'status-active' : 'status-pending';
+                  return `
                   <tr>
                     <td><strong>${o.orderNumber || o.id}</strong><br><small>${o.createdAt ? new Date(o.createdAt.seconds * 1000).toLocaleDateString() : 'Recent'}</small></td>
                     <td>
                       <strong>${o.customerName || 'Customer'}</strong><br>
                       <small>${o.customerPhone || ''}</small><br>
-                      <small>${o.deliveryAddress?.city || ''}</small>
+                      <small>${o.deliveryAddress?.city || o.shippingAddress || ''}</small>
                     </td>
                     <td>
                       ${Array.isArray(o.items) ? o.items.map(it => `<div>${it.name} × ${it.quantity}</div>`).join('') : '--'}
@@ -419,24 +514,23 @@
                       </span>
                     </td>
                     <td>
+                      <span class="status-badge ${trackingClass}">${o.orderStatus || 'Processing'}</span><br>
+                      <small style="color:#555;">${o.courier || 'Local Logistics'}</small><br>
+                      <small>${o.trackingNumber ? `<code>${o.trackingNumber}</code>` : 'Pending Pickup'}</small>
+                      ${o.currentLocation ? `<br><small style="color:#285c3b;">📍 ${o.currentLocation}</small>` : ''}
+                    </td>
+                    <td>
                       <span class="status-badge ${o.orderStatus === 'Delivered' ? 'status-active' : o.orderStatus === 'Shipped' ? 'status-active' : 'status-pending'}">
                         ${o.orderStatus || 'Processing'}
                       </span>
                     </td>
                     <td>
-                      ${o.orderStatus === 'Delivered' ? `
-                        <span style="color:#285c3b; font-weight:bold;">Completed</span>
-                      ` : `
-                        <select onchange="updateFulfillmentStatus('${o.id}', this.value)" style="padding:4px 8px; border-radius:6px; border:1px solid #ccc;">
-                          <option value="">Update Status...</option>
-                          <option value="Processing" ${o.orderStatus === 'Processing' ? 'selected' : ''}>Processing</option>
-                          <option value="Shipped" ${o.orderStatus === 'Shipped' ? 'selected' : ''}>Mark Shipped</option>
-                          <option value="Delivered" ${o.orderStatus === 'Delivered' ? 'selected' : ''}>Mark Delivered</option>
-                        </select>
-                      `}
+                      <button type="button" class="action-btn" style="background:#285c3b; color:white; border:none; padding:7px 12px; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; white-space:nowrap;" onclick="openSellerTrackingModal('${o.id}')">
+                        Update Tracking
+                      </button>
                     </td>
                   </tr>
-                `).join('')}
+                `}).join('')}
               </tbody>
             </table>
           </div>
@@ -644,6 +738,165 @@
         alert("Failed to save settings: " + e.message);
       }
     }
+
+    // Open Tracking Modal for Seller
+    function openSellerTrackingModal(orderId) {
+      const order = sellerOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      document.getElementById('sellerTrackOrderId').value = order.id;
+      document.getElementById('sellerTrackOrderNum').textContent = order.orderNumber || order.id;
+      document.getElementById('sellerTrackCustomer').textContent = order.customerName || 'Customer';
+
+      document.getElementById('sellerTrackStatus').value = order.orderStatus || 'Processing';
+      document.getElementById('sellerTrackCourier').value = order.courier || 'J&T Express';
+      document.getElementById('sellerTrackNumber').value = order.trackingNumber || '';
+      document.getElementById('sellerTrackLocation').value = order.currentLocation || '';
+      document.getElementById('sellerTrackNotes').value = order.trackingNotes || '';
+
+      document.getElementById('sellerTrackingModal').style.display = 'flex';
+    }
+
+    function closeSellerTrackingModal() {
+      document.getElementById('sellerTrackingModal').style.display = 'none';
+    }
+
+    // Submit Tracking Update
+    async function submitSellerTrackingUpdate() {
+      const orderId = document.getElementById('sellerTrackOrderId').value;
+      if (!orderId) return;
+
+      const btn = document.getElementById('saveSellerTrackBtn');
+      btn.disabled = true;
+      btn.textContent = 'Broadcasting...';
+
+      const trackingData = {
+        orderStatus: document.getElementById('sellerTrackStatus').value,
+        courier: document.getElementById('sellerTrackCourier').value,
+        trackingNumber: document.getElementById('sellerTrackNumber').value.trim(),
+        currentLocation: document.getElementById('sellerTrackLocation').value.trim(),
+        trackingNotes: document.getElementById('sellerTrackNotes').value.trim()
+      };
+
+      try {
+        if (window.ArtisanDB && window.ArtisanDB.updateOrderTracking) {
+          await window.ArtisanDB.updateOrderTracking(orderId, trackingData);
+        } else {
+          await window.ArtisanDB.updateOrder(orderId, trackingData);
+        }
+        alert('Tracking updated successfully! The customer and admin can now view the latest live delivery status.');
+        closeSellerTrackingModal();
+      } catch (e) {
+        alert('Error updating tracking: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Tracking & Broadcast';
+      }
+    }
+
+    // Export Seller Sales & Orders (Excel or MS Word)
+    function exportSellerSales(format) {
+      if (!window.ArtisanExport) {
+        alert('Export utilities are initializing. Please try again in a moment.');
+        return;
+      }
+      const shopName = document.getElementById('sidebarShopName')?.innerText || 'Artisan_Shop';
+      const cleanShop = shopName.replace(/[^a-zA-Z0-9]/g, '_');
+
+      if (format === 'excel') {
+        const headers = ['Order Number', 'Date', 'Customer Name', 'Customer Phone', 'Delivery City', 'Items Ordered', 'Total (PHP)', 'Payment Method', 'Payment Status', 'Fulfillment Status', 'Courier', 'Tracking Number', 'Current Hub Location'];
+        const rows = sellerOrders.map(o => [
+          o.orderNumber || o.id,
+          o.createdAt ? new Date(o.createdAt.seconds * 1000).toLocaleDateString('en-PH') : 'Recent',
+          o.customerName || 'Customer',
+          o.customerPhone || '-',
+          o.deliveryAddress?.city || o.shippingAddress || '-',
+          Array.isArray(o.items) ? o.items.map(i => `${i.quantity}x ${i.name}`).join('; ') : '-',
+          Number(o.total || 0).toFixed(2),
+          o.paymentMethod || 'COD',
+          o.paymentStatus || 'Pending',
+          o.orderStatus || 'Processing',
+          o.courier || '-',
+          o.trackingNumber || '-',
+          o.currentLocation || '-'
+        ]);
+
+        window.ArtisanExport.exportToExcel(`ArtisanAisle_${cleanShop}_Orders_${Date.now()}`, `${shopName} - Sales & Orders Log`, headers, rows);
+      } else {
+        const headers = ['Order Number', 'Customer', 'Items Summary', 'Total Amount', 'Payment', 'Tracking Status', 'Courier & Waybill'];
+        const rows = sellerOrders.map(o => [
+          o.orderNumber || o.id,
+          `${o.customerName || 'Customer'} (${o.customerPhone || '-'})`,
+          Array.isArray(o.items) ? o.items.map(i => `${i.quantity}x ${i.name}`).join(', ') : '-',
+          `PHP ${Number(o.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          `${o.paymentMethod || 'COD'} (${o.paymentStatus || 'Pending'})`,
+          o.orderStatus || 'Processing',
+          `${o.courier || 'Local Logistics'} - ${o.trackingNumber || 'Pending'}`
+        ]);
+
+        const totalRevenue = sellerOrders
+          .filter(o => o.paymentStatus === 'Paid')
+          .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+        const metadata = {
+          'Artisan Shop': shopName,
+          'Artisan Name': currentSellerProfile?.name || 'Verified Artisan',
+          'Total Orders Received': sellerOrders.length,
+          'Verified Revenue': `PHP ${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          'Active Listed Products': sellerProducts.length
+        };
+
+        window.ArtisanExport.exportToWord(`ArtisanAisle_${cleanShop}_SalesReport_${Date.now()}`, `${shopName} - Performance & Sales Report`, metadata, headers, rows);
+      }
+    }
+
+    // Export Seller Products Catalog (Excel or MS Word)
+    function exportSellerProducts(format) {
+      if (!window.ArtisanExport) {
+        alert('Export utilities are initializing. Please try again in a moment.');
+        return;
+      }
+      const shopName = document.getElementById('sidebarShopName')?.innerText || 'Artisan_Shop';
+      const cleanShop = shopName.replace(/[^a-zA-Z0-9]/g, '_');
+
+      if (format === 'excel') {
+        const headers = ['Product ID', 'Item Name', 'Category', 'Price (PHP)', 'Stock Count', 'Status'];
+        const rows = sellerProducts.map(p => [
+          p.id || '-',
+          p.name || 'Handcrafted Item',
+          p.category || 'Handicraft',
+          Number(p.price || 0).toFixed(2),
+          Number(p.stock || 0),
+          p.status || 'Active'
+        ]);
+
+        window.ArtisanExport.exportToExcel(`ArtisanAisle_${cleanShop}_Catalog_${Date.now()}`, `${shopName} - Product Catalog Inventory`, headers, rows);
+      } else {
+        const headers = ['Item Name', 'Category', 'Unit Price', 'Stock Level', 'Status'];
+        const rows = sellerProducts.map(p => [
+          p.name || 'Handcrafted Item',
+          p.category || 'Handicraft',
+          `PHP ${Number(p.price || 0).toFixed(2)}`,
+          p.stock || 0,
+          p.status || 'Active'
+        ]);
+
+        const metadata = {
+          'Artisan Shop': shopName,
+          'Total Listed Crafts': sellerProducts.length,
+          'In-Stock Creations': sellerProducts.filter(p => (Number(p.stock) || 0) > 0).length,
+          'Low Stock Items (<5)': sellerProducts.filter(p => (Number(p.stock) || 0) < 5).length
+        };
+
+        window.ArtisanExport.exportToWord(`ArtisanAisle_${cleanShop}_CatalogReport_${Date.now()}`, `${shopName} - Product Catalog Report`, metadata, headers, rows);
+      }
+    }
+
+    window.openSellerTrackingModal = openSellerTrackingModal;
+    window.closeSellerTrackingModal = closeSellerTrackingModal;
+    window.submitSellerTrackingUpdate = submitSellerTrackingUpdate;
+    window.exportSellerSales = exportSellerSales;
+    window.exportSellerProducts = exportSellerProducts;
 
     // Logout Handler
     async function handleSellerLogout() {

@@ -3351,4 +3351,210 @@ footer {
   border-radius: 8px;
 }
 
+/* Order Tracking Stepper Styles */
+.order-tracking-stepper-box {
+  background: #fdfbf7;
+  border: 1.5px solid #e7ded0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 15px 0;
+}
+
+.tracking-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.step-point {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+  text-align: center;
+  width: 75px;
+}
+
+.step-point .circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e0d8cc;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  transition: all 0.3s ease;
+}
+
+.step-point.active .circle {
+  background: #285c3b;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(40, 92, 59, 0.2);
+}
+
+.step-point.completed .circle {
+  background: #285c3b;
+  color: white;
+}
+
+.step-point span {
+  font-size: 11px;
+  font-weight: 600;
+  color: #777;
+  line-height: 1.2;
+}
+
+.step-point.active span,
+.step-point.completed span {
+  color: #285c3b;
+  font-weight: 700;
+}
+
+.step-line {
+  flex: 1;
+  height: 3px;
+  background: #e0d8cc;
+  margin: 0 -10px 18px -10px;
+  z-index: 1;
+}
+
+.step-line.completed {
+  background: #285c3b;
+}
+
+.tracking-live-info {
+  border-top: 1px solid #ebd9c2;
+  padding-top: 12px;
+}
+
+.tracking-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  font-size: 13px;
+}
+
+.tracking-info-grid small {
+  display: block;
+  color: #888;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.tracking-note-banner {
+  background: #f7f0e4;
+  border-left: 3px solid #285c3b;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #333;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+/* Export Buttons & Actions */
+.export-btn-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-export-excel {
+  background: #107c41 !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.btn-export-excel:hover {
+  opacity: 0.9;
+}
+
+.btn-export-word {
+  background: #185abd !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.btn-export-word:hover {
+  opacity: 0.9;
+}
+
+/* Universal Modal Styles */
+.modal-backdrop,
+.seller-login-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-card,
+.seller-login-box {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 26px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid #ebd9c2;
+}
+
+.modal-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #777;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.close-modal-btn:hover {
+  color: #222;
+}
+
+
+
 

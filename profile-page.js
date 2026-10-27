@@ -29,6 +29,7 @@ function initProfileAuth() {
     renderProfileData(currentUser);
     renderSellerStatusCard(currentUser);
     loadNotifications(currentUser.uid);
+    loadProfileOrders(currentUser.uid);
   });
 }
 
@@ -320,3 +321,55 @@ function loadNotifications(userId) {
     });
   });
 }
+
+function loadProfileOrders(userId) {
+  const container = document.getElementById('profileRecentOrdersList');
+  if (!container) return;
+
+  ArtisanDB.subscribeUserOrders(userId, (orders) => {
+    if (!orders || orders.length === 0) {
+      container.innerHTML = `
+        <p class="empty-muted" style="text-align: center; padding: 16px;">
+          You haven't placed any handcrafted orders yet. 
+          <a href="products.html" style="color: #285c3b; font-weight: 600; text-decoration: underline; margin-left: 6px;">Browse Artisan Products</a>
+        </p>
+      `;
+      return;
+    }
+
+    container.innerHTML = '';
+    orders.slice(0, 4).forEach(order => {
+      const statusClass = (order.orderStatus || 'processing').toLowerCase();
+      
+      const itemEl = document.createElement('div');
+      itemEl.style.cssText = 'background: #fdfcf9; border: 1px solid #ebd9c2; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;';
+      
+      itemEl.innerHTML = `
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <strong style="color: #285c3b; font-size: 14px;">${order.orderNumber || order.id}</strong>
+            <span class="status-badge ${statusClass}">${order.orderStatus || 'Processing'}</span>
+          </div>
+          <p style="margin: 0; font-size: 13px; color: #555;">
+            ${(order.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ') || 'Handcrafted items'}
+          </p>
+          <div style="font-size: 12px; color: #777; margin-top: 4px;">
+            Courier: <strong>${order.courier || 'Local Logistics'}</strong> • 
+            Tracking: <strong>${order.trackingNumber ? `<code>${order.trackingNumber}</code>` : 'Pending pickup'}</strong>
+            ${order.currentLocation ? ` • Location: <span style="color:#285c3b; font-weight:600;">📍 ${order.currentLocation}</span>` : ''}
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 15px; font-weight: 700; color: #285c3b; margin-bottom: 6px;">
+            ₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          </div>
+          <a href="cart.html#orders" class="secondary-btn" style="padding: 5px 12px; font-size: 12px; text-decoration: none; border-radius: 6px;">
+            Live Tracking Stepper →
+          </a>
+        </div>
+      `;
+      container.appendChild(itemEl);
+    });
+  });
+}
+

@@ -713,6 +713,64 @@ export const ArtisanDB = {
     });
   },
 
+  async updateOrderTracking(orderId, trackingData) {
+    if (!orderId) return;
+    const ref = doc(db, 'orders', orderId);
+    let existingUpdates = [];
+    let userId = null;
+    let orderNumber = orderId;
+    try {
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data();
+        existingUpdates = data.trackingUpdates || [];
+        userId = data.userId;
+        orderNumber = data.orderNumber || orderId;
+      }
+    } catch (e) {}
+
+    const newUpdate = {
+      status: trackingData.orderStatus || trackingData.trackingStatus || 'Processing',
+      location: trackingData.currentLocation || 'Artisan Workshop',
+      courier: trackingData.courier || 'Local Logistics',
+      trackingNumber: trackingData.trackingNumber || '',
+      note: trackingData.trackingNotes || 'Tracking status updated.',
+      timestamp: new Date().toISOString()
+    };
+
+    const updates = {
+      orderStatus: trackingData.orderStatus || 'Processing',
+      trackingStatus: trackingData.trackingStatus || trackingData.orderStatus || 'Processing',
+      courier: trackingData.courier || '',
+      trackingNumber: trackingData.trackingNumber || '',
+      currentLocation: trackingData.currentLocation || '',
+      trackingNotes: trackingData.trackingNotes || '',
+      estimatedDelivery: trackingData.estimatedDelivery || '',
+      trackingUpdates: [newUpdate, ...existingUpdates],
+      updatedAt: serverTimestamp()
+    };
+
+    if (trackingData.paymentStatus) {
+      updates.paymentStatus = trackingData.paymentStatus;
+    }
+
+    await updateDoc(ref, updates);
+
+    // Notify customer
+    if (userId) {
+      await addDoc(collection(db, 'notifications'), {
+        userId,
+        title: `Order Tracking Update: ${orderNumber}`,
+        message: `Your order ${orderNumber} tracking updated: ${updates.orderStatus} (${updates.currentLocation || updates.courier || 'In Transit'}).`,
+        orderId,
+        read: false,
+        createdAt: serverTimestamp()
+      }).catch(e => console.warn('Customer tracking notif warning:', e));
+    }
+
+    return updates;
+  },
+
   // --- Users Management for Admin ---
   subscribeAllUsers(callback) {
     return onSnapshot(collection(db, 'users'), (snap) => {

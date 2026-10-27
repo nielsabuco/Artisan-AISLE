@@ -1,0 +1,145 @@
+/**
+ * ArtisanAisle Data Export Utilities
+ * Exports datasets in native Microsoft Excel (.xls / .csv) and Microsoft Word (.doc) formats.
+ */
+
+export function exportToExcel(filename, title, headers, rows) {
+  const tableRowsHtml = rows.map((row, idx) => {
+    const bg = idx % 2 === 0 ? '#ffffff' : '#f9fbf9';
+    return `<tr style="background-color: ${bg};">
+      ${row.map(val => `<td style="padding: 8px 12px; border: 1px solid #dcdde1; font-family: Segoe UI, Arial, sans-serif; font-size: 13px;">${escapeHtml(String(val ?? ''))}</td>`).join('')}
+    </tr>`;
+  }).join('');
+
+  const tableHeadersHtml = headers.map(h => 
+    `<th style="background-color: #285c3b; color: #ffffff; padding: 10px 12px; border: 1px solid #1e472d; font-family: Segoe UI, Arial, sans-serif; font-size: 13px; font-weight: bold; text-align: left;">${escapeHtml(h)}</th>`
+  ).join('');
+
+  const htmlContent = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>${escapeHtml(title || 'Data Export')}</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+      <style>
+        table { border-collapse: collapse; width: 100%; }
+        td, th { white-space: nowrap; }
+      </style>
+    </head>
+    <body>
+      <h2 style="font-family: Georgia, serif; color: #285c3b; margin-bottom: 4px;">ArtisanAisle - ${escapeHtml(title)}</h2>
+      <p style="font-family: Arial, sans-serif; font-size: 12px; color: #666; margin-top: 0; margin-bottom: 16px;">
+        Exported on: ${new Date().toLocaleString('en-PH')} • Total Records: ${rows.length}
+      </p>
+      <table>
+        <thead>
+          <tr>${tableHeadersHtml}</tr>
+        </thead>
+        <tbody>
+          ${tableRowsHtml}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  triggerDownload(blob, `${filename}.xls`);
+}
+
+export function exportToWord(filename, title, metadata = {}, headers, rows) {
+  const metaHtml = Object.entries(metadata).map(([k, v]) => 
+    `<tr><td style="font-weight: bold; width: 180px; padding: 4px 8px; color: #285c3b;">${escapeHtml(k)}:</td><td style="padding: 4px 8px;">${escapeHtml(String(v))}</td></tr>`
+  ).join('');
+
+  const tableHeadersHtml = headers.map(h => 
+    `<th style="background-color: #285c3b; color: #ffffff; padding: 8px 10px; border: 1px solid #1e472d; font-family: Calibri, Arial, sans-serif; font-size: 11pt; text-align: left;">${escapeHtml(h)}</th>`
+  ).join('');
+
+  const tableRowsHtml = rows.map((row, idx) => {
+    const bg = idx % 2 === 0 ? '#ffffff' : '#f7f9f7';
+    return `<tr style="background-color: ${bg};">
+      ${row.map(val => `<td style="padding: 6px 10px; border: 1px solid #cccccc; font-family: Calibri, Arial, sans-serif; font-size: 10pt;">${escapeHtml(String(val ?? ''))}</td>`).join('')}
+    </tr>`;
+  }).join('');
+
+  const wordHtml = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head>
+      <meta charset='utf-8'>
+      <title>${escapeHtml(title)}</title>
+      <style>
+        body { font-family: Calibri, Arial, sans-serif; margin: 30px; color: #333333; }
+        h1 { font-family: Georgia, serif; color: #285c3b; border-bottom: 2px solid #285c3b; padding-bottom: 6px; margin-bottom: 12px; font-size: 20pt; }
+        .meta-box { background: #fdfcf9; border: 1px solid #e2dacd; border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 10pt; }
+        table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+        .footer { margin-top: 30px; font-size: 9pt; color: #888888; border-top: 1px solid #eeeeee; padding-top: 8px; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <h1>ArtisanAisle - ${escapeHtml(title)}</h1>
+      
+      <div class="meta-box">
+        <table>
+          ${metaHtml}
+          <tr><td style="font-weight: bold; width: 180px; padding: 4px 8px; color: #285c3b;">Generated Date:</td><td style="padding: 4px 8px;">${new Date().toLocaleString('en-PH')}</td></tr>
+          <tr><td style="font-weight: bold; width: 180px; padding: 4px 8px; color: #285c3b;">Total Records:</td><td style="padding: 4px 8px;">${rows.length}</td></tr>
+        </table>
+      </div>
+
+      <h3>Detailed Dataset</h3>
+      <table>
+        <thead>
+          <tr>${tableHeadersHtml}</tr>
+        </thead>
+        <tbody>
+          ${tableRowsHtml}
+        </tbody>
+      </table>
+
+      <div class="footer">
+        Generated by ArtisanAisle Filipino Handicraft Marketplace Platform • Confidential Business Report
+      </div>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob(['\ufeff', wordHtml], { type: 'application/msword;charset=utf-8' });
+  triggerDownload(blob, `${filename}.doc`);
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+if (typeof window !== 'undefined') {
+  window.ArtisanExport = { exportToExcel, exportToWord };
+}

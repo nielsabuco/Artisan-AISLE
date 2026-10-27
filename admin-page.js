@@ -1,5 +1,6 @@
 import { ArtisanDB } from './firebase-config.js';
 import { updateHeaderAuth } from './header-auth.js';
+import { exportToExcel, exportToWord } from './export-utils.js';
 
 let currentAdmin = null;
 let allApplications = [];
@@ -10,6 +11,8 @@ let allOrders = [];
 document.addEventListener('DOMContentLoaded', () => {
   initAdminAuth();
   setupSidebarNav();
+  setupExportButtons();
+  setupAdminTrackingModal();
 });
 
 function initAdminAuth() {
@@ -178,21 +181,21 @@ function renderApplicationsTable(apps) {
         if (confirm(`Approve seller application for "${app.shopName}"?\n\nThis will elevate their account to Seller, activate their shop profile, and dispatch an account password setup link to ${app.email}.`)) {
           try {
             await ArtisanDB.approveSellerApplication(app.id, app);
-            alert(`Application for "${app.shopName}" approved successfully! Password setup email dispatched.`);
-          } catch (err) {
-            alert('Approval error: ' + err.message);
+            alert(`Application for "${app.shopName}" has been approved! Password reset setup link dispatched.`);
+          } catch (e) {
+            alert('Approval error: ' + e.message);
           }
         }
       });
 
       tr.querySelector('.reject-btn')?.addEventListener('click', async () => {
-        const reason = prompt(`Enter rejection reason for "${app.shopName}":`, 'Incomplete documentation or unverified business permit.');
+        const reason = prompt('Please specify a rejection reason to send to the applicant:', 'Application requirements were incomplete.');
         if (reason !== null) {
           try {
             await ArtisanDB.rejectSellerApplication(app.id, app, reason);
-            alert(`Application for "${app.shopName}" rejected. Notification sent.`);
-          } catch (err) {
-            alert('Rejection error: ' + err.message);
+            alert(`Application rejected and feedback sent.`);
+          } catch (e) {
+            alert('Rejection error: ' + e.message);
           }
         }
       });
@@ -258,15 +261,15 @@ function renderProductsTable(products) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>
-        <div class="table-product-row">
-          <img src="${p.image || 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=150&q=80'}" alt="${p.name}" class="table-product-thumb" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=150&q=80'">
+        <div class="product-thumb-row">
+          <img src="${p.image || 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=100&q=80'}" alt="${p.name}" class="table-prod-img" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=100&q=80'">
           <div>
             <strong>${p.name}</strong><br>
-            <small>ID: ${p.id}</small>
+            <small>${p.id || '-'}</small>
           </div>
         </div>
       </td>
-      <td>${p.category || 'General'}</td>
+      <td><span class="category-pill">${p.category || 'General'}</span></td>
       <td>₱${Number(p.price || 0).toFixed(2)}</td>
       <td>
         <input type="number" class="inline-stock-input" value="${Number(p.stock) || 0}" min="0" data-id="${p.id}">
@@ -319,6 +322,7 @@ function renderOrdersTable(orders) {
   orders.forEach(o => {
     const tr = document.createElement('tr');
     const itemsSummary = (o.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ');
+    const trackingClass = (o.orderStatus || 'processing').toLowerCase();
 
     tr.innerHTML = `
       <td>
@@ -337,25 +341,255 @@ function renderOrdersTable(orders) {
         ${o.paymentReference ? `<br><small>Ref: <code>${o.paymentReference}</code></small>` : ''}
       </td>
       <td>
-        <span class="status-badge ${(o.orderStatus || 'processing').toLowerCase()}">${o.orderStatus || 'Processing'}</span>
+        <span class="status-badge ${trackingClass}">${o.orderStatus || 'Processing'}</span><br>
+        <small style="color:#555;">${o.courier || 'Local Logistics'}</small><br>
+        <small>${o.trackingNumber ? `<code>${o.trackingNumber}</code>` : 'Pending Waybill'}</small>
       </td>
       <td>
-        <select class="order-status-selector" data-id="${o.id}">
-          <option value="Processing" ${o.orderStatus === 'Processing' ? 'selected' : ''}>Processing</option>
-          <option value="Confirmed" ${o.orderStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-          <option value="Shipped" ${o.orderStatus === 'Shipped' ? 'selected' : ''}>Shipped</option>
-          <option value="Delivered" ${o.orderStatus === 'Delivered' ? 'selected' : ''}>Delivered</option>
-          <option value="Cancelled" ${o.orderStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-        </select>
+        <button type="button" class="action-btn edit-tracking-btn" style="background:#285c3b; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;">
+          Update Tracking
+        </button>
       </td>
     `;
 
-    tr.querySelector('.order-status-selector')?.addEventListener('change', async (e) => {
-      const newStatus = e.target.value;
-      await ArtisanDB.updateOrderStatus(o.id, newStatus);
-      alert(`Order ${o.orderNumber || o.id} marked as ${newStatus}.`);
+    tr.querySelector('.edit-tracking-btn')?.addEventListener('click', () => {
+      openAdminTrackingModal(o);
     });
 
     tbody.appendChild(tr);
   });
+}
+
+function setupAdminTrackingModal() {
+  const modal = document.getElementById('adminTrackingModal');
+  const closeBtn = document.getElementById('closeAdminTrackingModalBtn');
+  const cancelBtn = document.getElementById('cancelAdminTrackBtn');
+  const saveBtn = document.getElementById('saveAdminTrackBtn');
+
+  closeBtn?.addEventListener('click', () => { modal.style.display = 'none'; });
+  cancelBtn?.addEventListener('click', () => { modal.style.display = 'none'; });
+
+  saveBtn?.addEventListener('click', async () => {
+    const orderId = document.getElementById('adminTrackOrderId').value;
+    if (!orderId) return;
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving Tracking...';
+
+    const trackingData = {
+      orderStatus: document.getElementById('adminTrackStatus').value,
+      courier: document.getElementById('adminTrackCourier').value,
+      trackingNumber: document.getElementById('adminTrackNumber').value.trim(),
+      currentLocation: document.getElementById('adminTrackLocation').value.trim(),
+      trackingNotes: document.getElementById('adminTrackNotes').value.trim()
+    };
+
+    try {
+      await ArtisanDB.updateOrderTracking(orderId, trackingData);
+      alert('Order tracking updated successfully! The customer and seller have been notified.');
+      modal.style.display = 'none';
+    } catch (err) {
+      alert('Failed to update tracking: ' + err.message);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save & Broadcast Update';
+    }
+  });
+}
+
+function openAdminTrackingModal(order) {
+  const modal = document.getElementById('adminTrackingModal');
+  if (!modal) return;
+
+  document.getElementById('adminTrackOrderId').value = order.id;
+  document.getElementById('adminTrackOrderNum').textContent = order.orderNumber || order.id;
+  document.getElementById('adminTrackCustomer').textContent = order.customerName || 'Customer';
+
+  document.getElementById('adminTrackStatus').value = order.orderStatus || 'Processing';
+  document.getElementById('adminTrackCourier').value = order.courier || 'J&T Express';
+  document.getElementById('adminTrackNumber').value = order.trackingNumber || '';
+  document.getElementById('adminTrackLocation').value = order.currentLocation || '';
+  document.getElementById('adminTrackNotes').value = order.trackingNotes || '';
+
+  modal.style.display = 'flex';
+}
+
+function setupExportButtons() {
+  // 1. Export Sales & Orders (Excel)
+  const exportSalesExcel = () => {
+    const headers = ['Order Number', 'Date', 'Customer Name', 'Customer Phone', 'Items', 'Total (PHP)', 'Payment Method', 'Payment Status', 'Tracking Status', 'Courier', 'Tracking Number', 'Current Location'];
+    const rows = allOrders.map(o => [
+      o.orderNumber || o.id,
+      o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-PH') : 'Recent',
+      o.customerName || '-',
+      o.customerPhone || '-',
+      (o.items || []).map(i => `${i.quantity}x ${i.name}`).join('; '),
+      Number(o.total || 0).toFixed(2),
+      o.paymentMethod || 'COD',
+      o.paymentStatus || 'Pending',
+      o.orderStatus || 'Processing',
+      o.courier || '-',
+      o.trackingNumber || '-',
+      o.currentLocation || '-'
+    ]);
+
+    exportToExcel(`ArtisanAisle_Sales_Report_${Date.now()}`, 'Platform Sales & Orders Report', headers, rows);
+  };
+
+  // 2. Export Sales & Orders (Word)
+  const exportSalesWord = () => {
+    const headers = ['Order Number', 'Customer', 'Items Summary', 'Total (PHP)', 'Payment', 'Fulfillment', 'Tracking Number'];
+    const rows = allOrders.map(o => [
+      o.orderNumber || o.id,
+      `${o.customerName || '-'} (${o.customerPhone || '-'})`,
+      (o.items || []).map(i => `${i.quantity}x ${i.name}`).join(', '),
+      `PHP ${Number(o.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      `${o.paymentMethod || 'COD'} - ${o.paymentStatus || 'Pending'}`,
+      o.orderStatus || 'Processing',
+      o.trackingNumber || 'Pending'
+    ]);
+
+    const gmv = allOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    const metadata = {
+      'Report Type': 'Executive Sales & Orders Summary',
+      'Total GMV Volume': `PHP ${gmv.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      'Total Orders': allOrders.length,
+      'Active Sellers': allUsers.filter(u => u.role === 'seller' || u.sellerStatus === 'approved').length,
+      'Platform Admin': currentAdmin?.name || 'Administrator'
+    };
+
+    exportToWord(`ArtisanAisle_Sales_Executive_Report_${Date.now()}`, 'Executive Sales & Orders Report', metadata, headers, rows);
+  };
+
+  // 3. Export Products Catalog (Excel)
+  const exportProductsExcel = () => {
+    const headers = ['Product ID', 'Item Name', 'Category', 'Price (PHP)', 'Stock Count', 'Artisan Seller', 'Status'];
+    const rows = allProducts.map(p => [
+      p.id || '-',
+      p.name || 'Untitled Craft',
+      p.category || 'General',
+      Number(p.price || 0).toFixed(2),
+      Number(p.stock || 0),
+      p.sellerName || p.sellerEmail || 'Artisan',
+      p.status || 'Active'
+    ]);
+
+    exportToExcel(`ArtisanAisle_Catalog_Export_${Date.now()}`, 'Artisan Products Catalog Inventory', headers, rows);
+  };
+
+  // 4. Export Products Catalog (Word)
+  const exportProductsWord = () => {
+    const headers = ['Item Name', 'Category', 'Price (PHP)', 'Available Stock', 'Artisan Seller', 'Status'];
+    const rows = allProducts.map(p => [
+      p.name || 'Untitled Craft',
+      p.category || 'General',
+      `PHP ${Number(p.price || 0).toFixed(2)}`,
+      p.stock || 0,
+      p.sellerName || p.sellerEmail || 'Artisan',
+      p.status || 'Active'
+    ]);
+
+    const metadata = {
+      'Report Type': 'Handcrafted Products Catalog Audit',
+      'Total Listed Items': allProducts.length,
+      'In-Stock Products': allProducts.filter(p => (Number(p.stock) || 0) > 0).length,
+      'Low Stock Items (<5 units)': allProducts.filter(p => (Number(p.stock) || 0) < 5).length
+    };
+
+    exportToWord(`ArtisanAisle_Catalog_Report_${Date.now()}`, 'Artisan Products Inventory Report', metadata, headers, rows);
+  };
+
+  // 5. Export Users (Excel)
+  const exportUsersExcel = () => {
+    const headers = ['User ID', 'Full Name', 'Email Address', 'Phone Number', 'Account Role', 'Seller Status', 'City / Location'];
+    const rows = allUsers.map(u => [
+      u.uid || u.id || '-',
+      u.name || 'Anonymous User',
+      u.email || '-',
+      u.phone || '-',
+      u.role || 'user',
+      u.sellerStatus || 'none',
+      u.city || u.address || '-'
+    ]);
+
+    exportToExcel(`ArtisanAisle_Users_Export_${Date.now()}`, 'Platform Registered Users Directory', headers, rows);
+  };
+
+  // 6. Export Users (Word)
+  const exportUsersWord = () => {
+    const headers = ['Full Name', 'Email', 'Phone', 'Role', 'Seller Status'];
+    const rows = allUsers.map(u => [
+      u.name || 'Anonymous User',
+      u.email || '-',
+      u.phone || '-',
+      (u.role || 'user').toUpperCase(),
+      u.sellerStatus || 'none'
+    ]);
+
+    const metadata = {
+      'Report Type': 'User Accounts & Artisan Community Directory',
+      'Total Accounts': allUsers.length,
+      'Approved Sellers': allUsers.filter(u => u.role === 'seller' || u.sellerStatus === 'approved').length,
+      'Pending Seller Applicants': allUsers.filter(u => u.sellerStatus === 'pending').length
+    };
+
+    exportToWord(`ArtisanAisle_Users_Directory_${Date.now()}`, 'Registered Users Report', metadata, headers, rows);
+  };
+
+  // 7. Export Applications (Excel)
+  const exportAppsExcel = () => {
+    const headers = ['Application ID', 'Applicant Name', 'Email', 'Shop Name', 'Category', 'GCash Name', 'GCash Mobile', 'Gov ID / Permit', 'Status'];
+    const rows = allApplications.map(a => [
+      a.id || '-',
+      a.applicantName || a.name || '-',
+      a.applicantEmail || a.email || '-',
+      a.shopName || '-',
+      a.category || '-',
+      a.gcashName || '-',
+      a.gcashNumber || '-',
+      a.govId || a.permit || '-',
+      a.status || 'Pending'
+    ]);
+
+    exportToExcel(`ArtisanAisle_Seller_Applications_${Date.now()}`, 'Artisan Seller Applications Log', headers, rows);
+  };
+
+  // 8. Export Applications (Word)
+  const exportAppsWord = () => {
+    const headers = ['Applicant / Shop', 'Category', 'GCash Account', 'Gov ID', 'Status'];
+    const rows = allApplications.map(a => [
+      `${a.applicantName || a.name || '-'} / ${a.shopName || '-'}`,
+      a.category || '-',
+      `${a.gcashName || '-'} (${a.gcashNumber || '-'})`,
+      a.govId || a.permit || '-',
+      a.status || 'Pending'
+    ]);
+
+    const metadata = {
+      'Report Type': 'Seller Onboarding & Verification Submissions',
+      'Total Applications': allApplications.length,
+      'Pending Review': allApplications.filter(a => (a.status || '').toLowerCase() === 'pending').length,
+      'Approved': allApplications.filter(a => (a.status || '').toLowerCase() === 'approved').length
+    };
+
+    exportToWord(`ArtisanAisle_Applications_Summary_${Date.now()}`, 'Seller Applications Verification Report', metadata, headers, rows);
+  };
+
+  // Event Listeners for Sales
+  document.getElementById('exportSalesExcelBtn')?.addEventListener('click', exportSalesExcel);
+  document.getElementById('exportOrdersExcelBtn')?.addEventListener('click', exportSalesExcel);
+  document.getElementById('exportSalesWordBtn')?.addEventListener('click', exportSalesWord);
+  document.getElementById('exportOrdersWordBtn')?.addEventListener('click', exportSalesWord);
+
+  // Event Listeners for Products
+  document.getElementById('exportProductsExcelBtn')?.addEventListener('click', exportProductsExcel);
+  document.getElementById('exportProductsWordBtn')?.addEventListener('click', exportProductsWord);
+
+  // Event Listeners for Users
+  document.getElementById('exportUsersExcelBtn')?.addEventListener('click', exportUsersExcel);
+  document.getElementById('exportUsersWordBtn')?.addEventListener('click', exportUsersWord);
+
+  // Event Listeners for Applications
+  document.getElementById('exportAppsExcelBtn')?.addEventListener('click', exportAppsExcel);
+  document.getElementById('exportAppsWordBtn')?.addEventListener('click', exportAppsWord);
 }

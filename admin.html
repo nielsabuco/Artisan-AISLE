@@ -88,6 +88,14 @@
             <h1>Platform Performance</h1>
             <p>Real-time metrics across registered users, artisans, products, and customer orders.</p>
           </div>
+          <div class="export-btn-cluster">
+            <button type="button" class="btn-export-excel" id="exportSalesExcelBtn">
+              Export Sales (Excel)
+            </button>
+            <button type="button" class="btn-export-word" id="exportSalesWordBtn">
+              Export Report (Word)
+            </button>
+          </div>
         </div>
 
         <div class="metrics-grid">
@@ -125,6 +133,14 @@
             <h1>Seller Applications Review</h1>
             <p>Review applicant craft stories, ID/permit verification, and registered GCash details before granting seller privileges.</p>
           </div>
+          <div class="export-btn-cluster">
+            <button type="button" class="btn-export-excel" id="exportAppsExcelBtn">
+              Export Applications (Excel)
+            </button>
+            <button type="button" class="btn-export-word" id="exportAppsWordBtn">
+              Export Applications (Word)
+            </button>
+          </div>
         </div>
 
         <div class="table-wrap">
@@ -154,6 +170,14 @@
             <h1>Registered User Accounts</h1>
             <p>All customers and sellers registered on the platform.</p>
           </div>
+          <div class="export-btn-cluster">
+            <button type="button" class="btn-export-excel" id="exportUsersExcelBtn">
+              Export Users (Excel)
+            </button>
+            <button type="button" class="btn-export-word" id="exportUsersWordBtn">
+              Export Users (Word)
+            </button>
+          </div>
         </div>
 
         <div class="table-wrap">
@@ -180,6 +204,14 @@
           <div>
             <h1>Platform Catalog Moderation</h1>
             <p>Products listed by all approved artisans in the marketplace.</p>
+          </div>
+          <div class="export-btn-cluster">
+            <button type="button" class="btn-export-excel" id="exportProductsExcelBtn">
+              Export Catalog (Excel)
+            </button>
+            <button type="button" class="btn-export-word" id="exportProductsWordBtn">
+              Export Catalog (Word)
+            </button>
           </div>
         </div>
 
@@ -208,7 +240,15 @@
         <div class="section-header-row">
           <div>
             <h1>All Customer Orders</h1>
-            <p>Platform orders, payment verification records, and fulfillment tracking.</p>
+            <p>Platform orders, payment verification records, and live fulfillment tracking.</p>
+          </div>
+          <div class="export-btn-cluster">
+            <button type="button" class="btn-export-excel" id="exportOrdersExcelBtn">
+              Export Orders (Excel)
+            </button>
+            <button type="button" class="btn-export-word" id="exportOrdersWordBtn">
+              Export Orders (Word)
+            </button>
           </div>
         </div>
 
@@ -221,8 +261,8 @@
                 <th>Items</th>
                 <th>Total</th>
                 <th>Payment</th>
-                <th>Fulfillment</th>
-                <th>Update</th>
+                <th>Tracking / Courier</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="ordersTableBody">
@@ -232,6 +272,72 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <!-- Admin Order Tracking Modal -->
+  <div id="adminTrackingModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 540px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h2 style="margin: 0; font-size: 20px; color: #285c3b;">Admin: Manage Order Tracking</h2>
+        <button type="button" class="close-modal-btn" id="closeAdminTrackingModalBtn" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+      </div>
+      <p style="color: #666; font-size: 13px; margin-bottom: 16px;">
+        Update courier service, waybill number, current hub location, and tracking notes for this order.
+      </p>
+
+      <input type="hidden" id="adminTrackOrderId">
+
+      <div style="background: #f7f3eb; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">
+        <strong>Order:</strong> <span id="adminTrackOrderNum">-</span> • 
+        <strong>Customer:</strong> <span id="adminTrackCustomer">-</span>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Fulfillment Status *</label>
+        <select id="adminTrackStatus" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc;">
+          <option value="Processing">Processing</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Packed">Packed & Ready</option>
+          <option value="Shipped">Shipped / In Transit</option>
+          <option value="Out for Delivery">Out for Delivery</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div class="form-group">
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Courier Service</label>
+          <select id="adminTrackCourier" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc;">
+            <option value="J&T Express">J&T Express</option>
+            <option value="LBC Express">LBC Express</option>
+            <option value="Flash Express">Flash Express</option>
+            <option value="Ninja Van">Ninja Van</option>
+            <option value="2GO Express">2GO Express</option>
+            <option value="Artisan Local Logistics">Artisan Local Logistics</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Tracking Number / Waybill</label>
+          <input type="text" id="adminTrackNumber" placeholder="e.g. JNT-88219482" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px;">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Current Hub / Location</label>
+        <input type="text" id="adminTrackLocation" placeholder="e.g. Central Sorting Hub, Pasig City" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Tracking Notes for Customer</label>
+        <textarea id="adminTrackNotes" rows="2" placeholder="e.g. Package dispatched from distribution facility." style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;"></textarea>
+      </div>
+
+      <div class="modal-actions-row">
+        <button type="button" class="secondary-btn" id="cancelAdminTrackBtn">Cancel</button>
+        <button type="button" class="primary-btn" id="saveAdminTrackBtn">Save & Broadcast Update</button>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="header-auth.js"></script>
