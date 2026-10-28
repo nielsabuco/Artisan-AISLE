@@ -37,7 +37,8 @@ export default async function handler(req, res) {
       customerPhone,
       successUrl,
       cancelUrl,
-      apiKey
+      apiKey,
+      paymentMethodTypes
     } = body || {};
 
     const secretKey = apiKey || process.env.PAYMONGO_SECRET_KEY;
@@ -71,13 +72,17 @@ export default async function handler(req, res) {
       ];
     }
 
+    const requestedTypes = Array.isArray(paymentMethodTypes) && paymentMethodTypes.length > 0
+      ? paymentMethodTypes
+      : ['gcash', 'paymaya', 'card', 'qrph'];
+
     const payload = {
       data: {
         attributes: {
           send_email_receipt: true,
           show_description: true,
           show_line_items: true,
-          payment_method_types: ['gcash', 'paymaya', 'card', 'qrph'],
+          payment_method_types: requestedTypes,
           line_items: lineItems,
           description: `Payment for Order #${orderNumber || orderId} on ArtisanAisle`,
           reference_number: String(orderNumber || orderId),

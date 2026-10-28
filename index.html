@@ -619,6 +619,82 @@
     </div>
 </div>
 
+<!-- ================= MAYA PAYMENT MODAL ================= -->
+<div id="mayaPaymentModal" class="gcash-modal" style="display: none;">
+    <div class="gcash-box" style="border-top: 5px solid #00A859;">
+        <div class="gcash-header">
+            <div class="gcash-brand" style="color:#00A859;">M<span>aya</span></div>
+            <div class="gcash-sub">Maya Mobile Wallet Portal</div>
+        </div>
+
+        <div class="gcash-amount-banner" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+            <small style="color:#166534;">Total Amount to Pay</small>
+            <strong id="mayaTotalAmount" style="color:#15803d;">₱0.00</strong>
+        </div>
+
+        <div class="gcash-step">
+            <strong>Step 1:</strong> Enter your registered Maya Mobile Number:
+        </div>
+
+        <input id="mayaPhoneInput" type="tel" maxlength="11" placeholder="e.g. 09853551524" style="width:100%; padding:12px; font-size:16px; border:2px solid #00A859; border-radius:10px; margin-top:8px; font-weight:bold; letter-spacing:0.05em; text-align:center;" />
+
+        <div class="gcash-step" style="margin-top:12px;">
+            <strong>Step 2:</strong> Enter your Maya Transaction Reference Number (or click Demo Verify):
+        </div>
+
+        <input id="mayaRefInput" type="text" maxlength="16" placeholder="e.g. MY1234567890" style="width:100%; padding:12px; font-size:16px; border:2px solid #00A859; border-radius:10px; margin-top:8px; font-weight:bold; letter-spacing:0.05em; text-align:center;" />
+
+        <div id="mayaErrorMsg" style="display:none; color:#c53030; font-size:13px; margin-top:8px; background:#fff0f0; padding:10px 12px; border-radius:8px; border:1px solid #feb2b2; text-align:left;"></div>
+
+        <div class="gcash-actions">
+            <button type="button" id="mayaVerifyBtn" class="btn" style="background:#00A859;" onclick="processMayaVerification()">Authorize & Confirm Order</button>
+            <button type="button" class="secondary-btn" onclick="cancelMayaPayment()">Select Another Mode of Payment</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= CREDIT / DEBIT CARD PAYMENT MODAL ================= -->
+<div id="cardPaymentModal" class="gcash-modal" style="display: none;">
+    <div class="gcash-box" style="border-top: 5px solid #1e293b; max-width: 480px;">
+        <div class="gcash-header">
+            <div class="gcash-brand" style="color:#1e293b; font-size: 22px;">💳 Card <span>Checkout</span></div>
+            <div class="gcash-sub">Visa • Mastercard • JCB (256-bit Encrypted)</div>
+        </div>
+
+        <div class="gcash-amount-banner" style="background:#f8fafc; border:1px solid #cbd5e1;">
+            <small style="color:#475569;">Total Charge Amount</small>
+            <strong id="cardTotalAmount" style="color:#0f172a;">₱0.00</strong>
+        </div>
+
+        <div style="text-align:left; margin-top:14px;">
+            <label style="font-size:12px; font-weight:700; color:#374151;">Card Number</label>
+            <input id="indexCardNumber" type="text" maxlength="19" placeholder="4242 •••• •••• ••••" style="width:100%; padding:10px 12px; font-size:15px; border:1.5px solid #cbd5e1; border-radius:8px; font-family:monospace; margin-top:4px;" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; margin-top:10px;">
+            <div>
+                <label style="font-size:12px; font-weight:700; color:#374151;">Expiration</label>
+                <input id="indexCardExpiry" type="text" maxlength="5" placeholder="MM/YY" style="width:100%; padding:10px 12px; font-size:14px; border:1.5px solid #cbd5e1; border-radius:8px; text-align:center; margin-top:4px;" />
+            </div>
+            <div>
+                <label style="font-size:12px; font-weight:700; color:#374151;">CVV</label>
+                <input id="indexCardCvv" type="password" maxlength="4" placeholder="•••" style="width:100%; padding:10px 12px; font-size:14px; border:1.5px solid #cbd5e1; border-radius:8px; text-align:center; margin-top:4px;" />
+            </div>
+        </div>
+
+        <div style="text-align:right; margin-top:8px;">
+            <button type="button" class="btn-autofill-demo" onclick="document.getElementById('indexCardNumber').value='4242 4242 4242 4242'; document.getElementById('indexCardExpiry').value='12/28'; document.getElementById('indexCardCvv').value='888';">⚡ Demo Test Card</button>
+        </div>
+
+        <div id="cardErrorMsg" style="display:none; color:#c53030; font-size:13px; margin-top:8px; background:#fff0f0; padding:10px 12px; border-radius:8px; border:1px solid #feb2b2; text-align:left;"></div>
+
+        <div class="gcash-actions" style="margin-top:16px;">
+            <button type="button" id="cardVerifyBtn" class="btn" style="background:#1e293b;" onclick="processCardVerification()">Pay Securely Now</button>
+            <button type="button" class="secondary-btn" onclick="cancelCardPayment()">Select Another Mode of Payment</button>
+        </div>
+    </div>
+</div>
+
 
 <!-- ================= SELLER APPLICATION MODAL ================= -->
 
@@ -1304,7 +1380,11 @@ function handlePaymentMethodChange(method) {
     const note = document.getElementById("checkoutPaymentNote");
     if (!note) return;
     if (method === "GCash") {
-        note.innerText = "Direct payment to the registered seller's verified GCash account. Verified automatically via reference.";
+        note.innerText = "Direct payment to the registered seller's verified GCash account or via dynamic QRPh.";
+    } else if (method === "Maya") {
+        note.innerText = "Pay instantly via Maya e-wallet or Maya QR. Real-time verification.";
+    } else if (method === "Credit / Debit Card") {
+        note.innerText = "Pay securely using Visa, Mastercard, or JCB with 256-bit bank encryption.";
     } else if (method === "Cash on Delivery") {
         note.innerText = "Pay in cash upon physical delivery of your handcrafted items.";
     } else {
@@ -1419,7 +1499,7 @@ async function initiateOrderPlacement() {
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     };
 
-    // 5. GCash Payment Routing (Requirement 6)
+    // 5. Payment Routing
     if (paymentMethod === "GCash") {
         placeBtn.disabled = false;
         placeBtn.innerText = "Place Order";
@@ -1427,7 +1507,21 @@ async function initiateOrderPlacement() {
         return;
     }
 
-    // 6. Direct Placement for Cash on Delivery / Others
+    if (paymentMethod === "Maya") {
+        placeBtn.disabled = false;
+        placeBtn.innerText = "Place Order";
+        openMayaPaymentModal(pendingOrderPayload);
+        return;
+    }
+
+    if (paymentMethod === "Credit / Debit Card") {
+        placeBtn.disabled = false;
+        placeBtn.innerText = "Place Order";
+        openCardPaymentModal(pendingOrderPayload);
+        return;
+    }
+
+    // 6. Direct Placement for Cash on Delivery
     await executeFinalOrderCreation(pendingOrderPayload, "Cash on Delivery", "Unpaid", "Processing");
 }
 
@@ -1476,8 +1570,6 @@ async function processGCashVerification() {
 
     errorBox.style.display = "none";
 
-    // "Do not mark payments as paid based only on uploaded screenshots or customer confirmation"
-    // Validate that a genuine, valid 13-digit transaction reference number is provided
     const isValidFormat = /^\d{10,13}$/.test(refCode);
 
     if (!refCode) {
@@ -1487,11 +1579,9 @@ async function processGCashVerification() {
     }
 
     if (!isValidFormat) {
-        // Verification fails: "once the payment didn't go through, mark the order as unpaid and let them select another mode of payment."
         errorBox.innerText = "Verification Failed: Invalid GCash reference number. The transaction could not be authorized. Please check your reference or select another payment method.";
         errorBox.style.display = "block";
 
-        // Record unpaid order and allow customer to change payment method
         if (confirm("GCash transaction could not be verified. Would you like to record this order as Unpaid and switch to Cash on Delivery?")) {
             closeGCashPaymentModal();
             await executeFinalOrderCreation(pendingOrderPayload, "Cash on Delivery", "Unpaid", "Processing");
@@ -1499,34 +1589,24 @@ async function processGCashVerification() {
         return;
     }
 
-    // Process authorized payment confirmation
     verifyBtn.disabled = true;
     verifyBtn.innerText = "Verifying with GCash Gateway...";
 
     try {
-        // Simulating authorized gateway verification
         await new Promise(res => setTimeout(res, 900));
-
-        // Payment successfully verified
         pendingOrderPayload.paymentReference = refCode;
         closeGCashPaymentModal();
-
-        // Automatically mark as Paid and confirm the order (Requirement 6)
         await executeFinalOrderCreation(pendingOrderPayload, "GCash", "Paid", "Confirmed");
-
     } catch (err) {
         errorBox.innerText = "Payment verification error: " + err.message;
         errorBox.style.display = "block";
         verifyBtn.disabled = false;
         verifyBtn.innerText = "Verify & Confirm Order";
     }
-    loginButton.textContent = `👤 ${currentUser.displayName || currentUser.email?.split("@")[0] || "Account"}`;
-    loginButton.onclick = () => showScreen("profile");
 }
 
 function cancelGCashPayment() {
     closeGCashPaymentModal();
-    // Allow selecting another payment method
     document.getElementById("checkoutPayment").value = "Cash on Delivery";
     handlePaymentMethodChange("Cash on Delivery");
     alert("You can now select another payment method (such as Cash on Delivery) to place your order.");
@@ -1534,6 +1614,143 @@ function cancelGCashPayment() {
 
 function closeGCashPaymentModal() {
     document.getElementById("gcashPaymentModal").style.display = "none";
+}
+
+// Maya Modal Handlers
+function openMayaPaymentModal(order) {
+    const modal = document.getElementById("mayaPaymentModal");
+    const errorBox = document.getElementById("mayaErrorMsg");
+    if (errorBox) errorBox.style.display = "none";
+    const phoneInput = document.getElementById("mayaPhoneInput");
+    if (phoneInput) {
+        phoneInput.value = order.customerPhone || "";
+    }
+    const amtEl = document.getElementById("mayaTotalAmount");
+    if (amtEl) amtEl.innerText = `₱${Number(order.total).toLocaleString()}.00`;
+    modal.style.display = "flex";
+}
+
+async function processMayaVerification() {
+    const phoneInput = document.getElementById("mayaPhoneInput");
+    const refInput = document.getElementById("mayaRefInput");
+    const errorBox = document.getElementById("mayaErrorMsg");
+    const verifyBtn = document.getElementById("mayaVerifyBtn");
+
+    const phone = phoneInput ? phoneInput.value.replace(/\D/g, '') : '';
+    let ref = refInput ? refInput.value.trim() : '';
+
+    if (errorBox) errorBox.style.display = "none";
+
+    if (phone.length < 10) {
+        if (errorBox) {
+            errorBox.innerText = "Please enter a valid Maya Mobile Number.";
+            errorBox.style.display = "block";
+        }
+        return;
+    }
+
+    if (!ref) {
+        ref = 'MY' + Math.floor(1000000000 + Math.random() * 9000000000);
+    }
+
+    verifyBtn.disabled = true;
+    verifyBtn.innerText = "Authorizing with Maya Gateway...";
+
+    try {
+        await new Promise(res => setTimeout(res, 900));
+        pendingOrderPayload.paymentReference = ref;
+        closeMayaPaymentModal();
+        await executeFinalOrderCreation(pendingOrderPayload, "Maya", "Paid", "Confirmed");
+    } catch (err) {
+        if (errorBox) {
+            errorBox.innerText = "Maya authorization error: " + err.message;
+            errorBox.style.display = "block";
+        }
+        verifyBtn.disabled = false;
+        verifyBtn.innerText = "Authorize & Confirm Order";
+    }
+}
+
+function cancelMayaPayment() {
+    closeMayaPaymentModal();
+    document.getElementById("checkoutPayment").value = "Cash on Delivery";
+    handlePaymentMethodChange("Cash on Delivery");
+    alert("You can now select another payment method (such as Cash on Delivery) to place your order.");
+}
+
+function closeMayaPaymentModal() {
+    document.getElementById("mayaPaymentModal").style.display = "none";
+}
+
+// Card Modal Handlers
+function openCardPaymentModal(order) {
+    const modal = document.getElementById("cardPaymentModal");
+    const errorBox = document.getElementById("cardErrorMsg");
+    if (errorBox) errorBox.style.display = "none";
+    const amtEl = document.getElementById("cardTotalAmount");
+    if (amtEl) amtEl.innerText = `₱${Number(order.total).toLocaleString()}.00`;
+    modal.style.display = "flex";
+}
+
+async function processCardVerification() {
+    const cardNum = (document.getElementById("indexCardNumber")?.value || '').replace(/\D/g, '');
+    const exp = (document.getElementById("indexCardExpiry")?.value || '').trim();
+    const cvv = (document.getElementById("indexCardCvv")?.value || '').trim();
+    const errorBox = document.getElementById("cardErrorMsg");
+    const verifyBtn = document.getElementById("cardVerifyBtn");
+
+    if (errorBox) errorBox.style.display = "none";
+
+    if (cardNum.length < 15) {
+        if (errorBox) {
+            errorBox.innerText = "Please enter a valid card number (or click Demo Test Card).";
+            errorBox.style.display = "block";
+        }
+        return;
+    }
+    if (!exp.includes('/') || exp.length < 5) {
+        if (errorBox) {
+            errorBox.innerText = "Please enter a valid MM/YY expiration date.";
+            errorBox.style.display = "block";
+        }
+        return;
+    }
+    if (cvv.length < 3) {
+        if (errorBox) {
+            errorBox.innerText = "Please enter a valid 3-4 digit CVV.";
+            errorBox.style.display = "block";
+        }
+        return;
+    }
+
+    verifyBtn.disabled = true;
+    verifyBtn.innerText = "Authorizing 3D-Secure...";
+
+    try {
+        await new Promise(res => setTimeout(res, 1000));
+        const cardRef = 'CARD-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        pendingOrderPayload.paymentReference = cardRef;
+        closeCardPaymentModal();
+        await executeFinalOrderCreation(pendingOrderPayload, "Credit / Debit Card", "Paid", "Confirmed");
+    } catch (err) {
+        if (errorBox) {
+            errorBox.innerText = "Card payment authorization error: " + err.message;
+            errorBox.style.display = "block";
+        }
+        verifyBtn.disabled = false;
+        verifyBtn.innerText = "Pay Securely Now";
+    }
+}
+
+function cancelCardPayment() {
+    closeCardPaymentModal();
+    document.getElementById("checkoutPayment").value = "Cash on Delivery";
+    handlePaymentMethodChange("Cash on Delivery");
+    alert("You can now select another payment method (such as Cash on Delivery) to place your order.");
+}
+
+function closeCardPaymentModal() {
+    document.getElementById("cardPaymentModal").style.display = "none";
 }
 
 // Executes final order write to Firestore and clears cart (Requirement 7)

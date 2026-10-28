@@ -2745,6 +2745,146 @@ footer {
   color: #666;
 }
 
+.payment-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.payment-chip {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.payment-chip.gcash-chip {
+  background: #dbeafe;
+  color: #007DFE;
+}
+
+.payment-chip.maya-chip {
+  background: #dcfce7;
+  color: #00A859;
+}
+
+.payment-chip.card-chip {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.maya-seller-box {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.card-seller-box {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+/* Card Visual in Checkout Modal */
+.interactive-card-preview {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: white;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.35);
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.card-preview-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.card-chip-svg {
+  width: 44px;
+  height: 32px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #fef08a 0%, #eab308 100%);
+  border: 1px solid #ca8a04;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.6);
+}
+
+.card-network-logo {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 1.5px;
+  font-style: italic;
+  color: #f8fafc;
+}
+
+.card-preview-number {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 19px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  color: #f8fafc;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.card-preview-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card-holder-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.card-expiry-val {
+  font-weight: 700;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.btn-autofill-demo {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-autofill-demo:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
 .gcash-seller-box {
   background: #f0f7f3;
   border: 1px solid #b7dcbe;

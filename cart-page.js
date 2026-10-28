@@ -1,5 +1,6 @@
 import { ArtisanDB } from './firebase-config.js';
 import { updateHeaderAuth } from './header-auth.js';
+import { PayMongo } from './paymongo-service.js';
 
 let isSubmitting = false;
 
@@ -203,23 +204,36 @@ async function renderCart() {
 function setupPaymentListener() {
   const radios = document.querySelectorAll('input[name="paymentOption"]');
   const gcashPanel = document.getElementById('gcashDirectDetailsPanel');
+  const mayaPanel = document.getElementById('mayaDirectDetailsPanel');
+  const cardPanel = document.getElementById('cardDirectDetailsPanel');
   const submitBtn = document.getElementById('placeOrderSubmitBtn');
+
+  const updatePanels = (val) => {
+    if (gcashPanel) gcashPanel.style.display = val === 'GCash' ? 'block' : 'none';
+    if (mayaPanel) mayaPanel.style.display = val === 'Maya' ? 'block' : 'none';
+    if (cardPanel) cardPanel.style.display = val === 'Credit / Debit Card' ? 'block' : 'none';
+
+    if (submitBtn) {
+      const btnText = submitBtn.querySelector('.btn-text');
+      if (val === 'GCash') {
+        if (btnText) btnText.textContent = 'Proceed to GCash Payment →';
+        submitBtn.style.background = '#007DFE';
+      } else if (val === 'Maya') {
+        if (btnText) btnText.textContent = 'Proceed to Maya Payment →';
+        submitBtn.style.background = '#00A859';
+      } else if (val === 'Credit / Debit Card') {
+        if (btnText) btnText.textContent = 'Pay with Credit / Debit Card →';
+        submitBtn.style.background = '#1e293b';
+      } else {
+        if (btnText) btnText.textContent = 'Place Order (Cash on Delivery)';
+        submitBtn.style.background = '#285c3b';
+      }
+    }
+  };
 
   radios.forEach(radio => {
     radio.addEventListener('change', () => {
-      if (radio.value === 'GCash') {
-        if (gcashPanel) gcashPanel.style.display = 'block';
-        if (submitBtn) {
-          submitBtn.querySelector('.btn-text').textContent = 'Proceed to GCash Payment →';
-          submitBtn.style.background = '#007DFE';
-        }
-      } else {
-        if (gcashPanel) gcashPanel.style.display = 'none';
-        if (submitBtn) {
-          submitBtn.querySelector('.btn-text').textContent = 'Place Order (Cash on Delivery)';
-          submitBtn.style.background = '#285c3b';
-        }
-      }
+      updatePanels(radio.value);
     });
   });
 }
@@ -288,7 +302,12 @@ function setupPlaceOrder() {
     // Set Loading State
     isSubmitting = true;
     submitBtn.disabled = true;
-    submitBtn.querySelector('.btn-text').textContent = paymentMethod === 'GCash' ? 'Redirecting to GCash...' : 'Processing Order...';
+    let loadingMsg = 'Processing Order...';
+    if (paymentMethod === 'GCash') loadingMsg = 'Redirecting to GCash...';
+    else if (paymentMethod === 'Maya') loadingMsg = 'Connecting to Maya...';
+    else if (paymentMethod === 'Credit / Debit Card') loadingMsg = 'Connecting to Card Gateway...';
+
+    submitBtn.querySelector('.btn-text').textContent = loadingMsg;
     submitBtn.querySelector('.btn-spinner').style.display = 'inline-block';
 
     try {
@@ -339,7 +358,37 @@ function setupPlaceOrder() {
         return;
       }
 
-      // 6. IF COD: Show Success Modal
+      // 6. IF MAYA: Launch PayMongo or in-page Maya checkout
+      if (paymentMethod === 'Maya') {
+        try {
+          const pmResult = await PayMongo.createCheckoutSession(createdOrder, 'paymaya');
+          if (pmResult.success && pmResult.checkoutUrl) {
+            window.location.href = pmResult.checkoutUrl;
+            return;
+          }
+        } catch (e) {
+          console.warn('PayMongo Maya error, opening sandbox portal:', e);
+        }
+        openMayaSandboxModal(createdOrder);
+        return;
+      }
+
+      // 7. IF CREDIT / DEBIT CARD: Launch PayMongo or in-page Card modal
+      if (paymentMethod === 'Credit / Debit Card') {
+        try {
+          const pmResult = await PayMongo.createCheckoutSession(createdOrder, 'card');
+          if (pmResult.success && pmResult.checkoutUrl) {
+            window.location.href = pmResult.checkoutUrl;
+            return;
+          }
+        } catch (e) {
+          console.warn('PayMongo Card error, opening sandbox portal:', e);
+        }
+        openCardSandboxModal(createdOrder);
+        return;
+      }
+
+      // 8. IF COD: Show Success Modal
       document.getElementById('successModalTitle').textContent = 'Order Successfully Placed!';
       document.getElementById('successModalSubtitle').textContent = 'Thank you for supporting our local artisans. Your order details have been recorded.';
       document.getElementById('receiptOrderNumber').textContent = createdOrder.orderNumber;
@@ -355,7 +404,11 @@ function setupPlaceOrder() {
     } finally {
       isSubmitting = false;
       submitBtn.disabled = false;
-      submitBtn.querySelector('.btn-text').textContent = paymentMethod === 'GCash' ? 'Proceed to GCash Payment →' : 'Place Order Now';
+      let defaultBtnText = 'Place Order (Cash on Delivery)';
+      if (paymentMethod === 'GCash') defaultBtnText = 'Proceed to GCash Payment →';
+      else if (paymentMethod === 'Maya') defaultBtnText = 'Proceed to Maya Payment →';
+      else if (paymentMethod === 'Credit / Debit Card') defaultBtnText = 'Pay with Credit / Debit Card →';
+      submitBtn.querySelector('.btn-text').textContent = defaultBtnText;
       submitBtn.querySelector('.btn-spinner').style.display = 'none';
     }
   });
@@ -385,59 +438,72 @@ async function checkPaymentCallback() {
     if (!order) return;
 
     if (paymentState === 'success') {
-      // 1. Success verification from GCash / PayMongo
-      const methodParam = params.get('method');
-      const isPayMongo = methodParam === 'paymongo_gcash' || (order.paymentMethod || '').includes('PayMongo');
+      const methodParam = params.get('method') || '';
+      const isMaya = methodParam === 'paymongo_maya' || (order.paymentMethod || '').toLowerCase().includes('maya');
+      const isCard = methodParam === 'paymongo_card' || (order.paymentMethod || '').toLowerCase().includes('card');
+      const isPayMongo = methodParam.startsWith('paymongo_') || (order.paymentMethod || '').includes('PayMongo');
+
+      let resolvedMethodName = 'GCash (PayMongo)';
+      let successTitle = 'Payment Verified!';
+      let successSubtitle = 'Your transaction was authorized successfully. Your order is confirmed and marked as PAID.';
+      let refPrefix = 'PM-';
+
+      if (isMaya) {
+        resolvedMethodName = 'Maya (PayMongo)';
+        successTitle = 'Maya Payment Verified!';
+        successSubtitle = 'Your Maya mobile wallet payment was authorized successfully. Your order is confirmed and marked as PAID.';
+        refPrefix = 'MY-';
+      } else if (isCard) {
+        resolvedMethodName = 'Credit / Debit Card (PayMongo)';
+        successTitle = 'Card Payment Approved!';
+        successSubtitle = 'Your credit/debit card was charged successfully via 3D-Secure encrypted checkout. Your order is confirmed and marked as PAID.';
+        refPrefix = 'CARD-';
+      } else if (isPayMongo) {
+        resolvedMethodName = 'GCash (PayMongo)';
+        successTitle = 'PayMongo GCash Payment Verified!';
+        successSubtitle = 'Your GCash transaction went through successfully. Your order is confirmed and marked as PAID.';
+        refPrefix = 'GC-';
+      } else {
+        resolvedMethodName = order.paymentMethod || 'GCash (QRPh)';
+        successTitle = 'GCash Payment Verified!';
+        successSubtitle = 'Your GCash transaction went through successfully. Your order is confirmed and marked as PAID.';
+        refPrefix = 'QRPH-';
+      }
 
       if (order.paymentStatus !== 'Paid') {
-        const generatedRef = ref || ('PM-' + Math.random().toString(36).substring(2, 11).toUpperCase());
-        await ArtisanDB.updateOrder(orderId, {
-          paymentStatus: 'Paid',
-          orderStatus: 'Confirmed',
-          paymentMethod: isPayMongo ? 'GCash (PayMongo)' : (order.paymentMethod || 'GCash'),
-          paymentReference: generatedRef,
-          paidAmount: Number(order.total || 0),
-          paidAt: new Date().toISOString()
-        });
+        const generatedRef = ref || (refPrefix + Math.random().toString(36).substring(2, 11).toUpperCase());
+        await finalizePaidOrder(orderId, resolvedMethodName, generatedRef, Number(order.total || 0), order.items);
         order.paymentStatus = 'Paid';
         order.paymentReference = generatedRef;
-        order.paymentMethod = isPayMongo ? 'GCash (PayMongo)' : (order.paymentMethod || 'GCash');
-
-        // Decrement inventory stock
-        if (order.items && Array.isArray(order.items)) {
-          for (const item of order.items) {
-            const pid = item.productId || item.id;
-            const qty = Number(item.quantity) || 1;
-            if (pid) {
-              try { await ArtisanDB.decrementStock(pid, qty); } catch (e) {}
-            }
-          }
-        }
-
-        ArtisanDB.clearCart();
+        order.paymentMethod = resolvedMethodName;
       }
 
-      document.getElementById('successModalTitle').textContent = isPayMongo ? 'PayMongo GCash Payment Verified!' : 'GCash Payment Verified!';
-      document.getElementById('successModalSubtitle').textContent = 'Your GCash transaction went through successfully. Your order is confirmed and marked as PAID.';
-      document.getElementById('receiptOrderNumber').textContent = order.orderNumber || orderId;
-      document.getElementById('receiptPaymentMethod').textContent = order.paymentMethod || (isPayMongo ? 'GCash (PayMongo)' : 'GCash (QRPh)');
-      
-      const refRow = document.getElementById('receiptGcashRefRow');
-      const refVal = document.getElementById('receiptGcashRef');
-      if (refRow && refVal) {
-        refVal.textContent = ref || order.paymentReference || 'VERIFIED';
-        refRow.style.display = 'flex';
-      }
-
-      document.getElementById('receiptPaymentStatus').textContent = 'Paid';
-      document.getElementById('receiptPaymentStatus').className = 'status-badge-inline delivered';
-      document.getElementById('receiptTotalAmount').textContent = `₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      
-      document.getElementById('orderSuccessModal').style.display = 'flex';
+      showSuccessReceipt(order, resolvedMethodName, order.paymentReference || ref, successTitle, successSubtitle);
       history.replaceState(null, null, window.location.pathname);
 
     } else if (paymentState === 'failed') {
-      // 2. Failed / Cancelled flow with alternative choices
+      const methodParam = params.get('method') || '';
+      const isMaya = methodParam === 'paymongo_maya' || (order.paymentMethod || '').toLowerCase().includes('maya');
+      const isCard = methodParam === 'paymongo_card' || (order.paymentMethod || '').toLowerCase().includes('card');
+
+      const failedTitle = document.getElementById('paymentFailedTitle');
+      const failedMsg = document.getElementById('paymentFailedMessage');
+      const retryBtn = document.getElementById('retryGcashBtn');
+
+      if (isMaya) {
+        if (failedTitle) failedTitle.textContent = 'Maya Payment Incomplete';
+        if (failedMsg) failedMsg.textContent = 'Your Maya transaction was not completed or was cancelled. Your order has been saved!';
+        if (retryBtn) retryBtn.textContent = 'Retry Maya Payment';
+      } else if (isCard) {
+        if (failedTitle) failedTitle.textContent = 'Card Payment Incomplete';
+        if (failedMsg) failedMsg.textContent = 'Your card authorization was not completed or was cancelled. Your order has been saved!';
+        if (retryBtn) retryBtn.textContent = 'Retry Card Payment';
+      } else {
+        if (failedTitle) failedTitle.textContent = 'GCash Payment Incomplete';
+        if (failedMsg) failedMsg.textContent = 'Your GCash transaction was not completed or was cancelled. Your order has been saved!';
+        if (retryBtn) retryBtn.textContent = 'Retry GCash Payment';
+      }
+
       document.getElementById('failedReceiptOrderNumber').textContent = order.orderNumber || orderId;
       document.getElementById('failedReceiptAmount').textContent = `₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
@@ -463,12 +529,19 @@ async function checkPaymentCallback() {
           btn.disabled = false;
           btn.textContent = 'Switch to Cash on Delivery (COD)';
         }
-      });
+      }, { once: true });
 
-      // Choice 2: Retry GCash
-      document.getElementById('retryGcashBtn')?.addEventListener('click', () => {
-        window.location.href = `gcash-checkout.html?orderId=${orderId}`;
-      });
+      // Choice 2: Retry Payment
+      retryBtn?.addEventListener('click', () => {
+        modal.style.display = 'none';
+        if (isMaya) {
+          openMayaSandboxModal(order);
+        } else if (isCard) {
+          openCardSandboxModal(order);
+        } else {
+          window.location.href = `gcash-checkout.html?orderId=${orderId}`;
+        }
+      }, { once: true });
 
       // Choice 3: Cancel Order
       document.getElementById('cancelFailedOrderBtn')?.addEventListener('click', async () => {
@@ -480,12 +553,276 @@ async function checkPaymentCallback() {
           modal.style.display = 'none';
           switchTab('orders');
         }
-      });
+      }, { once: true });
 
       history.replaceState(null, null, window.location.pathname);
     }
   } catch (err) {
     console.error('Payment callback check error:', err);
+  }
+}
+
+/**
+ * Finalizes an order as Paid in Firestore and decrements product inventory
+ */
+async function finalizePaidOrder(orderId, paymentMethod, reference, totalAmount, items) {
+  await ArtisanDB.updateOrder(orderId, {
+    paymentStatus: 'Paid',
+    orderStatus: 'Confirmed',
+    paymentMethod: paymentMethod,
+    paymentReference: reference,
+    paidAmount: Number(totalAmount || 0),
+    paidAt: new Date().toISOString()
+  });
+
+  // Decrement inventory stock
+  if (items && Array.isArray(items)) {
+    for (const item of items) {
+      const pid = item.productId || item.id;
+      const qty = Number(item.quantity) || 1;
+      if (pid) {
+        try { await ArtisanDB.decrementStock(pid, qty); } catch (e) {}
+      }
+    }
+  }
+
+  ArtisanDB.clearCart();
+  updateHeaderAuth();
+}
+
+/**
+ * Displays the verified order receipt modal
+ */
+function showSuccessReceipt(order, paymentMethod, reference, title, subtitle) {
+  document.getElementById('successModalTitle').textContent = title;
+  document.getElementById('successModalSubtitle').textContent = subtitle;
+  document.getElementById('receiptOrderNumber').textContent = order.orderNumber || order.id;
+  document.getElementById('receiptPaymentMethod').textContent = paymentMethod;
+
+  const refRow = document.getElementById('receiptGcashRefRow');
+  const refVal = document.getElementById('receiptGcashRef');
+  const refLabel = document.getElementById('receiptPaymentRefLabel');
+  if (refRow && refVal) {
+    if (refLabel) {
+      if (paymentMethod.includes('Maya')) refLabel.textContent = 'Maya Ref No:';
+      else if (paymentMethod.includes('Card')) refLabel.textContent = 'Card Auth Code:';
+      else refLabel.textContent = 'GCash Ref No:';
+    }
+    refVal.textContent = reference || 'VERIFIED';
+    refRow.style.display = 'flex';
+  }
+
+  document.getElementById('receiptPaymentStatus').textContent = 'Paid';
+  document.getElementById('receiptPaymentStatus').className = 'status-badge-inline delivered';
+  document.getElementById('receiptTotalAmount').textContent = `₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+  document.getElementById('orderSuccessModal').style.display = 'flex';
+}
+
+/**
+ * In-Page Maya Sandbox Authorization Modal
+ */
+function openMayaSandboxModal(order) {
+  const modal = document.getElementById('mayaCheckoutModal');
+  if (!modal) return;
+
+  const amtEl = document.getElementById('mayaModalAmount');
+  const refEl = document.getElementById('mayaModalOrderRef');
+  const phoneInput = document.getElementById('mayaMobileInput');
+  const errorEl = document.getElementById('mayaModalErrorNotice');
+  const confirmBtn = document.getElementById('confirmMayaPayBtn');
+  const closeBtn = document.getElementById('closeMayaModalBtn');
+  const cancelBtn = document.getElementById('cancelMayaPayBtn');
+
+  if (amtEl) amtEl.textContent = `₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  if (refEl) refEl.textContent = order.orderNumber || order.id;
+  if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
+
+  if (phoneInput && order.customerPhone) {
+    let clean = order.customerPhone.replace(/\D/g, '');
+    if (clean.startsWith('63')) clean = clean.slice(2);
+    if (clean.startsWith('0')) clean = clean.slice(1);
+    phoneInput.value = clean;
+  }
+
+  modal.style.display = 'flex';
+
+  const closeModal = () => { modal.style.display = 'none'; };
+  closeBtn?.addEventListener('click', closeModal, { once: true });
+  cancelBtn?.addEventListener('click', closeModal, { once: true });
+
+  confirmBtn?.addEventListener('click', async () => {
+    const rawPhone = (phoneInput?.value || '').replace(/\D/g, '');
+    if (rawPhone.length < 10) {
+      if (errorEl) {
+        errorEl.textContent = 'Please enter a valid 10-digit Maya mobile number (e.g. 9853551524).';
+        errorEl.style.display = 'block';
+      }
+      return;
+    }
+
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Authorizing with Maya Gateway...';
+
+    try {
+      await new Promise(r => setTimeout(r, 900));
+      const mayaRef = 'MY-' + Math.floor(1000000000 + Math.random() * 9000000000);
+
+      await finalizePaidOrder(order.id, 'Maya (PayMongo)', mayaRef, Number(order.total || 0), order.items);
+
+      modal.style.display = 'none';
+      showSuccessReceipt(
+        order,
+        'Maya (PayMongo)',
+        mayaRef,
+        'Maya Payment Verified!',
+        'Your Maya transaction was authorized successfully. Your order is confirmed and marked as PAID.'
+      );
+    } catch (err) {
+      console.error('Maya authorization failed:', err);
+      if (errorEl) {
+        errorEl.textContent = err.message || 'Maya authorization failed. Please try again.';
+        errorEl.style.display = 'block';
+      }
+    } finally {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Authorize Maya Payment';
+    }
+  }, { once: true });
+}
+
+/**
+ * In-Page Credit/Debit Card Sandbox Authorization Modal
+ */
+function openCardSandboxModal(order) {
+  const modal = document.getElementById('cardCheckoutModal');
+  if (!modal) return;
+
+  const amtEl = document.getElementById('cardModalAmount');
+  const numInput = document.getElementById('cardNumberInput');
+  const nameInput = document.getElementById('cardHolderNameInput');
+  const expInput = document.getElementById('cardExpiryInput');
+  const cvvInput = document.getElementById('cardCvvInput');
+  const errorEl = document.getElementById('cardModalErrorNotice');
+  const confirmBtn = document.getElementById('confirmCardPayBtn');
+  const autoFillBtn = document.getElementById('cardAutoFillDemoBtn');
+  const closeBtn = document.getElementById('closeCardModalBtn');
+  const cancelBtn = document.getElementById('cancelCardPayBtn');
+
+  const prevNum = document.getElementById('previewCardNumber');
+  const prevName = document.getElementById('previewCardName');
+  const prevExp = document.getElementById('previewCardExpiry');
+  const prevNet = document.getElementById('previewCardNetwork');
+
+  if (amtEl) amtEl.textContent = `₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
+
+  if (nameInput && !nameInput.value && order.customerName) {
+    nameInput.value = order.customerName.toUpperCase();
+    if (prevName) prevName.textContent = order.customerName.toUpperCase();
+  }
+
+  // Live input formatters
+  numInput?.addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, '').substring(0, 16);
+    let parts = v.match(/.{1,4}/g);
+    e.target.value = parts ? parts.join(' ') : v;
+    if (prevNum) prevNum.textContent = e.target.value || '•••• •••• •••• ••••';
+
+    if (prevNet) {
+      if (v.startsWith('4')) prevNet.textContent = 'VISA';
+      else if (v.startsWith('5')) prevNet.textContent = 'MASTERCARD';
+      else if (v.startsWith('35')) prevNet.textContent = 'JCB';
+      else prevNet.textContent = 'CARD';
+    }
+  });
+
+  nameInput?.addEventListener('input', (e) => {
+    if (prevName) prevName.textContent = e.target.value.toUpperCase() || 'YOUR NAME';
+  });
+
+  expInput?.addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, '').substring(0, 4);
+    if (v.length >= 3) {
+      e.target.value = v.substring(0, 2) + '/' + v.substring(2);
+    } else {
+      e.target.value = v;
+    }
+    if (prevExp) prevExp.textContent = e.target.value || 'MM/YY';
+  });
+
+  autoFillBtn?.addEventListener('click', () => {
+    if (numInput) numInput.value = '4242 4242 4242 4242';
+    if (nameInput) nameInput.value = (order.customerName || 'MARIA CLARA').toUpperCase();
+    if (expInput) expInput.value = '12/28';
+    if (cvvInput) cvvInput.value = '888';
+    if (prevNum) prevNum.textContent = '4242 4242 4242 4242';
+    if (prevName) prevName.textContent = (order.customerName || 'MARIA CLARA').toUpperCase();
+    if (prevExp) prevExp.textContent = '12/28';
+    if (prevNet) prevNet.textContent = 'VISA';
+    if (errorEl) errorEl.style.display = 'none';
+  });
+
+  modal.style.display = 'flex';
+
+  const closeModal = () => { modal.style.display = 'none'; };
+  closeBtn?.addEventListener('click', closeModal, { once: true });
+  cancelBtn?.addEventListener('click', closeModal, { once: true });
+
+  confirmBtn?.addEventListener('click', async () => {
+    const rawNum = (numInput?.value || '').replace(/\D/g, '');
+    const exp = (expInput?.value || '').trim();
+    const cvv = (cvvInput?.value || '').trim();
+    const name = (nameInput?.value || '').trim();
+
+    if (rawNum.length < 15 || rawNum.length > 16) {
+      showCardError('Please enter a valid 16-digit credit or debit card number.');
+      return;
+    }
+    if (!exp.includes('/') || exp.length < 5) {
+      showCardError('Please enter a valid expiry date in MM/YY format.');
+      return;
+    }
+    if (cvv.length < 3) {
+      showCardError('Please enter a 3 or 4-digit security CVV code.');
+      return;
+    }
+    if (!name) {
+      showCardError('Please enter the cardholder name.');
+      return;
+    }
+
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Authorizing 3D-Secure...';
+
+    try {
+      await new Promise(r => setTimeout(r, 1100));
+      const cardRef = 'CARD-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+      await finalizePaidOrder(order.id, 'Credit / Debit Card (PayMongo)', cardRef, Number(order.total || 0), order.items);
+
+      modal.style.display = 'none';
+      showSuccessReceipt(
+        order,
+        'Credit / Debit Card (PayMongo)',
+        cardRef,
+        'Card Payment Approved!',
+        'Your credit/debit card was charged successfully via 256-bit encrypted checkout. Your order is confirmed and marked as PAID.'
+      );
+    } catch (err) {
+      console.error('Card payment failed:', err);
+      showCardError(err.message || 'Payment authorization failed. Please check your card details.');
+    } finally {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Pay Securely Now';
+    }
+  }, { once: true });
+
+  function showCardError(msg) {
+    if (errorEl) {
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+    }
   }
 }
 

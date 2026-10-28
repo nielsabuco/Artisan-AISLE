@@ -110,16 +110,44 @@
               <label class="payment-radio-label">
                 <input type="radio" name="paymentOption" value="Cash on Delivery" checked>
                 <div class="payment-radio-card">
-                  <div class="payment-title">Cash on Delivery (COD)</div>
-                  <div class="payment-sub">Pay in cash upon physical package delivery. Available nationwide.</div>
+                  <div class="payment-card-header">
+                    <div class="payment-title">Cash on Delivery (COD)</div>
+                    <span class="payment-chip">Nationwide</span>
+                  </div>
+                  <div class="payment-sub">Pay in cash upon physical package delivery to your doorstep.</div>
                 </div>
               </label>
 
               <label class="payment-radio-label">
                 <input type="radio" name="paymentOption" value="GCash">
                 <div class="payment-radio-card">
-                  <div class="payment-title">GCash (Direct to Artisan Seller)</div>
-                  <div class="payment-sub">Send money directly to the seller's registered GCash account with instant verification.</div>
+                  <div class="payment-card-header">
+                    <div class="payment-title">GCash (E-Wallet & QRPh)</div>
+                    <span class="payment-chip gcash-chip">Instant</span>
+                  </div>
+                  <div class="payment-sub">Send money directly via PayMongo or scan seller's dynamic QRPh code.</div>
+                </div>
+              </label>
+
+              <label class="payment-radio-label">
+                <input type="radio" name="paymentOption" value="Maya">
+                <div class="payment-radio-card">
+                  <div class="payment-card-header">
+                    <div class="payment-title">Maya (PayMaya Wallet & QR)</div>
+                    <span class="payment-chip maya-chip">Instant</span>
+                  </div>
+                  <div class="payment-sub">Pay with your registered Maya mobile account or scan Maya QR with instant verification.</div>
+                </div>
+              </label>
+
+              <label class="payment-radio-label">
+                <input type="radio" name="paymentOption" value="Credit / Debit Card">
+                <div class="payment-radio-card">
+                  <div class="payment-card-header">
+                    <div class="payment-title">Credit / Debit Card</div>
+                    <span class="payment-chip card-chip">3D-Secure</span>
+                  </div>
+                  <div class="payment-sub">Visa, Mastercard, and JCB accepted with bank-grade 256-bit encryption.</div>
                 </div>
               </label>
             </div>
@@ -131,12 +159,49 @@
                 <h3 style="margin: 0; color: #0056b3; font-size: 17px;">Seamless GCash Mobile Checkout</h3>
               </div>
               <p style="color: #495057; font-size: 14px; margin-bottom: 12px; line-height: 1.5;">
-                When you click <strong>Proceed to GCash Payment</strong>, you will be securely redirected to GCash to authorize and pay your balance. Once complete, you will automatically return to ArtisanAisle and your order will be verified and marked as <strong>PAID</strong>.
+                When you click <strong>Proceed to GCash Payment</strong>, you will be securely redirected to GCash or our dynamic QRPh gateway to authorize payment. Your order will automatically be verified and marked as <strong>PAID</strong>.
               </p>
               <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #0056b3; font-weight: 600;">
                 <span>✓ Instant automated verification</span>
-                <span>✓ No receipt uploads required</span>
+                <span>✓ PayMongo & QRPh compatible</span>
                 <span>✓ Encrypted transaction</span>
+              </div>
+            </div>
+
+            <!-- Maya Direct Panel (shown when Maya selected) -->
+            <div id="mayaDirectDetailsPanel" class="maya-seller-box" style="display: none;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="background: #00A859; color: white; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 6px;">Maya</span>
+                <h3 style="margin: 0; color: #166534; font-size: 17px;">Official Maya E-Wallet Checkout</h3>
+              </div>
+              <p style="color: #374151; font-size: 14px; margin-bottom: 12px; line-height: 1.5;">
+                When you click <strong>Proceed to Maya Payment</strong>, you will authorize payment via your Maya mobile wallet or Maya QR code. Once confirmed, your order status is instantly marked as <strong>PAID</strong>.
+              </p>
+              <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #15803d; font-weight: 600;">
+                <span>✓ Instant automated verification</span>
+                <span>✓ Zero transaction fees</span>
+                <span>✓ Maya Wallet & Maya QR compatible</span>
+              </div>
+            </div>
+
+            <!-- Credit / Debit Card Panel (shown when Card selected) -->
+            <div id="cardDirectDetailsPanel" class="card-seller-box" style="display: none;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="background: #1e293b; color: white; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 6px;">Cards</span>
+                  <h3 style="margin: 0; color: #0f172a; font-size: 17px;">Encrypted 3D-Secure Card Checkout</h3>
+                </div>
+                <div style="font-size: 12px; color: #64748b; font-weight: 600;">
+                  Visa • Mastercard • JCB
+                </div>
+              </div>
+              <p style="color: #374151; font-size: 14px; margin-bottom: 12px; line-height: 1.5;">
+                When you click <strong>Pay with Credit / Debit Card</strong>, your transaction is processed with end-to-end 256-bit SSL encryption and bank 3D-Secure OTP verification. ArtisanAisle never stores your private card CVV.
+              </p>
+              <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #334155; font-weight: 600;">
+                <span>✓ Bank-grade 256-bit encryption</span>
+                <span>✓ Visa, Mastercard & JCB supported</span>
+                <span>✓ Protected by 3D-Secure OTP</span>
               </div>
             </div>
           </div>
@@ -191,6 +256,133 @@
     </div>
   </main>
 
+  <!-- Maya Checkout Modal (Sandbox & Direct) -->
+  <div id="mayaCheckoutModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 460px; text-align: left;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="background: #00A859; color: white; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 6px;">Maya</span>
+          <h2 style="margin: 0; font-size: 19px; color: #166534;">Maya Mobile Checkout</h2>
+        </div>
+        <button type="button" id="closeMayaModalBtn" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">✕</button>
+      </div>
+
+      <div class="order-receipt-summary" style="margin-bottom: 18px;">
+        <div class="receipt-row">
+          <span>Payable Amount:</span>
+          <strong id="mayaModalAmount" style="color: #00A859; font-size: 18px;">₱0.00</strong>
+        </div>
+        <div class="receipt-row">
+          <span>Order Reference:</span>
+          <strong id="mayaModalOrderRef">#ORD-000000</strong>
+        </div>
+      </div>
+
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: #15803d;">
+        🛡️ Connects directly to Maya. Enter your registered Maya mobile number below to authorize payment.
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label for="mayaMobileInput" style="display:block; font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 6px;">Maya Mobile Number</label>
+        <div style="display: flex; align-items: center; border: 1.5px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: white;">
+          <span style="padding: 10px 12px; background: #f8fafc; font-weight: 700; color: #475569; border-right: 1px solid #cbd5e1; font-size: 14px;">+63</span>
+          <input type="tel" id="mayaMobileInput" placeholder="9XX XXX XXXX" maxlength="12" style="border:none; outline:none; padding:10px 14px; width:100%; font-size:15px; font-weight:600; font-family: monospace;">
+        </div>
+      </div>
+
+      <div id="mayaModalErrorNotice" style="display:none; color:#dc2626; font-size:12px; margin-bottom:12px; background:#fef2f2; padding:8px 12px; border-radius:6px; border:1px solid #fecaca;"></div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+        <button type="button" class="primary-btn" id="confirmMayaPayBtn" style="background: #00A859; color: white; width: 100%; padding: 14px; font-size: 15px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+          Authorize Maya Payment
+        </button>
+        <button type="button" class="secondary-btn" id="cancelMayaPayBtn" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px; cursor: pointer;">
+          Cancel and return to cart
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Credit / Debit Card Checkout Modal (3D-Secure & Demo Sandbox) -->
+  <div id="cardCheckoutModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 480px; text-align: left;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="background: #1e293b; color: white; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 6px;">Cards</span>
+          <h2 style="margin: 0; font-size: 19px; color: #0f172a;">Encrypted Card Checkout</h2>
+        </div>
+        <button type="button" id="closeCardModalBtn" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">✕</button>
+      </div>
+
+      <!-- Live Interactive Card Preview -->
+      <div class="interactive-card-preview">
+        <div class="card-preview-top">
+          <div class="card-chip-svg">
+            <svg width="24" height="18" viewBox="0 0 24 18" fill="none">
+              <rect width="24" height="18" rx="3" fill="#ca8a04"/>
+              <path d="M0 6h24M0 12h24M8 0v18M16 0v18" stroke="#a16207" stroke-width="1"/>
+            </svg>
+          </div>
+          <span class="card-network-logo" id="previewCardNetwork">VISA / MC</span>
+        </div>
+        <div class="card-preview-number" id="previewCardNumber">•••• •••• •••• ••••</div>
+        <div class="card-preview-bottom">
+          <div>
+            <div style="color: #94a3b8; font-size: 9px; margin-bottom: 2px;">CARDHOLDER</div>
+            <div class="card-holder-name" id="previewCardName">YOUR NAME</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="color: #94a3b8; font-size: 9px; margin-bottom: 2px;">EXPIRES</div>
+            <div class="card-expiry-val" id="previewCardExpiry">MM/YY</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <span style="font-size: 13px; font-weight: 700; color: #374151;">Amount: <strong id="cardModalAmount" style="color: #285c3b; font-size: 16px;">₱0.00</strong></span>
+        <button type="button" class="btn-autofill-demo" id="cardAutoFillDemoBtn">⚡ Fill Demo Card</button>
+      </div>
+
+      <form id="cardPaymentForm" onsubmit="return false;">
+        <div style="margin-bottom: 12px;">
+          <label for="cardNumberInput" style="display:block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Card Number</label>
+          <input type="text" id="cardNumberInput" placeholder="4242 •••• •••• ••••" maxlength="19" autocomplete="cc-number" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px; font-family: monospace; font-weight:600;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label for="cardHolderNameInput" style="display:block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Cardholder Name</label>
+          <input type="text" id="cardHolderNameInput" placeholder="Full name as printed on card" autocomplete="cc-name" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label for="cardExpiryInput" style="display:block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Expiry Date</label>
+            <input type="text" id="cardExpiryInput" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px; text-align:center;">
+          </div>
+          <div>
+            <label for="cardCvvInput" style="display:block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Security CVV</label>
+            <input type="password" id="cardCvvInput" placeholder="•••" maxlength="4" autocomplete="cc-csc" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px; text-align:center;">
+          </div>
+        </div>
+
+        <div id="cardModalErrorNotice" style="display:none; color:#dc2626; font-size:12px; margin-bottom:12px; background:#fef2f2; padding:8px 12px; border-radius:6px; border:1px solid #fecaca;"></div>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; color: #64748b; margin-bottom: 16px;">
+          <span>🔒 256-Bit SSL Encrypted</span> • <span>3D-Secure Protected</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button type="button" class="primary-btn" id="confirmCardPayBtn" style="background: #1e293b; color: white; width: 100%; padding: 14px; font-size: 15px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+            Pay Securely Now
+          </button>
+          <button type="button" class="secondary-btn" id="cancelCardPayBtn" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px; cursor: pointer;">
+            Cancel and return to cart
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Order Success / Payment Verified Modal -->
   <div id="orderSuccessModal" class="modal-backdrop" style="display: none;">
     <div class="modal-card">
@@ -208,7 +400,7 @@
           <strong id="receiptPaymentMethod">Cash on Delivery</strong>
         </div>
         <div class="receipt-row" id="receiptGcashRefRow" style="display: none;">
-          <span>GCash Ref No:</span>
+          <span id="receiptPaymentRefLabel">Reference No:</span>
           <strong id="receiptGcashRef" style="color: #007DFE;">-</strong>
         </div>
         <div class="receipt-row">
@@ -228,12 +420,12 @@
     </div>
   </div>
 
-  <!-- GCash Payment Incomplete / Choice Modal -->
+  <!-- Payment Incomplete / Choice Modal -->
   <div id="paymentFailedModal" class="modal-backdrop" style="display: none;">
     <div class="modal-card">
       <div class="alert-icon-badge" style="background:#fde8e8; color:#e74c3c; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:bold; margin:0 auto 16px;">!</div>
-      <h2>GCash Payment Incomplete</h2>
-      <p id="paymentFailedMessage">Your GCash transaction was not completed or was cancelled. Don't worry, your order has been saved!</p>
+      <h2 id="paymentFailedTitle">Payment Incomplete</h2>
+      <p id="paymentFailedMessage">Your transaction was not completed or was cancelled. Don't worry, your order has been saved!</p>
       
       <div class="order-receipt-summary">
         <div class="receipt-row">
@@ -259,7 +451,7 @@
           Switch to Cash on Delivery (COD)
         </button>
         <button type="button" class="primary-btn" id="retryGcashBtn" style="background: #007DFE; color: white; width: 100%; padding: 13px; font-size: 15px; border-radius: 10px; font-weight: 700; cursor: pointer;">
-          Retry GCash Payment
+          Retry Payment
         </button>
         <button type="button" class="secondary-btn" id="cancelFailedOrderBtn" style="background: #f1f2f6; color: #57606f; width: 100%; padding: 10px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; margin-top: 4px;">
           Cancel Order

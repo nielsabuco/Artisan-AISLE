@@ -54,13 +54,31 @@ class PayMongoService {
   }
 
   /**
-   * Initiates a real PayMongo Checkout Session for GCash
+   * Initiates a real PayMongo Checkout Session for GCash, Maya, or Cards
+   * @param {Object} order The order object
+   * @param {string} channel 'gcash', 'paymaya', 'card', or 'all'
    */
-  async createCheckoutSession(order) {
+  async createCheckoutSession(order, channel = 'all') {
     const settings = await this.getSettings();
     const currentOrigin = window.location.origin;
-    const successUrl = `${currentOrigin}/cart.html?payment=success&orderId=${order.id}&method=paymongo_gcash`;
-    const cancelUrl = `${currentOrigin}/cart.html?payment=failed&orderId=${order.id}&reason=cancelled`;
+
+    const normalizedChannel = (channel || '').toLowerCase();
+    let methodTag = 'paymongo_gcash';
+    let paymentMethodTypes = ['gcash', 'paymaya', 'card', 'qrph'];
+
+    if (normalizedChannel.includes('maya')) {
+      methodTag = 'paymongo_maya';
+      paymentMethodTypes = ['paymaya', 'qrph'];
+    } else if (normalizedChannel.includes('card')) {
+      methodTag = 'paymongo_card';
+      paymentMethodTypes = ['card'];
+    } else if (normalizedChannel.includes('gcash')) {
+      methodTag = 'paymongo_gcash';
+      paymentMethodTypes = ['gcash', 'qrph'];
+    }
+
+    const successUrl = `${currentOrigin}/cart.html?payment=success&orderId=${order.id}&method=${methodTag}`;
+    const cancelUrl = `${currentOrigin}/cart.html?payment=failed&orderId=${order.id}&reason=cancelled&method=${methodTag}`;
 
     const payload = {
       orderId: order.id,
@@ -72,7 +90,8 @@ class PayMongoService {
       customerPhone: order.customerPhone,
       successUrl: successUrl,
       cancelUrl: cancelUrl,
-      apiKey: settings.secretKey
+      apiKey: settings.secretKey,
+      paymentMethodTypes: paymentMethodTypes
     };
 
     try {
