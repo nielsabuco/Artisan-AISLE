@@ -389,7 +389,7 @@ async function checkPaymentCallback() {
       document.getElementById('successModalTitle').textContent = 'GCash Payment Verified!';
       document.getElementById('successModalSubtitle').textContent = 'Your GCash transaction went through successfully. Your order is confirmed and marked as PAID.';
       document.getElementById('receiptOrderNumber').textContent = order.orderNumber || orderId;
-      document.getElementById('receiptPaymentMethod').textContent = 'GCash';
+      document.getElementById('receiptPaymentMethod').textContent = order.paymentMethod || 'GCash (QRPh)';
       
       const refRow = document.getElementById('receiptGcashRefRow');
       const refVal = document.getElementById('receiptGcashRef');

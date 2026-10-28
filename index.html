@@ -101,12 +101,31 @@
         <span class="section-pill">Handcrafted & Live</span>
     </div>
 
-    <!-- Dynamic Products loaded from Firebase Firestore (Hardcoded products removed) -->
+    <!-- Dynamic Products loaded from Firebase Firestore -->
     <div id="homeProductGrid" class="product-grid">
         <div class="catalog-loading">
             <div class="spinner"></div>
             <p>Loading handcrafted treasures...</p>
         </div>
+    </div>
+
+    <!-- Popular Products Section from Firestore Database -->
+    <div class="section-header" style="margin-top: 48px;">
+        <h2 class="section-title">Popular Products</h2>
+        <span class="section-pill">Community Best Sellers</span>
+    </div>
+
+    <div id="popularProductGrid" class="product-grid">
+        <div class="catalog-loading">
+            <div class="spinner"></div>
+            <p>Loading popular artisan favorites...</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 36px 0 16px;">
+        <button type="button" class="primary-btn" onclick="showScreen('products')" style="padding: 13px 32px; font-size: 15px; font-weight: 600; letter-spacing: 0.5px;">
+            Explore All Handcrafted Products →
+        </button>
     </div>
 
 </section>
@@ -705,6 +724,10 @@ const fallbackProducts = [
         price: 650,
         stock: 15,
         status: "Active",
+        isNew: true,
+        popular: false,
+        rating: 4.9,
+        reviews: 18,
         image: "https://i.etsystatic.com/50829130/r/il/396bf3/6117942828/il_1140xN.6117942828_ptjd.jpg?fbclid=IwY2xjawTmgCBwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEepg7OtAA_5JhHMhJqL_XIzEEom92qhWgEd4AEJ7TxrttW8ZZmGGJSA_tmg74_aem_i2m_YqwCVhogIjT-bLyvqg",
         sellerId: "dsppODMdDbS5oXPWKhV0mMQJVLm1",
         sellerName: "Marciene Jerusalem",
@@ -719,6 +742,10 @@ const fallbackProducts = [
         price: 550,
         stock: 12,
         status: "Active",
+        isNew: false,
+        popular: true,
+        rating: 5.0,
+        reviews: 42,
         image: "https://m.media-amazon.com/images/I/81UngKI1lIL._AC_SL1500_.jpg?fbclid=IwY2xjawTmgWdwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
         sellerId: "aO8SEtQTfLPyqxigjFhJQQP1Hg42",
         sellerName: "Maer Jerusalem",
@@ -733,6 +760,10 @@ const fallbackProducts = [
         price: 450,
         stock: 8,
         status: "Active",
+        isNew: true,
+        popular: false,
+        rating: 4.8,
+        reviews: 14,
         image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80",
         sellerId: "LUYGjn3VTBaiiRYgDlI8Ktw432M2",
         sellerName: "Reniel Sabuco",
@@ -747,6 +778,10 @@ const fallbackProducts = [
         price: 750,
         stock: 10,
         status: "Active",
+        isNew: false,
+        popular: true,
+        rating: 5.0,
+        reviews: 36,
         image: "https://warisanlighting.com/wp-content/uploads/parser/custom-lamps-2.jpg?fbclid=IwY2xjawTmgGtwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMUF6QkdJNXFvcWw5M0xlV0NzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeWVpYX8HSDQvhT0gD7NiiQO_-mBeOKCTr41F78gxYlzRELsZ6K7FY92N4fPk_aem_hWcjV0vWrzKBYQjGOwHnow",
         sellerId: "CuqMgEoBx6hn87YJFisFb3nTj3e2",
         sellerName: "Marciene Jerusalem",
@@ -761,6 +796,10 @@ const fallbackProducts = [
         price: 160,
         stock: 14,
         status: "Active",
+        isNew: true,
+        popular: true,
+        rating: 4.9,
+        reviews: 29,
         image: "https://nphikwtyvmrlvudxmdre.supabase.co/storage/v1/object/public/product-images/products/f39bb4c2-806b-4c50-bb61-f9606b2a6ebd.webp",
         sellerId: "8lnUq4rGPxdyitABRJFzwL3DnMc2",
         sellerName: "Pierce Estrada",
@@ -889,21 +928,50 @@ function renderAllProductGrids() {
 }
 
 function renderHomeProducts() {
-    const homeGrid = document.getElementById("homeProductGrid");
-    if (!homeGrid) return;
+    const newGrid = document.getElementById("homeProductGrid");
+    const popularGrid = document.getElementById("popularProductGrid");
+    if (!newGrid && !popularGrid) return;
 
-    const activeList = liveProducts.filter(p => (p.status || 'Active') === 'Active').slice(0, 8);
+    const activeList = liveProducts.filter(p => !p.deleted && (p.status || 'Active') === 'Active');
 
     if (activeList.length === 0) {
-        homeGrid.innerHTML = `
-            <div class="catalog-empty">
+        const emptyMsg = `
+            <div class="catalog-empty" style="grid-column: 1 / -1;">
                 <p>No products available yet. Check back soon for new handmade items!</p>
             </div>
         `;
+        if (newGrid) newGrid.innerHTML = emptyMsg;
+        if (popularGrid) popularGrid.innerHTML = emptyMsg;
         return;
     }
 
-    homeGrid.innerHTML = activeList.map(p => createProductCardHtml(p)).join("");
+    // 1. New Products: Sorted by creation time descending or isNew
+    const newProducts = [...activeList].sort((a, b) => {
+        if (a.isNew && !b.isNew) return -1;
+        if (!a.isNew && b.isNew) return 1;
+        const aTime = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const bTime = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        if (bTime !== aTime) return bTime - aTime;
+        return (Number(b.stock) || 0) - (Number(a.stock) || 0);
+    }).slice(0, 8);
+
+    if (newGrid) {
+        newGrid.innerHTML = newProducts.map(p => createProductCardHtml(p, { badge: 'New' })).join("");
+    }
+
+    // 2. Popular Products: Sorted by rating, reviews, sales or featured/popular status
+    const popularProducts = [...activeList].sort((a, b) => {
+        if (a.popular && !b.popular) return -1;
+        if (!a.popular && b.popular) return 1;
+        const scoreA = (Number(a.rating) || 5) * 10 + (Number(a.reviews) || 0) + (Number(a.salesCount) || 0);
+        const scoreB = (Number(b.rating) || 5) * 10 + (Number(b.reviews) || 0) + (Number(b.salesCount) || 0);
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        return (Number(b.price) || 0) - (Number(a.price) || 0);
+    }).slice(0, 8);
+
+    if (popularGrid) {
+        popularGrid.innerHTML = popularProducts.map(p => createProductCardHtml(p, { badge: 'Popular' })).join("");
+    }
 }
 
 function renderCatalogProducts() {
@@ -913,7 +981,7 @@ function renderCatalogProducts() {
     const query = document.getElementById("searchInput")?.value.trim().toLowerCase() || "";
 
     const filtered = liveProducts.filter(p => {
-        const isActive = (p.status || 'Active') === 'Active';
+        const isActive = !p.deleted && (p.status || 'Active') === 'Active';
         const matchesCategory = currentCategory === "All Products" || (p.category || "").toLowerCase() === currentCategory.toLowerCase();
         const matchesQuery = query === "" || (p.name || "").toLowerCase().includes(query) || (p.category || "").toLowerCase().includes(query);
         return isActive && matchesCategory && matchesQuery;
@@ -939,17 +1007,28 @@ function renderCatalogProducts() {
     });
 }
 
-function createProductCardHtml(product) {
+function createProductCardHtml(product, options = {}) {
     const image = product.image || "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80";
     const price = Number(product.price || 0).toLocaleString();
     const stock = Number(product.stock || 0);
     const isOut = stock <= 0;
+    const badgeType = options.badge || (product.isNew ? 'New' : (product.popular ? 'Popular' : ''));
+
+    let badgeHtml = '';
+    if (isOut) {
+        badgeHtml = '<span class="product-badge" style="background:#c53030;">Out of Stock</span>';
+    } else if (badgeType === 'New') {
+        badgeHtml = '<span class="product-badge" style="background:#285c3b;">New</span>';
+    } else if (badgeType === 'Popular') {
+        badgeHtml = '<span class="product-badge" style="background:#a66a35;">★ Popular</span>';
+    }
 
     return `
         <div class="product-card" data-category="${product.category || 'Craft'}" onclick="openProductQuickView('${product.id}')" style="cursor: pointer;">
-            ${product.isNew ? '<span class="product-badge">New</span>' : ''}
-            ${isOut ? '<span class="product-badge" style="background:#c53030;">Out of Stock</span>' : ''}
-            <img src="${image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80'" />
+            <div class="product-thumb-wrap">
+                ${badgeHtml}
+                <img src="${image}" alt="${product.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80'" />
+            </div>
             <div class="product-info">
                 <h3>${product.name}</h3>
                 <p class="price">₱${price}.00</p>
@@ -1179,7 +1258,9 @@ function renderCart() {
         } else {
             cartItems.innerHTML = cart.map((item, index) => `
                 <div class="cart-item">
-                    <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=150&q=80'">
+                    <div class="cart-item-thumb">
+                        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=150&q=80'">
+                    </div>
                     <div style="flex:1;">
                         <h3>${item.name}</h3>
                         <p class="price">₱${Number(item.price).toLocaleString()}.00</p>

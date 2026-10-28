@@ -321,8 +321,10 @@ nav a:hover,
 
 .product-card img {
   width: 100%;
-  height: 190px;
+  height: 100%;
   object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .product-info {
@@ -478,10 +480,17 @@ nav a:hover,
 }
 
 .cart-item img {
-  width: 100px;
+  width: 90px;
   height: 90px;
+  min-width: 90px;
+  min-height: 90px;
+  max-width: 90px;
+  max-height: 90px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 12px;
+  background: #f7f3eb;
+  flex-shrink: 0;
+  display: block;
 }
 
 .cart-item-controls {
@@ -1966,8 +1975,12 @@ footer {
     border-radius: 10px;
   }
 
-  .product-card img {
+  .product-thumb-wrap {
     height: 140px;
+  }
+
+  .product-card img {
+    height: 100%;
     object-fit: cover;
   }
 
@@ -2079,9 +2092,14 @@ footer {
     align-items: flex-start;
   }
 
+  .cart-item-thumb,
   .cart-item img {
     width: 76px;
     height: 76px;
+    min-width: 76px;
+    min-height: 76px;
+    max-width: 76px;
+    max-height: 76px;
   }
 
   #home .hero {
@@ -2452,98 +2470,169 @@ footer {
   font-weight: 600;
 }
 
+.cart-item-card,
 .cart-item-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 0;
+  gap: 18px;
+  padding: 18px 0;
   border-bottom: 1px solid #eee;
+  background: transparent;
 }
 
+.cart-item-card:last-child,
 .cart-item-row:last-child {
   border-bottom: none;
 }
 
+/* The Cart Image Holder Container */
 .cart-item-thumb {
-  width: 75px;
-  height: 75px;
-  border-radius: 8px;
-  object-fit: cover;
+  width: 90px;
+  height: 90px;
+  min-width: 90px;
+  min-height: 90px;
+  max-width: 90px;
+  max-height: 90px;
+  border-radius: 12px;
   border: 1px solid #dfd5c6;
+  background: #f7f3eb;
+  overflow: hidden;
+  position: relative;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* The Image inside the Cart Image Holder */
+.cart-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border-radius: 11px;
+  transition: transform 0.25s ease;
+}
+
+.cart-item-thumb:hover img {
+  transform: scale(1.06);
 }
 
 .cart-item-details {
   flex: 1;
+  min-width: 0;
 }
 
+.cart-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.cart-item-title,
 .cart-item-name {
-  font-size: 15px;
-  margin: 0 0 5px;
-  color: #1a1a1a;
-}
-
-.cart-item-meta {
-  font-size: 12px;
-  color: #666;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 4px;
-}
-
-.cart-item-price-unit {
-  font-size: 13px;
-  color: #285c3b;
+  font-size: 16px;
   font-weight: 600;
+  color: #1e3d29;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
 }
 
-.cart-item-controls {
+.cart-item-seller {
+  font-size: 13px;
+  color: #666;
+  display: block;
+}
+
+.cart-item-remove-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: #999;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.cart-item-remove-btn:hover {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.cart-item-footer {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
 }
 
-.qty-pill {
+.cart-qty-control {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 20px;
+  border: 1px solid #dcd1be;
+  border-radius: 8px;
   overflow: hidden;
+  background: #ffffff;
 }
 
-.qty-btn {
+.cart-qty-control .qty-btn {
   background: #f7f3eb;
   border: none;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   font-size: 16px;
-  cursor: pointer;
   font-weight: 700;
   color: #285c3b;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.15s;
 }
 
-.qty-btn:hover {
+.cart-qty-control .qty-btn:hover:not(:disabled) {
   background: #ebdcc5;
 }
 
-.qty-val {
-  padding: 0 10px;
-  font-size: 13px;
-  font-weight: 700;
-  min-width: 20px;
-  text-align: center;
+.cart-qty-control .qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-.cart-item-line-total {
+.cart-qty-control .qty-input {
+  width: 36px;
+  height: 32px;
+  border: none;
+  text-align: center;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
+  color: #222;
+  background: #fff;
+}
+
+.cart-item-pricing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.cart-item-pricing .unit-price {
+  font-size: 12px;
+  color: #777;
+}
+
+.cart-item-pricing .line-total {
+  font-size: 16px;
+  font-weight: 700;
   color: #285c3b;
-  min-width: 80px;
-  text-align: right;
 }
 
 .item-delete-btn {
@@ -3347,8 +3436,28 @@ footer {
 
 .product-thumb-wrap {
   position: relative;
+  width: 100%;
+  height: 200px;
+  background: #f7f3eb;
   overflow: hidden;
-  border-radius: 8px;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-thumb-wrap img {
+  transform: scale(1.05);
 }
 
 /* Order Tracking Stepper Styles */
