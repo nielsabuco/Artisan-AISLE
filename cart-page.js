@@ -385,11 +385,42 @@ async function checkPaymentCallback() {
     if (!order) return;
 
     if (paymentState === 'success') {
-      // 1. Success verification from GCash
-      document.getElementById('successModalTitle').textContent = 'GCash Payment Verified!';
+      // 1. Success verification from GCash / PayMongo
+      const methodParam = params.get('method');
+      const isPayMongo = methodParam === 'paymongo_gcash' || (order.paymentMethod || '').includes('PayMongo');
+
+      if (order.paymentStatus !== 'Paid') {
+        const generatedRef = ref || ('PM-' + Math.random().toString(36).substring(2, 11).toUpperCase());
+        await ArtisanDB.updateOrder(orderId, {
+          paymentStatus: 'Paid',
+          orderStatus: 'Confirmed',
+          paymentMethod: isPayMongo ? 'GCash (PayMongo)' : (order.paymentMethod || 'GCash'),
+          paymentReference: generatedRef,
+          paidAmount: Number(order.total || 0),
+          paidAt: new Date().toISOString()
+        });
+        order.paymentStatus = 'Paid';
+        order.paymentReference = generatedRef;
+        order.paymentMethod = isPayMongo ? 'GCash (PayMongo)' : (order.paymentMethod || 'GCash');
+
+        // Decrement inventory stock
+        if (order.items && Array.isArray(order.items)) {
+          for (const item of order.items) {
+            const pid = item.productId || item.id;
+            const qty = Number(item.quantity) || 1;
+            if (pid) {
+              try { await ArtisanDB.decrementStock(pid, qty); } catch (e) {}
+            }
+          }
+        }
+
+        ArtisanDB.clearCart();
+      }
+
+      document.getElementById('successModalTitle').textContent = isPayMongo ? 'PayMongo GCash Payment Verified!' : 'GCash Payment Verified!';
       document.getElementById('successModalSubtitle').textContent = 'Your GCash transaction went through successfully. Your order is confirmed and marked as PAID.';
       document.getElementById('receiptOrderNumber').textContent = order.orderNumber || orderId;
-      document.getElementById('receiptPaymentMethod').textContent = order.paymentMethod || 'GCash (QRPh)';
+      document.getElementById('receiptPaymentMethod').textContent = order.paymentMethod || (isPayMongo ? 'GCash (PayMongo)' : 'GCash (QRPh)');
       
       const refRow = document.getElementById('receiptGcashRefRow');
       const refVal = document.getElementById('receiptGcashRef');

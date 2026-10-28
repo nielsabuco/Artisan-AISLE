@@ -1,4 +1,5 @@
 import { ArtisanDB } from './firebase-config.js';
+import { PayMongo } from './paymongo-service.js';
 
 let currentOrder = null;
 let orderId = '';
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   await loadOrderDetails();
+  await checkGatewayStatus();
   setupEventListeners();
   startCountdownTimer();
 });
@@ -47,9 +49,19 @@ async function loadOrderDetails() {
     document.getElementById('gcashTotalAmountDisplay').textContent = totalFormatted;
     document.getElementById('gcashBtnAmount').textContent = totalFormatted;
     document.getElementById('gcashOrderNumberTag').textContent = `Order Reference: ${orderRef}`;
+    
+    // QRPh figures
     document.getElementById('qrOrderRefText').textContent = orderRef;
     document.getElementById('qrPayableAmount').textContent = totalFormatted;
     document.getElementById('qrStepAmount').textContent = totalFormatted;
+
+    // PayMongo figures
+    const pmPayable = document.getElementById('pmPayableAmount');
+    if (pmPayable) pmPayable.textContent = totalFormatted;
+    const pmOrderRef = document.getElementById('pmOrderRefText');
+    if (pmOrderRef) pmOrderRef.textContent = orderRef;
+    const pmBtnAmt = document.getElementById('pmBtnAmount');
+    if (pmBtnAmt) pmBtnAmt.textContent = totalFormatted;
 
     // Resolve artisan / seller GCash details
     let sellerName = 'Eugene Marciene Jerusalem';
@@ -63,7 +75,6 @@ async function loadOrderDetails() {
       if (firstItem.sellerGCash) {
         sellerPhone = firstItem.sellerGCash;
       } else if (firstItem.sellerId) {
-        // Attempt to fetch from seller document
         try {
           const sellerDoc = await ArtisanDB.getSeller(firstItem.sellerId);
           if (sellerDoc && sellerDoc.gcashNumber) {
@@ -76,7 +87,6 @@ async function loadOrderDetails() {
       }
     }
 
-    // Format phone nicely: 0976 494 8458
     let cleanPhone = sellerPhone.replace(/\D/g, '');
     if (cleanPhone.startsWith('63') && cleanPhone.length === 12) cleanPhone = '0' + cleanPhone.slice(2);
     const prettyPhone = cleanPhone.length === 11 
@@ -95,7 +105,6 @@ async function loadOrderDetails() {
       orderRef: orderRef
     });
 
-    // Generate high-contrast, scannable QR Code
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=${encodeURIComponent(qrphPayload)}`;
     const qrImg = document.getElementById('qrphImageTag');
     if (qrImg) {
@@ -118,22 +127,51 @@ async function loadOrderDetails() {
 }
 
 /**
+ * Checks and updates PayMongo gateway status in the UI
+ */
+async function checkGatewayStatus() {
+  try {
+    const status = await PayMongo.getStatus();
+    const badge = document.getElementById('pmBadgeStatus');
+    const title = document.getElementById('pmStatusTitle');
+    const modeText = document.getElementById('pmModeIndicatorText');
+
+    if (badge) {
+      badge.textContent = status.isLiveMode ? 'Live Mode' : 'Sandbox';
+      badge.style.background = status.isLiveMode ? '#dcfce7' : '#fef3c7';
+      badge.style.color = status.isLiveMode ? '#15803d' : '#92400e';
+    }
+
+    if (title && modeText) {
+      if (status.isConfigured) {
+        title.textContent = status.isLiveMode ? 'PayMongo Live GCash Gateway' : 'PayMongo Sandbox Gateway';
+        modeText.textContent = status.isLiveMode 
+          ? 'Connected & ready to accept real money transfers' 
+          : 'Connected with test keys (safe sandbox testing)';
+      } else {
+        title.textContent = 'PayMongo Gateway (Ready for Keys)';
+        modeText.textContent = 'Add your sk_test_ or sk_live_ key in Admin Console to enable live portal';
+      }
+    }
+  } catch (e) {
+    console.warn('Could not check gateway status:', e);
+  }
+}
+
+/**
  * Builds an authentic Philippine QRPh EMVCo Tag-Length-Value (TLV) payload string
  */
 function generateQRPhPayload({ merchantName, gcashNumber, amount, orderRef }) {
-  // Helper to format EMVCo TLV string
   const tlv = (tag, val) => {
     const s = String(val);
     const len = String(s.length).padStart(2, '0');
     return `${tag}${len}${s}`;
   };
 
-  // Tag 26: Merchant Account Information (QRPh standard for Philippine E-Money)
   const sub00 = tlv('00', 'ph.gov.qrph.p2m');
   const sub01 = tlv('01', gcashNumber || '09764948458');
   const tag26 = tlv('26', `${sub00}${sub01}`);
 
-  // Tag 62: Additional Data (Order Reference)
   const subRef = tlv('01', orderRef || 'ORD-000');
   const tag62 = tlv('62', subRef);
 
@@ -154,9 +192,6 @@ function generateQRPhPayload({ merchantName, gcashNumber, amount, orderRef }) {
   return `${raw}${crc}`;
 }
 
-/**
- * Computes standard 16-bit CRC for EMVCo specifications (polynomial 0x1021)
- */
 function computeCRC16(str) {
   let crc = 0xFFFF;
   for (let i = 0; i < str.length; i++) {
@@ -176,25 +211,29 @@ function computeCRC16(str) {
  * Sets up user interaction listeners
  */
 function setupEventListeners() {
-  // Tab Switchers
+  const tabPayMongoBtn = document.getElementById('tabPayMongoBtn');
   const tabQrphBtn = document.getElementById('tabQrphBtn');
   const tabDirectBtn = document.getElementById('tabDirectBtn');
+
+  const paymongoView = document.getElementById('paymongoViewContainer');
   const qrphView = document.getElementById('qrphViewContainer');
   const directView = document.getElementById('directViewContainer');
 
-  tabQrphBtn?.addEventListener('click', () => {
-    tabQrphBtn.classList.add('active');
-    tabDirectBtn.classList.remove('active');
-    qrphView.style.display = 'block';
-    directView.style.display = 'none';
-  });
+  const switchTab = (activeTab, activeView) => {
+    [tabPayMongoBtn, tabQrphBtn, tabDirectBtn].forEach(b => b?.classList.remove('active'));
+    [paymongoView, qrphView, directView].forEach(v => { if (v) v.style.display = 'none'; });
 
-  tabDirectBtn?.addEventListener('click', () => {
-    tabDirectBtn.classList.add('active');
-    tabQrphBtn.classList.remove('active');
-    directView.style.display = 'block';
-    qrphView.style.display = 'none';
-  });
+    activeTab?.classList.add('active');
+    if (activeView) activeView.style.display = 'block';
+  };
+
+  tabPayMongoBtn?.addEventListener('click', () => switchTab(tabPayMongoBtn, paymongoView));
+  tabQrphBtn?.addEventListener('click', () => switchTab(tabQrphBtn, qrphView));
+  tabDirectBtn?.addEventListener('click', () => switchTab(tabDirectBtn, directView));
+
+  // PayMongo Launch Checkout Button
+  const paymongoProceedBtn = document.getElementById('paymongoProceedBtn');
+  paymongoProceedBtn?.addEventListener('click', handlePayMongoCheckout);
 
   // Verify QR Payment button
   const verifyQrBtn = document.getElementById('gcashVerifyQrPaymentBtn');
@@ -230,12 +269,65 @@ function setupEventListeners() {
     copyToClipboard(amt, 'Exact amount (₱' + amt + ') copied!');
   });
 
-  // Cancel links (redirects to cart with options)
+  // Cancel links
   const cancelAction = () => {
     window.location.href = `cart.html?payment=failed&orderId=${orderId}&reason=cancelled`;
   };
+  document.getElementById('pmCancelBtn')?.addEventListener('click', cancelAction);
   document.getElementById('gcashCancelBtn')?.addEventListener('click', cancelAction);
   document.getElementById('gcashCancelBtnDirect')?.addEventListener('click', cancelAction);
+}
+
+/**
+ * Handles PayMongo official checkout redirect
+ */
+async function handlePayMongoCheckout() {
+  hideError();
+
+  const overlay = document.getElementById('gcashProcessingOverlay');
+  const title = document.getElementById('gcashProcessingTitle');
+  const msg = document.getElementById('gcashProcessingMsg');
+  const proceedBtn = document.getElementById('paymongoProceedBtn');
+
+  proceedBtn.disabled = true;
+  overlay.style.display = 'flex';
+
+  title.textContent = 'Connecting to PayMongo...';
+  msg.textContent = 'Preparing official GCash checkout session for Order #' + (currentOrder.orderNumber || orderId) + '...';
+
+  try {
+    const result = await PayMongo.createCheckoutSession(currentOrder);
+
+    if (result.success && result.checkoutUrl) {
+      title.textContent = 'Redirecting to Official GCash...';
+      msg.textContent = 'Opening the PayMongo payment gateway. Please authorize payment in the window...';
+      await delay(800);
+      window.location.href = result.checkoutUrl;
+      return;
+    }
+
+    if (result.needsSetup) {
+      overlay.style.display = 'none';
+      proceedBtn.disabled = false;
+      showError(
+        'PayMongo Secret Key is not configured yet. ' +
+        'Please go to the Admin Console > Payment Gateway tab to enter your sk_test_... or sk_live_... key. ' +
+        'In the meantime, you can switch to the "Scan QRPh Code" tab to test!'
+      );
+      return;
+    }
+
+    throw new Error(result.error || 'Failed to initialize PayMongo checkout.');
+
+  } catch (err) {
+    console.warn('PayMongo Checkout session issue:', err);
+    overlay.style.display = 'none';
+    proceedBtn.disabled = false;
+    showError(
+      'Could not initialize PayMongo Checkout: ' + err.message + '. ' +
+      'Check your Secret Key in Admin Console > Payment Gateway or use the Scan QRPh tab.'
+    );
+  }
 }
 
 /**
@@ -253,7 +345,6 @@ async function handleQrPaymentVerification() {
     return;
   }
 
-  // Format check: GCash reference numbers are typically 10 to 14 numeric characters
   if (refValue.length < 8) {
     showError('GCash Reference numbers are typically 12-13 digits long. Please check your receipt.');
     refInput?.focus();
@@ -269,21 +360,17 @@ async function handleQrPaymentVerification() {
   overlay.style.display = 'flex';
 
   try {
-    // Stage 1: Querying Payment Network
     title.textContent = 'Connecting to GCash & QRPh...';
     msg.textContent = `Validating transaction for Order ${currentOrder.orderNumber || orderId}...`;
     await delay(1200);
 
-    // Stage 2: Verifying Reference Match
     title.textContent = 'Verifying BSP QRPh Settlement...';
     msg.textContent = `Checking reference number #${refValue} with GCash Philippine clearing network...`;
     await delay(1400);
 
-    // Stage 3: Payment Capture & Success
     title.textContent = 'Payment Successfully Verified!';
     msg.textContent = `Received ₱${Number(currentOrder.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}. Updating your order status...`;
 
-    // 1. Update order in Firestore database
     await ArtisanDB.updateOrder(orderId, {
       paymentStatus: 'Paid',
       orderStatus: 'Confirmed',
@@ -293,7 +380,6 @@ async function handleQrPaymentVerification() {
       paidAt: new Date().toISOString()
     });
 
-    // 2. Decrement inventory for ordered products
     if (currentOrder.items && Array.isArray(currentOrder.items)) {
       for (const item of currentOrder.items) {
         const prodId = item.productId || item.id;
@@ -308,12 +394,8 @@ async function handleQrPaymentVerification() {
       }
     }
 
-    // 3. Clear customer shopping cart
     ArtisanDB.clearCart();
-
     await delay(1000);
-
-    // Redirect to cart receipt view with verified green checkmark
     window.location.href = `cart.html?payment=success&orderId=${orderId}&ref=${refValue}`;
 
   } catch (err) {
@@ -363,10 +445,8 @@ async function handleDirectPaymentSubmit() {
     title.textContent = 'Payment Approved!';
     msg.textContent = 'Transaction verified! Confirming order with ArtisanAisle...';
 
-    // Official 13-digit GCash reference number starting with 9
     const gcashRef = '9' + Math.floor(100000000000 + Math.random() * 900000000000);
 
-    // Update order in Firestore
     await ArtisanDB.updateOrder(orderId, {
       paymentStatus: 'Paid',
       orderStatus: 'Confirmed',
@@ -377,7 +457,6 @@ async function handleDirectPaymentSubmit() {
       paidAt: new Date().toISOString()
     });
 
-    // Decrement stock
     if (currentOrder.items && Array.isArray(currentOrder.items)) {
       for (const item of currentOrder.items) {
         const prodId = item.productId || item.id;
@@ -392,11 +471,8 @@ async function handleDirectPaymentSubmit() {
       }
     }
 
-    // Clear cart
     ArtisanDB.clearCart();
-
     await delay(1000);
-
     window.location.href = `cart.html?payment=success&orderId=${orderId}&ref=${gcashRef}`;
 
   } catch (err) {
@@ -407,9 +483,6 @@ async function handleDirectPaymentSubmit() {
   }
 }
 
-/**
- * 15-Minute Expiry Countdown Timer
- */
 function startCountdownTimer() {
   const timerDisplay = document.getElementById('qrTimerDisplay');
   if (!timerDisplay) return;
@@ -422,7 +495,8 @@ function startCountdownTimer() {
       clearInterval(timerInterval);
       timerDisplay.textContent = 'Expired';
       showError('This QRPh code has expired. Please refresh the page to generate a fresh QR code.');
-      document.getElementById('gcashVerifyQrPaymentBtn').disabled = true;
+      const verifyBtn = document.getElementById('gcashVerifyQrPaymentBtn');
+      if (verifyBtn) verifyBtn.disabled = true;
       return;
     }
 
@@ -432,9 +506,6 @@ function startCountdownTimer() {
   }, 1000);
 }
 
-/**
- * Save / Download QR Code Image
- */
 function downloadQrImage() {
   const qrImg = document.getElementById('qrphImageTag');
   if (!qrImg || !qrImg.src) return;
@@ -449,9 +520,6 @@ function downloadQrImage() {
   showToast('QR Code download started! Scan from your GCash app gallery.');
 }
 
-/**
- * Clipboard helper
- */
 function copyToClipboard(text, successMsg) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(() => {

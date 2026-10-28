@@ -60,6 +60,7 @@ function initAdminAuth() {
 
     // Start Real-time Data Listeners
     startAdminListeners();
+    initPaymentGatewaySettings();
   });
 }
 
@@ -1067,5 +1068,147 @@ async function seedDefaultCatalog() {
     }
   }
 }
+
+async function initPaymentGatewaySettings() {
+  const form = document.getElementById('adminPaymentSettingsForm');
+  const secretInput = document.getElementById('pmSecretKeyInput');
+  const publicInput = document.getElementById('pmPublicKeyInput');
+  const testRadio = document.getElementById('modeRadioTest');
+  const liveRadio = document.getElementById('modeRadioLive');
+  const statusVal = document.getElementById('adminPmStatusVal');
+  const statusSub = document.getElementById('adminPmStatusSub');
+  const modeVal = document.getElementById('adminPmModeVal');
+  const alertBox = document.getElementById('pmSettingsAlert');
+  const testBtn = document.getElementById('testPmConnectionBtn');
+
+  if (!form || !secretInput) return;
+
+  // Load existing settings from database
+  try {
+    const settings = await ArtisanDB.getPaymentSettings();
+    if (settings) {
+      if (settings.secretKey) secretInput.value = settings.secretKey;
+      if (settings.publicKey) publicInput.value = settings.publicKey;
+      if (settings.isLiveMode) {
+        liveRadio.checked = true;
+      } else {
+        testRadio.checked = true;
+      }
+    }
+  } catch (e) {
+    console.warn('Error loading payment settings:', e);
+  }
+
+  updateStatusDisplay();
+
+  function updateStatusDisplay() {
+    const key = secretInput.value.trim();
+    const isConfigured = (key.startsWith('sk_test_') || key.startsWith('sk_live_')) && !key.includes('placeholder');
+    const isLive = liveRadio.checked;
+
+    if (isConfigured) {
+      statusVal.textContent = 'Configured & Ready';
+      statusVal.style.color = '#285c3b';
+      statusSub.textContent = `Active Key: ${key.slice(0, 7)}••••`;
+    } else {
+      statusVal.textContent = 'Not Configured';
+      statusVal.style.color = '#d97706';
+      statusSub.textContent = 'Add your sk_test_ or sk_live_ key to enable real checkout';
+    }
+
+    if (isLive) {
+      modeVal.textContent = 'Live Mode (Real Money)';
+      modeVal.style.color = '#007DFE';
+    } else {
+      modeVal.textContent = 'Sandbox (Test Mode)';
+      modeVal.style.color = '#285c3b';
+    }
+  }
+
+  secretInput.addEventListener('input', updateStatusDisplay);
+  testRadio.addEventListener('change', updateStatusDisplay);
+  liveRadio.addEventListener('change', updateStatusDisplay);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('savePmSettingsBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving Settings...';
+
+    const secretKey = secretInput.value.trim();
+    const publicKey = publicInput.value.trim();
+    const isLiveMode = liveRadio.checked;
+
+    try {
+      await ArtisanDB.updatePaymentSettings({
+        secretKey,
+        publicKey,
+        isLiveMode,
+        enabled: true
+      });
+
+      alertBox.textContent = '✓ Payment gateway settings successfully saved! Orders will now process through PayMongo with these credentials.';
+      alertBox.style.background = '#e7eee8';
+      alertBox.style.color = '#285c3b';
+      alertBox.style.border = '1px solid #c2d6c5';
+      alertBox.style.display = 'block';
+      updateStatusDisplay();
+    } catch (err) {
+      alertBox.textContent = 'Failed to save settings: ' + err.message;
+      alertBox.style.background = '#fef2f2';
+      alertBox.style.color = '#b91c1c';
+      alertBox.style.border = '1px solid #fecaca';
+      alertBox.style.display = 'block';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save Gateway Settings';
+    }
+  });
+
+  testBtn?.addEventListener('click', async () => {
+    const key = secretInput.value.trim();
+    if (!key) {
+      alert('Please enter a PayMongo Secret Key before testing.');
+      return;
+    }
+
+    testBtn.disabled = true;
+    testBtn.textContent = 'Testing Key...';
+    try {
+      const authHeader = 'Basic ' + btoa(key + ':');
+      const res = await fetch('https://api.paymongo.com/v1/checkout_sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: authHeader
+        },
+        body: JSON.stringify({
+          data: {
+            attributes: {
+              line_items: [{ name: 'Test Key Validation', amount: 10000, currency: 'PHP', quantity: 1 }],
+              payment_method_types: ['gcash'],
+              success_url: window.location.href,
+              cancel_url: window.location.href
+            }
+          }
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.data) {
+        alert('🎉 PayMongo Connection SUCCESSFUL!\n\nYour Secret Key is valid and active. Real GCash payments can now be processed.');
+      } else {
+        const msg = (data.errors && data.errors[0]?.detail) || 'Could not validate key.';
+        alert('PayMongo Notice:\n\n' + msg + '\n\nNote: If testing in the browser causes CORS restrictions, test via the checkout flow directly after saving.');
+      }
+    } catch (e) {
+      alert('Connection test sent! Save the key and test in checkout to complete verification.');
+    } finally {
+      testBtn.disabled = false;
+      testBtn.textContent = 'Test PayMongo Connection';
+    }
+  });
+}
+
 
 

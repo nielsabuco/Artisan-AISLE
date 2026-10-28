@@ -74,6 +74,12 @@ service cloud.firestore {
       allow delete: if isSignedIn();
     }
 
+    // Payment Gateway & System Settings
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Fallback for any other collections
     match /{document=**} {
       allow read, write: if isSignedIn();

@@ -526,20 +526,77 @@
 
       <!-- Mode Switcher Tabs -->
       <div class="gcash-tab-nav">
-        <button type="button" class="gcash-tab-btn active" id="tabQrphBtn">
+        <button type="button" class="gcash-tab-btn active" id="tabPayMongoBtn">
+          <span>⚡ PayMongo GCash</span>
+          <span class="gcash-tab-badge" id="pmBadgeStatus">Live Gateway</span>
+        </button>
+        <button type="button" class="gcash-tab-btn" id="tabQrphBtn">
           <span>📷 Scan QRPh Code</span>
-          <span class="gcash-tab-badge">Recommended</span>
         </button>
         <button type="button" class="gcash-tab-btn" id="tabDirectBtn">
-          <span>📱 GCash Direct Pay</span>
+          <span>📱 Direct Express</span>
         </button>
       </div>
 
       <!-- Error notification -->
       <div id="gcashErrorBanner" style="display:none; background:#fef2f2; color:#b91c1c; border-left: 4px solid #ef4444; padding:12px 16px; font-size:13px; margin: 16px 24px 0;"></div>
 
-      <!-- VIEW 1: QRPh Code Scanner (Primary) -->
-      <div id="qrphViewContainer" class="gcash-form-body">
+      <!-- VIEW 0: PayMongo Official Gateway (Real GCash) -->
+      <div id="paymongoViewContainer" class="gcash-form-body">
+        
+        <div id="pmGatewayStatusCard" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-weight: 700; color: #166534; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <span>🟢</span>
+              <span id="pmStatusTitle">PayMongo Official Gateway</span>
+            </div>
+            <span id="pmModeIndicatorText" style="font-size: 12px; color: #15803d; display: block; margin-top: 2px;">
+              Ready to process real GCash payment
+            </span>
+          </div>
+          <span style="background: #dcfce7; color: #15803d; font-weight: 800; font-size: 11px; padding: 4px 10px; border-radius: 999px; text-transform: uppercase;">
+            SECURE BSP
+          </span>
+        </div>
+
+        <div class="merchant-info-card" style="margin-bottom: 22px;">
+          <div class="merchant-info-row">
+            <span>Payable Amount:</span>
+            <strong id="pmPayableAmount" style="color: #007DFE; font-size: 18px;">₱0.00</strong>
+          </div>
+          <div class="merchant-info-row">
+            <span>Order Reference:</span>
+            <strong id="pmOrderRefText">#ORD-000000</strong>
+          </div>
+          <div class="merchant-info-row">
+            <span>Payment Method:</span>
+            <strong>GCash (Official Web Checkout)</strong>
+          </div>
+        </div>
+
+        <!-- How PayMongo GCash Works -->
+        <div class="qr-steps-list" style="margin-bottom: 24px;">
+          <h4>How Real GCash Payment Works:</h4>
+          <ol>
+            <li>Click the button below to open the official PayMongo checkout.</li>
+            <li>Select <strong>GCash</strong> and enter your mobile number.</li>
+            <li>Input the 6-digit authentication code (OTP) sent to your phone.</li>
+            <li>Authorize the payment; you will be returned here automatically with your verified receipt!</li>
+          </ol>
+        </div>
+
+        <!-- Launch Button -->
+        <button type="button" id="paymongoProceedBtn" class="gcash-pay-btn" style="padding: 16px; font-size: 16px;">
+          <span>🚀 Launch Official GCash Portal</span>
+          <span id="pmBtnAmount">₱0.00</span>
+        </button>
+
+        <!-- Cancel link -->
+        <a id="pmCancelBtn" class="gcash-cancel-link">Cancel and choose another payment method (COD)</a>
+      </div>
+
+      <!-- VIEW 1: QRPh Code Scanner (Secondary) -->
+      <div id="qrphViewContainer" class="gcash-form-body" style="display: none;">
         
         <div class="qrph-official-banner">
           <div class="qrph-header-row">

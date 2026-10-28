@@ -1088,6 +1088,26 @@ export const ArtisanDB = {
       ...msgData,
       createdAt: serverTimestamp()
     });
+  },
+
+  // --- Payment Gateway Settings ---
+  async getPaymentSettings() {
+    try {
+      const snap = await getDoc(doc(db, 'settings', 'payment_gateway'));
+      if (snap.exists()) return snap.data();
+    } catch (e) {
+      console.warn('Could not read payment settings from Firestore:', e);
+    }
+    return null;
+  },
+
+  async updatePaymentSettings(settings) {
+    const ref = doc(db, 'settings', 'payment_gateway');
+    await setDoc(ref, {
+      ...settings,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    return { success: true };
   }
 };
 
