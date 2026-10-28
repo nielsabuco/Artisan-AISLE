@@ -190,15 +190,17 @@
         currentSellerProfile = profile || user;
 
         // Strict Enforcement: Grant access if approved, role is seller, or user is platform admin
-        const isApproved = (profile && profile.sellerStatus === 'approved') ||
-                           (profile && profile.role === 'seller') ||
-                           (profile && profile.role === 'admin') ||
+        const sellerStatus = String(profile?.sellerStatus || '').toLowerCase();
+        const userRole = String(profile?.role || '').toLowerCase();
+        const isApproved = sellerStatus === 'approved' ||
+                           userRole === 'seller' ||
+                           userRole === 'admin' ||
                            (user.email && window.ArtisanDB?.isEmailAdmin && window.ArtisanDB.isEmailAdmin(user.email));
 
         if (!isApproved) {
-          const statusText = profile?.sellerStatus === 'pending'
+          const statusText = sellerStatus === 'pending'
             ? "Your seller application is currently pending admin review. You cannot manage products until approved."
-            : profile?.sellerStatus === 'rejected'
+            : sellerStatus === 'rejected'
             ? `Your seller application was not approved. Reason: ${profile?.sellerRejectionReason || 'Requirements not met.'}`
             : "You have not registered as an artisan seller. Please apply through your profile on the homepage.";
           showRestricted(statusText, false);
@@ -229,7 +231,14 @@
           renderCurrentView();
         });
 
-        renderCurrentView();
+        // Check URL parameters for direct view routing (e.g. ?view=add-product)
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedView = urlParams.get('view');
+        if (requestedView && ['dashboard', 'products', 'add-product', 'orders', 'analytics', 'settings'].includes(requestedView)) {
+          setSellerView(requestedView);
+        } else {
+          renderCurrentView();
+        }
       });
     }
 
@@ -623,10 +632,10 @@
           image: imageUrl,
           description: description || "Handcrafted by local Filipino artisans.",
           sellerId: currentSellerUser.uid,
-          sellerName: sellerDoc.shopName || currentSellerProfile?.name || "Artisan Seller",
+          sellerName: sellerDoc.shopName || currentSellerProfile?.shopName || currentSellerProfile?.name || currentSellerUser.displayName || "Artisan Seller",
           sellerEmail: currentSellerUser.email,
-          sellerGCash: sellerDoc.gcashNumber || '',
-          sellerGCashName: sellerDoc.gcashName || '',
+          sellerGCash: sellerDoc.gcashNumber || currentSellerProfile?.gcashNumber || currentSellerProfile?.phone || '',
+          sellerGCashName: sellerDoc.gcashName || currentSellerProfile?.gcashName || currentSellerProfile?.name || '',
           status: "Active"
         };
 

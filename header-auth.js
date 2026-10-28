@@ -54,6 +54,7 @@ export function updateHeaderAuth() {
         </div>
         <a href="profile.html" class="dropdown-item">My Profile</a>
         <a href="cart.html#orders" class="dropdown-item">My Orders</a>
+        ${isSeller ? '<a href="seller.html?view=add-product" class="dropdown-item portal-item">+ List New Product</a>' : ''}
         ${isSeller ? '<a href="seller.html" class="dropdown-item portal-item">Seller Portal</a>' : ''}
         ${isAdmin ? '<a href="admin.html" class="dropdown-item admin-item">Admin Portal</a>' : ''}
         <button type="button" class="dropdown-item logout-btn" id="headerLogoutBtn">Logout</button>

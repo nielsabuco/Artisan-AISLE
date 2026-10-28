@@ -468,7 +468,26 @@
 
     <div class="form-box profile-form">
         <h2>Profile Settings</h2>
-        <p style="margin-bottom:20px;">Manage your account details and delivery information.</p>
+        <p style="margin-bottom:20px;">Manage your account details, profile picture, and delivery information.</p>
+
+        <!-- Profile Avatar & Identity Card -->
+        <div class="index-profile-avatar-wrap" style="display: flex; align-items: center; gap: 16px; margin-bottom: 22px; padding: 16px; background: #fdfaf5; border: 1px solid #ebd9c2; border-radius: 12px;">
+            <div style="position: relative; width: 72px; height: 72px; flex-shrink: 0;">
+                <img id="indexProfileAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Profile Picture" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid #285c3b; box-shadow: 0 3px 8px rgba(0,0,0,0.1);" />
+                <label for="indexAvatarFileInput" style="position: absolute; bottom: 0; right: 0; background: #285c3b; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" title="Change Profile Picture">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                </label>
+                <input type="file" id="indexAvatarFileInput" accept="image/*" style="display: none;" onchange="handleIndexAvatarChange(this)" />
+            </div>
+            <div>
+                <h3 id="indexProfileDisplayName" style="margin: 0 0 4px; font-size: 17px; color: #285c3b;">User Profile</h3>
+                <p id="indexProfileDisplayEmail" style="margin: 0 0 8px; font-size: 13px; color: #666;">user@example.com</p>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" class="btn" style="padding: 5px 12px; font-size: 12px; background: #285c3b;" onclick="document.getElementById('indexAvatarFileInput').click()">Change Picture</button>
+                    <a href="profile.html" class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px; text-decoration: none;">Open Full Profile Page →</a>
+                </div>
+            </div>
+        </div>
 
         <div class="form-group">
             <label>Full Name</label>
@@ -764,19 +783,6 @@
 
 <!-- Main Storefront Application Script -->
 <script>
-(async () => {
-  // Wait for Firebase to be ready before executing anything
-  await new Promise(resolve => {
-    const checkFirebase = () => {
-      if (window.ArtisanDB || window.firebaseApi) {
-        resolve();
-      } else {
-        setTimeout(checkFirebase, 10);
-      }
-    };
-    checkFirebase();
-  });
-
 /* ================= APPLICATION STATE ================= */
 
 let liveProducts = [];
@@ -888,23 +894,43 @@ const fallbackProducts = [
 
 /* ================= INITIALIZATION ================= */
 
-window.addEventListener('DOMContentLoaded', () => {
+function startStorefrontApp() {
+    let bootstrapped = false;
+
+    // Immediately render fallback products so users never see an infinite loading spinner
+    if (!liveProducts || liveProducts.length === 0) {
+        liveProducts = fallbackProducts;
+        renderAllProductGrids();
+    }
+
     // Wait for ArtisanDB service layer to connect
     const checkDB = setInterval(() => {
         if (window.ArtisanDB) {
             clearInterval(checkDB);
-            bootstrapApplication();
+            if (!bootstrapped) {
+                bootstrapped = true;
+                bootstrapApplication();
+            }
         }
-    }, 40);
+    }, 30);
 
-    // Safety timeout in case of offline/direct preview
+    // Safety fallback: if Firebase takes time or is offline, ensure products are displayed
     setTimeout(() => {
-        if (!liveProducts.length) {
+        if (!bootstrapped && window.ArtisanDB) {
+            bootstrapped = true;
+            bootstrapApplication();
+        } else if (!liveProducts || liveProducts.length === 0) {
             liveProducts = fallbackProducts;
             renderAllProductGrids();
         }
-    }, 1500);
-});
+    }, 600);
+}
+
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', startStorefrontApp);
+} else {
+    startStorefrontApp();
+}
 
 function bootstrapApplication() {
     // 1. Auth listener
@@ -1846,7 +1872,15 @@ function renderOrders() {
 /* ================= USER PROFILE & SELLER APPLICATION (Requirement 4) ================= */
 
 function renderProfileSection(user) {
+    const defaultAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+    const avatarImg = document.getElementById("indexProfileAvatarImg");
+    const dispName = document.getElementById("indexProfileDisplayName");
+    const dispEmail = document.getElementById("indexProfileDisplayEmail");
+
     if (!user) {
+        if (avatarImg) avatarImg.src = defaultAvatar;
+        if (dispName) dispName.textContent = "Guest Visitor";
+        if (dispEmail) dispEmail.textContent = "Please log in to manage your account";
         document.getElementById("profileName").value = "";
         document.getElementById("profileEmail").value = "";
         document.getElementById("profilePhone").value = "";
@@ -1855,6 +1889,16 @@ function renderProfileSection(user) {
             <button type="button" class="btn" onclick="window.location.href='login.html'">Login</button>
         `;
         return;
+    }
+
+    if (avatarImg) {
+        avatarImg.src = user.avatar || user.photoURL || defaultAvatar;
+    }
+    if (dispName) {
+        dispName.textContent = user.name || (user.email ? user.email.split('@')[0] : 'Artisan User');
+    }
+    if (dispEmail) {
+        dispEmail.textContent = user.email || '';
     }
 
     const profile = JSON.parse(localStorage.getItem("handicraft_profile") || "{}");
@@ -1870,7 +1914,8 @@ function renderProfileSection(user) {
     // Display application status: pending, approved, or rejected (Requirement 4)
     const badge = document.getElementById("profileSellerBadge");
     const container = document.getElementById("profileSellerContent");
-    const status = user.sellerStatus || "none";
+    const status = String(user.sellerStatus || '').toLowerCase();
+    const role = String(user.role || '').toLowerCase();
 
     badge.style.display = "inline-block";
 
@@ -1878,30 +1923,34 @@ function renderProfileSection(user) {
         badge.className = "status-badge status-pending";
         badge.innerText = "Pending Review";
         container.innerHTML = `
-            <div class="seller-status-banner" style="background:#fff8e6; border:1px solid #f6e05e;">
+            <div class="seller-status-banner" style="background:#fff8e6; border:1px solid #f6e05e; border-radius:8px; padding:16px;">
                 <div>
                     <strong style="color:#b7791f; display:block;">Application Submitted for Admin Review</strong>
                     <p style="font-size:13px; color:#666; margin:4px 0 0;">Your application for "${user.pendingShopName || 'your artisan shop'}" is under review. You will receive an approval notification and email once processed.</p>
                 </div>
             </div>
         `;
-    } else if (status === "approved" || user.role === "seller") {
+    } else if (status === "approved" || role === "seller") {
         badge.className = "status-badge status-approved";
         badge.innerText = "Approved Seller";
         container.innerHTML = `
-            <div class="seller-status-banner" style="background:#e6f6ec; border:1px solid #b8e2c8;">
+            <div class="seller-status-banner" style="background:#e6f6ec; border:1px solid #b8e2c8; border-radius:8px; padding:16px;">
                 <div>
-                    <strong style="color:#1e7e34; display:block;">You are an Authorized Artisan Seller!</strong>
-                    <p style="font-size:13px; color:#555; margin:4px 0 0;">Manage your handmade products, track orders, and configure your GCash payout settings in the Seller Portal.</p>
+                    <strong style="color:#1e7e34; display:block; font-size:16px;">✓ You are an Authorized Artisan Seller!</strong>
+                    <p style="font-size:13px; color:#444; margin:6px 0 12px;">You can list handcrafted products, track incoming customer orders, and configure your GCash payout details in your Seller Portal.</p>
                 </div>
-                <button type="button" class="btn" style="background:#285c3b; margin-top:8px;" onclick="window.location.href='seller.html'">Go to Seller Portal</button>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button type="button" class="btn" style="background:#285c3b; color:#fff;" onclick="window.location.href='seller.html?view=add-product'">+ List New Product</button>
+                    <button type="button" class="btn" style="background:#4a7c59; color:#fff;" onclick="window.location.href='seller.html?view=products'">Manage Products</button>
+                    <button type="button" class="btn" style="background:#dfd5c6; color:#285c3b; border:1px solid #285c3b;" onclick="window.location.href='seller.html'">Seller Portal Dashboard</button>
+                </div>
             </div>
         `;
     } else if (status === "rejected") {
         badge.className = "status-badge status-rejected";
         badge.innerText = "Application Rejected";
         container.innerHTML = `
-            <div class="seller-status-banner" style="background:#fde8e8; border:1px solid #feb2b2;">
+            <div class="seller-status-banner" style="background:#fde8e8; border:1px solid #feb2b2; border-radius:8px; padding:16px;">
                 <div>
                     <strong style="color:#c53030; display:block;">Seller Application Not Approved</strong>
                     <p style="font-size:13px; color:#555; margin:4px 0 0;">Reason: ${user.sellerRejectionReason || 'Requirements not met.'}</p>
@@ -1916,6 +1965,37 @@ function renderProfileSection(user) {
             <p>Are you a creator of authentic Filipino handmade crafts? Join our community of local artisans and start selling to customers nationwide.</p>
             <button type="button" class="btn" onclick="openSellerApplicationModal()">Apply as Seller</button>
         `;
+    }
+}
+
+async function handleIndexAvatarChange(input) {
+    const file = input.files?.[0];
+    if (!file) return;
+    const user = window.ArtisanDB?.getLocalUser();
+    if (!user || !user.uid) {
+        alert("Please log in to change your profile picture.");
+        return;
+    }
+    try {
+        let avatarData = '';
+        if (window.ArtisanDB && window.ArtisanDB.uploadImage) {
+            avatarData = await window.ArtisanDB.uploadImage(file, 600);
+        } else {
+            avatarData = await new Promise((res, rej) => {
+                const r = new FileReader();
+                r.onload = () => res(r.result);
+                r.onerror = rej;
+                r.readAsDataURL(file);
+            });
+        }
+        const avatarImg = document.getElementById('indexProfileAvatarImg');
+        if (avatarImg) avatarImg.src = avatarData;
+
+        await window.ArtisanDB.updateUserProfile(user.uid, { avatar: avatarData, photoURL: avatarData });
+        alert("Profile picture updated successfully!");
+        if (window.updateHeaderAuth) window.updateHeaderAuth();
+    } catch (err) {
+        alert("Failed to update profile picture: " + err.message);
     }
 }
 

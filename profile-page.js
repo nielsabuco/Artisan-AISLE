@@ -94,7 +94,9 @@ function renderSellerStatusCard(user) {
         </div>
       </div>
       <div class="seller-actions-row" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <a href="seller.html" class="primary-btn" style="text-decoration: none;">Open Seller Portal</a>
+        <a href="seller.html?view=add-product" class="primary-btn" style="text-decoration: none; background: #285c3b;">+ List New Product</a>
+        <a href="seller.html?view=products" class="secondary-btn" style="text-decoration: none;">Manage Products</a>
+        <a href="seller.html" class="secondary-btn" style="text-decoration: none;">Seller Portal Dashboard</a>
       </div>
     `;
   } else if (status === 'pending') {
@@ -155,11 +157,44 @@ function setupEditModal() {
   const modal = document.getElementById('editProfileModal');
   const openBtn = document.getElementById('openEditProfileModalBtn');
   const avatarIconBtn = document.getElementById('avatarEditIconBtn');
+  const directFileInput = document.getElementById('directAvatarFileInput');
   const closeBtn = document.getElementById('closeEditProfileModalBtn');
   const cancelBtn = document.getElementById('cancelEditProfileBtn');
   const fileInput = document.getElementById('avatarFileInput');
+  const urlInput = document.getElementById('avatarUrlInput');
   const previewImg = document.getElementById('editAvatarPreview');
   const form = document.getElementById('editProfileForm');
+
+  // Direct Avatar Photo Change: clicking camera icon opens file selector directly!
+  avatarIconBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (directFileInput) {
+      directFileInput.click();
+    } else {
+      openModal();
+    }
+  });
+
+  directFileInput?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser || !currentUser.uid) return;
+
+    try {
+      const optimized = await ArtisanDB.uploadImage(file, 600);
+      const avatarImg = document.getElementById('userAvatarImg');
+      if (avatarImg) avatarImg.src = optimized;
+
+      const updates = { avatar: optimized, photoURL: optimized };
+      await ArtisanDB.updateUserProfile(currentUser.uid, updates);
+      currentUser = { ...currentUser, ...updates };
+
+      renderProfileData(currentUser);
+      updateHeaderAuth();
+      alert('Profile picture updated successfully!');
+    } catch (err) {
+      alert('Unable to update profile picture: ' + err.message);
+    }
+  });
 
   const openModal = () => {
     if (!currentUser) return;
@@ -168,6 +203,7 @@ function setupEditModal() {
     document.getElementById('editPhone').value = currentUser.phone || '';
     document.getElementById('editAddress').value = currentUser.address || '';
     document.getElementById('editCity').value = currentUser.city || '';
+    if (urlInput) urlInput.value = '';
     
     const currentAvatar = currentUser.avatar || currentUser.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
     if (previewImg) previewImg.src = currentAvatar;
@@ -178,14 +214,14 @@ function setupEditModal() {
   const closeModal = () => {
     modal.style.display = 'none';
     pendingAvatarData = null;
+    if (urlInput) urlInput.value = '';
   };
 
   openBtn?.addEventListener('click', openModal);
-  avatarIconBtn?.addEventListener('click', openModal);
   closeBtn?.addEventListener('click', closeModal);
   cancelBtn?.addEventListener('click', closeModal);
 
-  // Avatar file input handler
+  // Avatar file input handler inside modal
   fileInput?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -196,6 +232,15 @@ function setupEditModal() {
       if (previewImg) previewImg.src = optimized;
     } catch (err) {
       alert('Unable to process image. Please choose another file.');
+    }
+  });
+
+  // Avatar URL input handler inside modal
+  urlInput?.addEventListener('input', () => {
+    const url = urlInput.value.trim();
+    if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+      pendingAvatarData = url;
+      if (previewImg) previewImg.src = url;
     }
   });
 
@@ -219,6 +264,7 @@ function setupEditModal() {
 
       if (pendingAvatarData) {
         updates.avatar = pendingAvatarData;
+        updates.photoURL = pendingAvatarData;
       }
 
       await ArtisanDB.updateUserProfile(currentUser.uid, updates);

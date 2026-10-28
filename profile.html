@@ -59,6 +59,7 @@
               <circle cx="12" cy="13" r="4"></circle>
             </svg>
           </button>
+          <input type="file" id="directAvatarFileInput" accept="image/*" style="display: none;">
         </div>
 
         <div class="profile-identity-info">
@@ -177,11 +178,13 @@
           </div>
           <div class="avatar-upload-inputs">
             <label for="avatarFileInput" class="custom-file-upload-btn">
-              Choose New Photo
-            </svg>
+              Choose New Photo File
             </label>
             <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
-            <small class="helper-text">JPEG, PNG, or WebP. Max 5MB.</small>
+            <div style="margin-top: 8px;">
+              <input type="url" id="avatarUrlInput" placeholder="Or paste image URL (https://...)" style="font-size: 13px; padding: 7px 10px; width: 100%; border: 1px solid #ccc; border-radius: 6px;">
+            </div>
+            <small class="helper-text">JPEG, PNG, or WebP (max 5MB), or enter an image URL.</small>
           </div>
         </div>
 

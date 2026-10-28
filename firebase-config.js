@@ -286,6 +286,18 @@ export const ArtisanDB = {
   async updateUserProfile(uid, data) {
     if (!uid) return;
     try {
+      if (auth.currentUser && auth.currentUser.uid === uid) {
+        const authUpdates = {};
+        if (data.name) authUpdates.displayName = data.name;
+        const photo = data.photoURL || data.avatar;
+        if (photo && photo.startsWith('http')) {
+          authUpdates.photoURL = photo;
+        }
+        if (Object.keys(authUpdates).length > 0) {
+          await updateProfile(auth.currentUser, authUpdates).catch(() => {});
+        }
+      }
+
       await setDoc(doc(db, 'users', uid), {
         ...data,
         updatedAt: serverTimestamp()
