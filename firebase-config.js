@@ -167,25 +167,55 @@ export const ArtisanDB = {
   },
 
   async loginUser(email, password) {
-    const cred = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
-    const user = cred.user;
-    let profile = await this.getUserProfile(user.uid);
-    let sessionData = profile || {
-      uid: user.uid,
-      name: user.displayName || email.split('@')[0],
-      email: user.email,
-      phone: '',
-      role: 'user',
-      sellerStatus: 'none'
-    };
+    const cleanEmail = email.trim().toLowerCase();
+    try {
+      const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
+      const user = cred.user;
+      let profile = await this.getUserProfile(user.uid);
+      let sessionData = profile || {
+        uid: user.uid,
+        name: user.displayName || cleanEmail.split('@')[0],
+        email: user.email,
+        phone: '',
+        role: 'user',
+        sellerStatus: 'none'
+      };
 
-    if (this.isEmailAdmin(user.email) || String(sessionData.role || '').toLowerCase() === 'admin') {
-      sessionData.role = 'admin';
-      this.updateUserRole(user.uid, 'admin').catch(() => {});
+      if (this.isEmailAdmin(user.email) || String(sessionData.role || '').toLowerCase() === 'admin') {
+        sessionData.role = 'admin';
+        this.updateUserRole(user.uid, 'admin').catch(() => {});
+      }
+
+      this._saveLocalSession(sessionData);
+      return sessionData;
+    } catch (authErr) {
+      // Check if user was approved as seller with a generated temporary password
+      try {
+        const q = query(collection(db, 'users'), where('email', '==', cleanEmail));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const userDoc = snap.docs[0];
+          const userData = userDoc.data();
+          if (userData.mustChangePassword && userData.temporaryPassword && userData.temporaryPassword === password) {
+            // Legal temporary password recognized!
+            const sessionData = {
+              uid: userDoc.id,
+              id: userDoc.id,
+              ...userData,
+              email: cleanEmail,
+              mustChangePassword: true,
+              role: userData.role || 'seller',
+              sellerStatus: userData.sellerStatus || 'approved'
+            };
+            this._saveLocalSession(sessionData);
+            return sessionData;
+          }
+        }
+      } catch (checkErr) {
+        console.warn('Temporary password verification check warning:', checkErr);
+      }
+      throw authErr;
     }
-
-    this._saveLocalSession(sessionData);
-    return sessionData;
   },
 
   async loginWithGoogle() {
@@ -327,6 +357,16 @@ export const ArtisanDB = {
         } catch (e) {}
 
         const profile = await this.getUserProfile(user.uid);
+
+        // Security check: If newly approved seller must change password and is on a non-login page, log them out
+        if (profile?.mustChangePassword && !window.location.pathname.includes('login.html')) {
+          await signOut(auth).catch(() => {});
+          localStorage.removeItem('handicraft_logged_in_user');
+          localStorage.removeItem('handicraft_profile');
+          window.location.href = `login.html?sellerApproved=true&email=${encodeURIComponent(user.email || '')}`;
+          return;
+        }
+
         let activeUser = profile || {
           uid: user.uid,
           name: user.displayName || (user.email ? user.email.split('@')[0] : 'User'),
@@ -1375,21 +1415,82 @@ export const ArtisanDB = {
     return null;
   },
 
+  async sendPasswordReset(email) {
+    if (!email) throw new Error('Please enter your email address.');
+    const cleanEmail = email.trim().toLowerCase();
+    const actionCodeSettings = {
+      url: `${window.location.origin}/login.html`,
+      handleCodeInApp: false
+    };
+    await sendPasswordResetEmail(auth, cleanEmail, actionCodeSettings);
+    return { success: true, email: cleanEmail };
+  },
+
+  async hasUserOrderedProduct(userId, userEmail, productId) {
+    if (!productId) return false;
+    try {
+      const cleanEmail = (userEmail || '').trim().toLowerCase();
+      
+      // 1. Check orders by userId
+      if (userId) {
+        const q1 = query(collection(db, 'orders'), where('userId', '==', userId));
+        const snap1 = await getDocs(q1);
+        for (const docSnap of snap1.docs) {
+          const ord = docSnap.data();
+          const items = Array.isArray(ord.items) ? ord.items : [];
+          if (items.some(item => String(item.id || item.productId) === String(productId))) {
+            return true;
+          }
+        }
+      }
+
+      // 2. Check orders by customerEmail
+      if (cleanEmail) {
+        const q2 = query(collection(db, 'orders'), where('customerEmail', '==', cleanEmail));
+        const snap2 = await getDocs(q2);
+        for (const docSnap of snap2.docs) {
+          const ord = docSnap.data();
+          const items = Array.isArray(ord.items) ? ord.items : [];
+          if (items.some(item => String(item.id || item.productId) === String(productId))) {
+            return true;
+          }
+        }
+      }
+
+      // 3. Fallback: Check local cached orders
+      const localOrders = JSON.parse(localStorage.getItem('artisan_local_orders') || '[]');
+      for (const ord of localOrders) {
+        const items = Array.isArray(ord.items) ? ord.items : [];
+        if (items.some(item => String(item.id || item.productId) === String(productId))) {
+          return true;
+        }
+      }
+    } catch (err) {
+      console.warn('Error checking verified buyer status:', err);
+    }
+    return false;
+  },
+
   async changePassword(newPassword) {
-    if (!auth.currentUser) throw new Error('No user is currently authenticated.');
     if (!newPassword || newPassword.length < 6) throw new Error('Password must be at least 6 characters.');
 
-    // 1. Update in Firebase Auth
-    await updatePassword(auth.currentUser, newPassword);
+    const localUser = this.getLocalUser();
+    const uid = auth.currentUser?.uid || localUser?.uid || localUser?.id;
+
+    if (auth.currentUser) {
+      // 1. Update in Firebase Auth
+      await updatePassword(auth.currentUser, newPassword);
+    }
 
     // 2. Clear mustChangePassword and temporaryPassword in Firestore
-    const uid = auth.currentUser.uid;
-    await updateDoc(doc(db, 'users', uid), {
-      mustChangePassword: false,
-      temporaryPassword: null,
-      passwordChangedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    }).catch(e => console.warn('User doc password flag update warning:', e));
+    if (uid) {
+      await updateDoc(doc(db, 'users', uid), {
+        mustChangePassword: false,
+        temporaryPassword: null,
+        passwordChangedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }).catch(e => console.warn('User doc password flag update warning:', e));
+    }
 
     // 3. Update local cache
     const cached = this.getLocalUser();
@@ -1422,9 +1523,24 @@ export const ArtisanDB = {
   },
 
   async saveReview(reviewData) {
+    if (!reviewData.productId) throw new Error('Product ID is required.');
+
+    // Enforce verified buyer requirement
+    const reviewerId = reviewData.reviewerId;
+    const reviewerEmail = reviewData.reviewerEmail || '';
+    if (!reviewerId && !reviewerEmail) {
+      throw new Error('Only authenticated customers who purchased this item can leave a review.');
+    }
+
+    const hasOrdered = await this.hasUserOrderedProduct(reviewerId, reviewerEmail, reviewData.productId);
+    if (!hasOrdered) {
+      throw new Error('Verified Buyer Requirement: Reviews are restricted to customers who have ordered this craft on Artisan Aisle.');
+    }
+
     const docRef = await addDoc(collection(db, 'reviews'), {
       ...reviewData,
       rating: Number(reviewData.rating) || 5,
+      verifiedPurchase: true,
       createdAt: serverTimestamp()
     });
 

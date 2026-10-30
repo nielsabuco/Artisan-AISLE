@@ -103,7 +103,10 @@
 
           <div class="detail-info">
             <h2 id="quickViewName" style="font-family:'Cinzel', serif; font-size:24px; color:#1e3d29; margin:0 0 10px;">Product Name</h2>
-            <div id="productsQuickViewRating" class="detail-rating">★★★★★ <span style="color:#666; font-size:13px;">(Artisan Verified)</span></div>
+            <div id="productsQuickViewRating" class="detail-rating" style="cursor: pointer;">★★★★★ <span style="color:#666; font-size:13px;">(Artisan Verified)</span></div>
+            <button type="button" class="btn-reviews-trigger" id="productsQuickViewReviewsBtn">
+              💬 View Customer Reviews (<span id="productsQuickViewReviewsCount">0</span>)
+            </button>
             <div id="quickViewPrice" class="detail-price">₱0.00</div>
 
             <div class="detail-seller-card">
@@ -141,6 +144,40 @@
               <div class="detail-trust-item">🛡️ Direct GCash & COD</div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Reviews List Modal -->
+    <div id="productReviewsListModal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card" style="max-width: 620px; padding: 24px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #ebd9c8; padding-bottom: 12px; flex-shrink: 0;">
+          <div>
+            <h2 style="font-family: 'Cinzel', Georgia, serif; margin: 0; color: #1d4831; font-size: 20px;">Customer Reviews</h2>
+            <p id="reviewsModalProductSubtitle" style="margin: 3px 0 0; color: #6b5a4e; font-size: 13px; font-weight: 500;">Verified Artisan Community Reviews</p>
+          </div>
+          <button type="button" class="close-modal-btn" id="closeReviewsListModalBtn" aria-label="Close">✕</button>
+        </div>
+
+        <!-- Rating Summary Box -->
+        <div class="review-modal-summary" style="display: flex; align-items: center; justify-content: space-between; background: #fbf9f5; border: 1.5px solid #ebd9c8; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; flex-shrink: 0;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 34px; font-weight: 800; color: #1d4831; font-family: 'Cinzel', serif;" id="reviewsModalAvgScore">5.0</div>
+            <div>
+              <div id="reviewsModalStars" style="color: #f59e0b; font-size: 17px; letter-spacing: 1px;">★★★★★</div>
+              <small id="reviewsModalTotalCount" style="color: #55625a; font-weight: 600;">Based on 0 verified reviews</small>
+            </div>
+          </div>
+          <div>
+            <button type="button" id="reviewsModalWriteReviewBtn" class="primary-btn" style="padding: 8px 16px; font-size: 13px;">
+              ★ Write a Review
+            </button>
+          </div>
+        </div>
+
+        <!-- Scrollable Reviews List Container -->
+        <div id="productReviewsListContainer" style="overflow-y: auto; flex: 1; padding-right: 4px;">
+          <div style="text-align: center; padding: 30px 10px; color: #777;">Loading verified reviews...</div>
         </div>
       </div>
     </div>

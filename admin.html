@@ -343,7 +343,12 @@
               <label for="pmSecretKeyInput" style="display:block; font-weight: 700; font-size: 14px; margin-bottom: 6px;">
                 Secret Key (Required for Checkout API)
               </label>
-              <input type="password" id="pmSecretKeyInput" placeholder="sk_test_... or sk_live_..." style="width: 100%; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: monospace; font-size: 14px; box-sizing: border-box;" />
+              <div class="password-input-wrap">
+                <input type="password" id="pmSecretKeyInput" placeholder="sk_test_... or sk_live_..." style="width: 100%; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: monospace; font-size: 14px; box-sizing: border-box;" />
+                <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('pmSecretKeyInput', this)" aria-label="Show password" title="Show password">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
               <small style="color: #64748b; font-size: 12px; display: block; margin-top: 4px;">
                 Find this in your PayMongo Dashboard under <strong>Developers &gt; API Keys</strong>. Starts with <code>sk_test_</code> (for testing) or <code>sk_live_</code> (for real money).
               </small>
@@ -642,5 +647,21 @@
 
   <script type="module" src="header-auth.js"></script>
   <script type="module" src="admin-page.js"></script>
+  <script>
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isPass = input.type === 'password';
+      input.type = isPass ? 'text' : 'password';
+      if (btn) {
+        btn.innerHTML = isPass
+          ? `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+          : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+        btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+        btn.title = isPass ? 'Hide password' : 'Show password';
+      }
+    }
+    window.togglePasswordVisibility = togglePasswordVisibility;
+  </script>
 </body>
 </html>

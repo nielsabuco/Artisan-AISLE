@@ -223,9 +223,12 @@
                 Product Name
             </h1>
 
-            <div id="detailReviews" class="detail-rating">
-                ★★★★★ <span style="color:#666; font-size:13px;">(Artisan Verified)</span>
+            <div id="detailReviews" class="detail-rating" style="cursor: pointer;" onclick="openProductReviewsList(currentProduct?.id, currentProduct?.name)">
+                ★★★★★ <span id="detailReviewsCountText" style="color:#666; font-size:13px;">(Artisan Verified)</span>
             </div>
+            <button type="button" class="btn-reviews-trigger" onclick="openProductReviewsList(currentProduct?.id, currentProduct?.name)">
+                💬 View Customer Reviews (<span id="detailReviewsBtnCount">0</span>)
+            </button>
 
             <p class="detail-price">
                 ₱<span id="detailPrice">0.00</span>
@@ -298,7 +301,10 @@
 
       <div class="detail-info">
         <h2 id="quickViewName" style="font-family:'Cinzel', serif; font-size:24px; color:#1e3d29; margin:0 0 10px;">Product Name</h2>
-        <div id="quickViewRatingBlock" class="detail-rating">★★★★★ <span style="color:#666; font-size:13px;">(Artisan Verified)</span></div>
+        <div id="quickViewRatingBlock" class="detail-rating" style="cursor: pointer;" onclick="openProductReviewsList(quickViewProduct?.id, quickViewProduct?.name)">★★★★★ <span id="quickViewReviewCountText" style="color:#666; font-size:13px;">(Artisan Verified)</span></div>
+        <button type="button" class="btn-reviews-trigger" onclick="openProductReviewsList(quickViewProduct?.id, quickViewProduct?.name)">
+          💬 View Customer Reviews (<span id="quickViewReviewBtnCount">0</span>)
+        </button>
         <div id="quickViewPrice" class="detail-price">₱0.00</div>
 
         <div class="detail-seller-card">
@@ -336,6 +342,40 @@
           <div class="detail-trust-item">🛡️ Direct GCash & COD</div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Reviews List Modal -->
+<div id="productReviewsListModal" class="modal-backdrop" style="display: none;" onclick="if(event.target===this)closeProductReviewsList()">
+  <div class="modal-card" style="max-width: 620px; padding: 24px; max-height: 85vh; display: flex; flex-direction: column;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #ebd9c8; padding-bottom: 12px; flex-shrink: 0;">
+      <div>
+        <h2 style="font-family: 'Cinzel', Georgia, serif; margin: 0; color: #1d4831; font-size: 20px;">Customer Reviews</h2>
+        <p id="reviewsModalProductSubtitle" style="margin: 3px 0 0; color: #6b5a4e; font-size: 13px; font-weight: 500;">Verified Artisan Community Reviews</p>
+      </div>
+      <button type="button" class="close-modal-btn" onclick="closeProductReviewsList()" aria-label="Close">✕</button>
+    </div>
+
+    <!-- Rating Summary Box -->
+    <div class="review-modal-summary" style="display: flex; align-items: center; justify-content: space-between; background: #fbf9f5; border: 1.5px solid #ebd9c8; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; flex-shrink: 0;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="font-size: 34px; font-weight: 800; color: #1d4831; font-family: 'Cinzel', serif;" id="reviewsModalAvgScore">5.0</div>
+        <div>
+          <div id="reviewsModalStars" style="color: #f59e0b; font-size: 17px; letter-spacing: 1px;">★★★★★</div>
+          <small id="reviewsModalTotalCount" style="color: #55625a; font-weight: 600;">Based on 0 verified reviews</small>
+        </div>
+      </div>
+      <div>
+        <button type="button" id="reviewsModalWriteReviewBtn" class="primary-btn" style="padding: 8px 16px; font-size: 13px;" onclick="goToWriteReviewFromModal()">
+          ★ Write a Review
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable Reviews List Container -->
+    <div id="productReviewsListContainer" style="overflow-y: auto; flex: 1; padding-right: 4px;">
+      <div style="text-align: center; padding: 30px 10px; color: #777;">Loading verified reviews...</div>
     </div>
   </div>
 </div>
@@ -579,7 +619,12 @@
         <div class="admin-login-box">
             <h2>Admin Login</h2>
             <p>Enter the dashboard password to continue.</p>
-            <input id="adminPasswordInput" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')submitAdminLogin()" />
+            <div class="password-input-wrap">
+                <input id="adminPasswordInput" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')submitAdminLogin()" />
+                <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('adminPasswordInput', this)" aria-label="Show password" title="Show password">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+            </div>
             <div style="display:flex; gap:10px; margin-top:15px;">
                 <button type="button" class="btn" style="flex:1;" onclick="submitAdminLogin()">Open Dashboard</button>
                 <button type="button" class="secondary-btn" style="flex:1;" onclick="closeAdminLoginModal(); showScreen('home');">Cancel</button>
@@ -2606,6 +2651,125 @@ function renderAdminSettingsView(container) {
         </div>
     `;
 }
+
+let currentReviewModalProductId = null;
+
+async function openProductReviewsList(productId, productName) {
+    currentReviewModalProductId = productId || (typeof quickViewProduct !== 'undefined' ? quickViewProduct?.id : null) || (typeof currentProduct !== 'undefined' ? currentProduct?.id : null);
+    const modal = document.getElementById('productReviewsListModal');
+    const container = document.getElementById('productReviewsListContainer');
+    const subtitle = document.getElementById('reviewsModalProductSubtitle');
+    const scoreEl = document.getElementById('reviewsModalAvgScore');
+    const starsEl = document.getElementById('reviewsModalStars');
+    const countEl = document.getElementById('reviewsModalTotalCount');
+
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    if (subtitle) {
+        subtitle.textContent = productName ? `Reviews for "${productName}"` : 'Verified Artisan Reviews';
+    }
+
+    if (container) {
+        container.innerHTML = '<div style="text-align:center; padding:30px; color:#666;">Loading verified reviews...</div>';
+    }
+
+    try {
+        const db = window.ArtisanDB || window.firebaseApi;
+        let reviews = [];
+        if (db && db.getProductReviews && currentReviewModalProductId) {
+            reviews = await db.getProductReviews(currentReviewModalProductId);
+        }
+
+        const count = reviews.length;
+        const total = reviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0);
+        const avg = count > 0 ? (total / count).toFixed(1) : '5.0';
+
+        if (scoreEl) scoreEl.textContent = avg;
+        if (countEl) countEl.textContent = `Based on ${count} verified review${count === 1 ? '' : 's'}`;
+        if (starsEl) {
+            const rounded = Math.round(Number(avg));
+            starsEl.textContent = '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
+        }
+
+        if (reviews.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:36px 16px; background:#fff; border-radius:10px; border:1px dashed #dcd1be;">
+                    <div style="font-size:32px; margin-bottom:8px;">🌿</div>
+                    <h3 style="font-size:16px; color:#1d4831; margin:0 0 6px;">No Customer Reviews Yet</h3>
+                    <p style="font-size:13px; color:#666; margin:0 0 16px;">Be the first verified buyer to experience this craft and share your feedback!</p>
+                    <button type="button" class="primary-btn" style="padding:8px 18px; font-size:13px;" onclick="goToWriteReviewFromModal()">★ Write First Review</button>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = reviews.map(r => {
+            const rScore = Number(r.rating) || 5;
+            const starText = '★'.repeat(rScore) + '☆'.repeat(5 - rScore);
+            const dateStr = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : (r.date || 'Verified Purchase');
+            const initial = (r.reviewerName || 'Customer').charAt(0).toUpperCase();
+
+            return `
+                <div class="review-item-card">
+                    <div class="review-item-header">
+                        <div class="reviewer-meta-box">
+                            <div class="reviewer-avatar-circle">${initial}</div>
+                            <div>
+                                <div class="reviewer-name-line">
+                                    ${r.reviewerName || 'Artisan Patron'}
+                                    <span class="verified-order-badge">✓ Verified Buyer</span>
+                                </div>
+                                <div class="review-date-text">${dateStr}</div>
+                            </div>
+                        </div>
+                        <div class="review-stars-row">${starText}</div>
+                    </div>
+                    ${r.headline ? `<div class="review-headline-text">${r.headline}</div>` : ''}
+                    <div class="review-comment-text">${r.comment || ''}</div>
+                    ${r.recommend !== false ? `<div class="review-recommend-badge">👍 Recommends this handcrafted craft</div>` : ''}
+                </div>
+            `;
+        }).join('');
+
+    } catch (err) {
+        console.error('Error loading product reviews:', err);
+        if (container) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#c53030;">Unable to load reviews right now.</div>';
+        }
+    }
+}
+
+function closeProductReviewsList() {
+    const modal = document.getElementById('productReviewsListModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function goToWriteReviewFromModal() {
+    closeProductReviewsList();
+    if (currentReviewModalProductId) {
+        window.location.href = `review.html?productId=${currentReviewModalProductId}`;
+    }
+}
+
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    if (btn) {
+        btn.innerHTML = isPass
+          ? `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+          : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+        btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+        btn.title = isPass ? 'Hide password' : 'Show password';
+    }
+}
+
+window.openProductReviewsList = openProductReviewsList;
+window.closeProductReviewsList = closeProductReviewsList;
+window.goToWriteReviewFromModal = goToWriteReviewFromModal;
+window.togglePasswordVisibility = togglePasswordVisibility;
 
 </script>
 </body>

@@ -206,6 +206,18 @@ function openQuickView(product) {
         ★ Write a Review
       </a>
     `;
+    ratingBlock.onclick = (e) => {
+      if (e.target.tagName === 'A') return;
+      openProductReviewsList(product.id, product.name);
+    };
+  }
+
+  const reviewsCountEl = document.getElementById('productsQuickViewReviewsCount');
+  if (reviewsCountEl) reviewsCountEl.textContent = rCount;
+
+  const reviewsBtn = document.getElementById('productsQuickViewReviewsBtn');
+  if (reviewsBtn) {
+    reviewsBtn.onclick = () => openProductReviewsList(product.id, product.name);
   }
 
   const defaultImg = 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80';
@@ -285,5 +297,118 @@ function setupSearch() {
 // Hook setupQuickViewModal on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   setupQuickViewModal();
+  setupReviewsModal();
 });
+
+let currentReviewsListProductId = null;
+
+function setupReviewsModal() {
+  const closeBtn = document.getElementById('closeReviewsListModalBtn');
+  const modal = document.getElementById('productReviewsListModal');
+  const writeBtn = document.getElementById('reviewsModalWriteReviewBtn');
+
+  closeBtn?.addEventListener('click', closeProductReviewsList);
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) closeProductReviewsList();
+  });
+  writeBtn?.addEventListener('click', () => {
+    closeProductReviewsList();
+    if (currentReviewsListProductId) {
+      window.location.href = `review.html?productId=${currentReviewsListProductId}`;
+    }
+  });
+}
+
+async function openProductReviewsList(productId, productName) {
+  currentReviewsListProductId = productId || activeModalProduct?.id;
+  const modal = document.getElementById('productReviewsListModal');
+  const container = document.getElementById('productReviewsListContainer');
+  const subtitle = document.getElementById('reviewsModalProductSubtitle');
+  const scoreEl = document.getElementById('reviewsModalAvgScore');
+  const starsEl = document.getElementById('reviewsModalStars');
+  const countEl = document.getElementById('reviewsModalTotalCount');
+
+  if (!modal) return;
+  modal.style.display = 'flex';
+
+  if (subtitle) {
+    subtitle.textContent = productName ? `Reviews for "${productName}"` : 'Verified Artisan Reviews';
+  }
+
+  if (container) {
+    container.innerHTML = '<div style="text-align:center; padding:30px; color:#666;">Loading verified reviews...</div>';
+  }
+
+  try {
+    let reviews = [];
+    if (ArtisanDB?.getProductReviews && currentReviewsListProductId) {
+      reviews = await ArtisanDB.getProductReviews(currentReviewsListProductId);
+    }
+
+    const count = reviews.length;
+    const total = reviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0);
+    const avg = count > 0 ? (total / count).toFixed(1) : '5.0';
+
+    if (scoreEl) scoreEl.textContent = avg;
+    if (countEl) countEl.textContent = `Based on ${count} verified review${count === 1 ? '' : 's'}`;
+    if (starsEl) {
+      const rounded = Math.round(Number(avg));
+      starsEl.textContent = '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
+    }
+
+    if (reviews.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:36px 16px; background:#fff; border-radius:10px; border:1px dashed #dcd1be;">
+          <div style="font-size:32px; margin-bottom:8px;">🌿</div>
+          <h3 style="font-size:16px; color:#1d4831; margin:0 0 6px;">No Customer Reviews Yet</h3>
+          <p style="font-size:13px; color:#666; margin:0 0 16px;">Be the first verified buyer to experience this craft and share your feedback!</p>
+          <a href="review.html?productId=${currentReviewsListProductId}" class="primary-btn" style="display:inline-block; padding:8px 18px; font-size:13px; text-decoration:none;">★ Write First Review</a>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = reviews.map(r => {
+      const rScore = Number(r.rating) || 5;
+      const starText = '★'.repeat(rScore) + '☆'.repeat(5 - rScore);
+      const dateStr = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : (r.date || 'Verified Purchase');
+      const initial = (r.reviewerName || 'Customer').charAt(0).toUpperCase();
+
+      return `
+        <div class="review-item-card">
+          <div class="review-item-header">
+            <div class="reviewer-meta-box">
+              <div class="reviewer-avatar-circle">${initial}</div>
+              <div>
+                <div class="reviewer-name-line">
+                  ${r.reviewerName || 'Artisan Patron'}
+                  <span class="verified-order-badge">✓ Verified Buyer</span>
+                </div>
+                <div class="review-date-text">${dateStr}</div>
+              </div>
+            </div>
+            <div class="review-stars-row">${starText}</div>
+          </div>
+          ${r.headline ? `<div class="review-headline-text">${r.headline}</div>` : ''}
+          <div class="review-comment-text">${r.comment || ''}</div>
+          ${r.recommend !== false ? `<div class="review-recommend-badge">👍 Recommends this handcrafted craft</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('Error loading product reviews:', err);
+    if (container) {
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:#c53030;">Unable to load reviews right now.</div>';
+    }
+  }
+}
+
+function closeProductReviewsList() {
+  const modal = document.getElementById('productReviewsListModal');
+  if (modal) modal.style.display = 'none';
+}
+
+window.openProductReviewsList = openProductReviewsList;
+window.closeProductReviewsList = closeProductReviewsList;
 

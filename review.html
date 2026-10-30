@@ -169,6 +169,25 @@
         </div>
       </div>
 
+      <!-- Verified Buyer Requirement Notice (if not ordered) -->
+      <div id="buyerVerificationGate" class="verified-buyer-gate-notice" style="display: none;">
+        <div style="font-size: 38px; margin-bottom: 8px;">🛡️</div>
+        <h3 id="gateTitle">Verified Buyer Required</h3>
+        <p id="gateMessage">
+          To ensure genuine quality ratings for our Filipino artisans, reviews can only be submitted by customers who have actually purchased this craft on Artisan Aisle.
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <a href="cart.html#orders" id="gateOrdersBtn" class="primary-btn" style="padding: 10px 20px; font-size: 13.5px; text-decoration: none;">View My Orders</a>
+          <a href="products.html" class="secondary-btn" style="padding: 10px 20px; font-size: 13.5px; text-decoration: none;">Explore Storefront</a>
+        </div>
+      </div>
+
+      <!-- Verified Buyer Confirmed Banner -->
+      <div id="verifiedBuyerSuccessBanner" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px 14px; margin-bottom: 18px; align-items: center; gap: 8px; color: #065f46; font-size: 13px; font-weight: 600;">
+        <span>🛡️ Verified Buyer Confirmed:</span>
+        <span style="font-weight: 400; color: #047857;">You ordered this item on Artisan Aisle. Your review will be published with an authentic Verified Purchase badge.</span>
+      </div>
+
       <!-- Success Screen (Shown after submission) -->
       <div id="reviewSuccessBlock" style="display: none; text-align: center; padding: 24px 12px;">
         <div style="width: 56px; height: 56px; border-radius: 50%; background: #e8f5e9; color: #1d4831; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 14px;">✓</div>
@@ -330,18 +349,35 @@
         document.getElementById('reviewProdName').textContent = paramName;
       }
 
-      // Fetch product record if ID present
+      // Fetch product record & verify purchase status
+      let retries = 0;
+      while (!window.ArtisanDB && retries < 20) {
+        await new Promise(r => setTimeout(r, 100));
+        retries++;
+      }
+
       const db = window.ArtisanDB || window.firebaseApi;
-      if (targetProductId) {
+      const currentUser = db?.getLocalUser ? db.getLocalUser() : null;
+      const form = document.getElementById('productReviewForm');
+      const gate = document.getElementById('buyerVerificationGate');
+      const verifiedBanner = document.getElementById('verifiedBuyerSuccessBanner');
+
+      if (!currentUser || !currentUser.uid) {
+        if (form) form.style.display = 'none';
+        if (gate) {
+          gate.style.display = 'block';
+          document.getElementById('gateTitle').textContent = 'Sign In to Review';
+          document.getElementById('gateMessage').textContent = 'Please sign in to your account. Only customers who have purchased this craft can leave an authentic review.';
+          document.getElementById('gateOrdersBtn').textContent = 'Login to Account';
+          document.getElementById('gateOrdersBtn').href = `login.html?redirect=${encodeURIComponent(window.location.href)}`;
+        }
+        return;
+      }
+
+      if (targetProductId && db) {
         try {
-          // Wait briefly for db
-          let retries = 0;
-          while (!window.ArtisanDB && retries < 15) {
-            await new Promise(r => setTimeout(r, 100));
-            retries++;
-          }
-          if (window.ArtisanDB?.getProduct) {
-            const prod = await window.ArtisanDB.getProduct(targetProductId);
+          if (db.getProduct) {
+            const prod = await db.getProduct(targetProductId);
             if (prod) {
               document.getElementById('reviewProdName').textContent = prod.name;
               document.getElementById('reviewProdMeta').textContent = `${prod.category || 'Handicraft'} • ₱${Number(prod.price || 0).toFixed(2)}`;
@@ -350,8 +386,24 @@
               }
             }
           }
+
+          // Strict Verified Buyer Verification
+          const hasOrdered = await db.hasUserOrderedProduct(currentUser.uid, currentUser.email, targetProductId);
+          if (!hasOrdered) {
+            if (form) form.style.display = 'none';
+            if (gate) {
+              gate.style.display = 'block';
+              document.getElementById('gateTitle').textContent = 'Verified Buyer Required';
+              document.getElementById('gateMessage').textContent = 'Our records show you have not purchased this handcrafted piece yet. Reviews on Artisan Aisle are restricted to verified purchasers to maintain trust and authenticity.';
+            }
+            return;
+          } else {
+            if (gate) gate.style.display = 'none';
+            if (form) form.style.display = 'block';
+            if (verifiedBanner) verifiedBanner.style.display = 'flex';
+          }
         } catch (e) {
-          console.warn('Could not load product details:', e);
+          console.warn('Could not verify purchase status:', e);
         }
       }
 
@@ -385,6 +437,7 @@
             comment: comment,
             reviewerName: reviewerName || 'Verified Buyer',
             reviewerId: currentUser?.uid || null,
+            reviewerEmail: currentUser?.email || '',
             recommend: recommendsCraft,
             verifiedPurchase: true
           });

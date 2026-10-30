@@ -44,7 +44,17 @@
     <div class="auth-divider"><span>or with email</span></div>
 
     <input id="loginInput" type="email" placeholder="Email Address" required />
-    <input id="passwordInput" type="password" placeholder="Password" required />
+    <div class="password-input-wrap">
+      <input id="passwordInput" type="password" placeholder="Password" required />
+      <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('passwordInput', this)" aria-label="Show password" title="Show password">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      </button>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; margin: -4px 0 14px;">
+      <a href="javascript:void(0)" onclick="openForgotPasswordModal()" style="font-size: 13px; color: #1d4831; font-weight: 600; text-decoration: none;">Forgot Password?</a>
+    </div>
+
     <button id="loginBtn" type="button" onclick="loginUser()">Login</button>
 
     <div class="link">
@@ -52,6 +62,37 @@
     </div>
     <div class="link" style="margin-top:10px;">
       <a href="index.html">Back to Storefront</a>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgotPasswordModal" class="modal-backdrop" style="display: none;" onclick="if(event.target===this)closeForgotPasswordModal()">
+    <div class="modal-card" style="max-width: 420px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 50%; background: #eef7ef; color: #1d4831; display: flex; align-items: center; justify-content: center; font-size: 18px;">🔑</div>
+          <h2 style="margin: 0; color: #1d4831; font-size: 19px;">Reset Password</h2>
+        </div>
+        <button type="button" class="close-modal-btn" onclick="closeForgotPasswordModal()" aria-label="Close">✕</button>
+      </div>
+
+      <p style="font-size: 13.5px; color: #555; line-height: 1.5; margin-bottom: 16px;">
+        Enter your registered email address and we'll send you an official password reset link directly to your inbox.
+      </p>
+
+      <form id="forgotPasswordForm" onsubmit="handleSendPasswordReset(event)">
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; font-size: 13px; color: #333; margin-bottom: 6px;">Your Registered Email</label>
+          <input type="email" id="forgotPassEmail" placeholder="Enter your account email" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+        </div>
+
+        <div id="forgotPassStatus" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px;"></div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="secondary-btn" onclick="closeForgotPasswordModal()">Cancel</button>
+          <button type="submit" id="sendResetBtn" class="primary-btn" style="padding: 10px 18px;">Send Reset Link →</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -73,12 +114,22 @@
       <form id="changePasswordForm" onsubmit="handleSetNewPassword(event)">
         <div style="margin-bottom: 14px;">
           <label style="display: block; font-weight: 600; font-size: 13px; color: #333; margin-bottom: 6px;">New Permanent Password (min. 6 characters)</label>
-          <input type="password" id="newPermanentPass" placeholder="Enter new secure password" required minlength="6" style="width: 100%; padding: 10px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box;" />
+          <div class="password-input-wrap">
+            <input type="password" id="newPermanentPass" placeholder="Enter new secure password" required minlength="6" style="width: 100%; padding: 10px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box;" />
+            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('newPermanentPass', this)" aria-label="Show password" title="Show password">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
         </div>
 
         <div style="margin-bottom: 20px;">
           <label style="display: block; font-weight: 600; font-size: 13px; color: #333; margin-bottom: 6px;">Confirm New Password</label>
-          <input type="password" id="confirmPermanentPass" placeholder="Re-enter new password" required minlength="6" style="width: 100%; padding: 10px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box;" />
+          <div class="password-input-wrap">
+            <input type="password" id="confirmPermanentPass" placeholder="Re-enter new password" required minlength="6" style="width: 100%; padding: 10px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box;" />
+            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('confirmPermanentPass', this)" aria-label="Show password" title="Show password">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
         </div>
 
         <button type="submit" id="saveNewPassBtn" class="primary-btn" style="width: 100%; padding: 12px; font-size: 15px; font-weight: 700;">
@@ -267,9 +318,88 @@
       }
     });
 
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isPass = input.type === 'password';
+      input.type = isPass ? 'text' : 'password';
+      if (btn) {
+        btn.innerHTML = isPass
+          ? `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+          : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+        btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+        btn.title = isPass ? 'Hide password' : 'Show password';
+      }
+    }
+
+    function openForgotPasswordModal() {
+      const modal = document.getElementById('forgotPasswordModal');
+      const loginEmail = document.getElementById('loginInput')?.value.trim();
+      const forgotInput = document.getElementById('forgotPassEmail');
+      const statusBox = document.getElementById('forgotPassStatus');
+      if (statusBox) statusBox.style.display = 'none';
+      if (forgotInput && loginEmail) {
+        forgotInput.value = loginEmail;
+      }
+      if (modal) modal.style.display = 'flex';
+      setTimeout(() => forgotInput?.focus(), 50);
+    }
+
+    function closeForgotPasswordModal() {
+      const modal = document.getElementById('forgotPasswordModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function handleSendPasswordReset(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgotPassEmail').value.trim();
+      const statusBox = document.getElementById('forgotPassStatus');
+      const btn = document.getElementById('sendResetBtn');
+
+      if (!email) {
+        alert('Please enter your email address.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending reset link...';
+
+      try {
+        const db = window.ArtisanDB || window.firebaseApi;
+        if (!db || !db.sendPasswordReset) {
+          throw new Error('Database service is initializing. Please wait a moment.');
+        }
+
+        await db.sendPasswordReset(email);
+        statusBox.style.display = 'block';
+        statusBox.style.background = '#eef7ef';
+        statusBox.style.color = '#1b5e20';
+        statusBox.style.border = '1px solid #c8e6c9';
+        statusBox.innerHTML = `✓ <strong>Password reset link sent!</strong> Check your inbox (or spam folder) for <em>${email}</em> and follow the link to reset your password.`;
+
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = 'Send Reset Link →';
+        }, 3000);
+      } catch (err) {
+        console.error('Password reset error:', err);
+        statusBox.style.display = 'block';
+        statusBox.style.background = '#fef2f2';
+        statusBox.style.color = '#991b1b';
+        statusBox.style.border = '1px solid #fecaca';
+        statusBox.textContent = err.message || 'Could not send reset email. Please verify your email address.';
+        btn.disabled = false;
+        btn.textContent = 'Send Reset Link →';
+      }
+    }
+
     window.loginUser = loginUser;
     window.loginWithGoogle = loginWithGoogle;
     window.handleSetNewPassword = handleSetNewPassword;
+    window.togglePasswordVisibility = togglePasswordVisibility;
+    window.openForgotPasswordModal = openForgotPasswordModal;
+    window.closeForgotPasswordModal = closeForgotPasswordModal;
+    window.handleSendPasswordReset = handleSendPasswordReset;
   </script>
 </body>
 </html>

@@ -79,28 +79,35 @@ export default async function handler(req, res) {
         <div class="content">
           <span class="badge">✓ SELLER ACCOUNT APPROVED</span>
           <h2>Mabuhay, ${applicantName}!</h2>
-          <p>We are delighted to inform you that your artisan seller application for <strong>${shopName}</strong> has been officially reviewed and <strong>approved</strong> by the Artisan Aisle administrative team!</p>
-          <p>Your dedicated seller portal is now ready. Below are your temporary account login credentials:</p>
+          <p>We are pleased to inform you that your artisan seller application for <strong>${shopName}</strong> has been officially approved by Artisan Aisle.</p>
           
+          <div class="notice" style="background:#e8f5e9; border-left:4px solid #2e7d32; color:#1b5e20; margin-bottom: 20px;">
+            <strong>Account Security Notice:</strong> Because your seller account has been approved, your previous session has been automatically logged out for security. <strong>Please log in again using this new set of credentials provided below.</strong>
+          </div>
+
           <div class="credentials-card">
-            <div class="credentials-title">🔐 Your Seller Login Credentials</div>
+            <div class="credentials-title">🔐 Your New Seller Login Credentials</div>
             <div class="credential-row">
               <span class="credential-label">Registered Email:</span>
               <span class="credential-value">${to}</span>
             </div>
             <div class="credential-row">
-              <span class="credential-label">Temporary Password:</span>
+              <span class="credential-label">Account Password:</span>
               <span class="credential-value">${temporaryPassword}</span>
             </div>
           </div>
 
           <p style="text-align: center;">
-            <a href="${targetLoginUrl}" class="btn">Login to Seller Account →</a>
+            <a href="${targetLoginUrl}" class="btn">Login Again to Your Seller Account →</a>
           </p>
 
           <div class="notice">
-            <strong>Security Notice:</strong> Upon logging in with these credentials, the system will automatically prompt you to set your own permanent, secure password before accessing your Seller Portal.
+            <strong>Next Step:</strong> Once you log in with these credentials, the system will automatically direct you to set your own permanent, secure password before accessing your Seller Portal.
           </div>
+
+          <p style="font-size: 13px; color: #64748b; margin-top: 20px; line-height: 1.5;">
+            <em>Note: For your convenience, a separate second email with an official password reset link has also been sent to this address so you can update your password at any time.</em>
+          </p>
         </div>
         <div class="footer">
           <p>&copy; 2026 Artisan Aisle. Supporting Local Filipino Artisans &amp; Preserving Heritage Crafts 🇵🇭</p>
