@@ -536,10 +536,22 @@ export const ArtisanDB = {
 
   subscribeSellers(callback) {
     return onSnapshot(collection(db, 'sellers'), (snap) => {
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const list = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(s => !s.deleted && s.status !== 'deleted');
       callback(list);
     }, (err) => {
       console.warn('Sellers listener warning:', err);
+    });
+  },
+
+  subscribeDeletedArtisans(callback) {
+    return onSnapshot(collection(db, 'deleted_artisans'), (snap) => {
+      const set = new Set(snap.docs.map(d => d.id));
+      callback(set);
+    }, (err) => {
+      console.warn('Deleted artisans listener warning:', err);
+      callback(new Set());
     });
   },
 
@@ -554,7 +566,9 @@ export const ArtisanDB = {
   async getSellers() {
     try {
       const snap = await getDocs(collection(db, 'sellers'));
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      return snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(s => !s.deleted && s.status !== 'deleted');
     } catch (err) {
       console.warn('Error fetching sellers:', err);
       return [];
@@ -572,9 +586,81 @@ export const ArtisanDB = {
     return { id: docRef.id, ...artisanData };
   },
 
-  async deleteArtisan(sellerId) {
+  async deleteArtisan(sellerId, artisanName = '') {
     if (!sellerId) return;
-    await deleteDoc(doc(db, 'sellers', sellerId));
+
+    // 1. Mark as tombstone in deleted_artisans collection so hardcoded/fallback arrays never revive it
+    try {
+      await setDoc(doc(db, 'deleted_artisans', sellerId), {
+        id: sellerId,
+        name: artisanName || '',
+        deletedAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.warn('Could not write deleted_artisans tombstone:', err.message);
+    }
+
+    // 2. Delete document from sellers collection
+    try {
+      await deleteDoc(doc(db, 'sellers', sellerId));
+    } catch (err) {
+      console.warn('Could not delete from sellers:', err.message);
+    }
+
+    // 3. Purge all products listed under this artisan/seller from the products collection
+    try {
+      const prodSnap = await getDocs(collection(db, 'products'));
+      const prodsToDelete = prodSnap.docs.filter(d => {
+        const p = d.data();
+        return p.sellerId === sellerId || 
+               (artisanName && String(p.sellerName || '').toLowerCase() === String(artisanName).toLowerCase()) ||
+               (artisanName && String(p.shopName || '').toLowerCase() === String(artisanName).toLowerCase());
+      });
+      for (const pDoc of prodsToDelete) {
+        await deleteDoc(doc(db, 'products', pDoc.id));
+      }
+    } catch (err) {
+      console.warn('Could not delete artisan products:', err.message);
+    }
+
+    // 4. Update any linked user account in users collection (demote to user, clear sellerStatus)
+    try {
+      const userSnap = await getDocs(collection(db, 'users'));
+      const matchingUsers = userSnap.docs.filter(d => {
+        const u = d.data();
+        return d.id === sellerId || 
+               u.sellerId === sellerId || 
+               (artisanName && String(u.shopName || '').toLowerCase() === String(artisanName).toLowerCase()) ||
+               (artisanName && String(u.name || '').toLowerCase() === String(artisanName).toLowerCase());
+      });
+      for (const uDoc of matchingUsers) {
+        await updateDoc(doc(db, 'users', uDoc.id), {
+          role: 'user',
+          sellerStatus: 'none',
+          sellerId: null,
+          pendingShopName: null,
+          updatedAt: serverTimestamp()
+        });
+      }
+    } catch (err) {
+      console.warn('Could not update user role on artisan delete:', err.message);
+    }
+
+    // 5. Delete any matching applications in seller_applications
+    try {
+      const appSnap = await getDocs(collection(db, 'seller_applications'));
+      const matchingApps = appSnap.docs.filter(d => {
+        const a = d.data();
+        return a.userId === sellerId || 
+               a.sellerId === sellerId || 
+               (artisanName && String(a.shopName || '').toLowerCase() === String(artisanName).toLowerCase());
+      });
+      for (const aDoc of matchingApps) {
+        await deleteDoc(doc(db, 'seller_applications', aDoc.id));
+      }
+    } catch (err) {
+      console.warn('Could not delete matching applications:', err.message);
+    }
   },
 
   // --- Seller Applications ---

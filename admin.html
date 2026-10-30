@@ -112,6 +112,12 @@
             <p>Real-time metrics across registered users, artisans, products, and customer orders.</p>
           </div>
           <div class="export-btn-cluster">
+            <button type="button" class="btn-export-json" id="exportAllDataJsonBtn" title="Download entire database backup (users, products, orders, applications, artisans) as structured JSON">
+              📥 Download Complete Database (JSON)
+            </button>
+            <button type="button" class="btn-export-excel" id="exportAllDataExcelBtn" title="Download all platform tables combined into a comprehensive Excel workbook">
+              📊 Download All Data (Excel)
+            </button>
             <button type="button" class="btn-export-excel" id="exportSalesExcelBtn">
               Export Sales (Excel)
             </button>
@@ -237,6 +243,12 @@
             </button>
             <button type="button" class="primary-btn" id="openAddArtisanModalBtn" style="padding: 8px 16px; font-size: 13px; font-weight: 600;">
               + Add New Artisan
+            </button>
+            <button type="button" class="btn-export-excel" id="exportArtisansExcelBtn">
+              Export Artisans (Excel)
+            </button>
+            <button type="button" class="btn-export-word" id="exportArtisansWordBtn">
+              Export Artisans (Word)
             </button>
           </div>
         </div>

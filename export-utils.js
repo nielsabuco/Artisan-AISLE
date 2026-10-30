@@ -120,6 +120,88 @@ export function exportToWord(filename, title, metadata = {}, headers, rows) {
   triggerDownload(blob, `${filename}.doc`);
 }
 
+/**
+ * Export data as formatted, indented JSON (Database backup / restoration)
+ */
+export function exportToJSON(filename, data) {
+  const jsonContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' });
+  triggerDownload(blob, `${filename}.json`);
+}
+
+/**
+ * Export comprehensive multi-table dataset to a single Excel workbook
+ * @param {string} filename - output file name without extension
+ * @param {string} title - title of the export workbook
+ * @param {Array<{ tableName: string, headers: string[], rows: any[][] }>} tables - array of table objects
+ */
+export function exportMultiTableExcel(filename, title, tables) {
+  const tablesHtml = tables.map((tbl, tblIdx) => {
+    const tableHeadersHtml = tbl.headers.map(h => 
+      `<th style="background-color: #285c3b; color: #ffffff; padding: 9px 12px; border: 1px solid #1e472d; font-family: Segoe UI, Arial, sans-serif; font-size: 13px; font-weight: bold; text-align: left;">${escapeHtml(h)}</th>`
+    ).join('');
+
+    const tableRowsHtml = tbl.rows.map((row, idx) => {
+      const bg = idx % 2 === 0 ? '#ffffff' : '#f9fbf9';
+      return `<tr style="background-color: ${bg};">
+        ${row.map(val => `<td style="padding: 7px 12px; border: 1px solid #dcdde1; font-family: Segoe UI, Arial, sans-serif; font-size: 12px;">${escapeHtml(String(val ?? ''))}</td>`).join('')}
+      </tr>`;
+    }).join('');
+
+    return `
+      <div style="margin-top: ${tblIdx === 0 ? '8px' : '28px'}; margin-bottom: 24px;">
+        <h3 style="font-family: Georgia, serif; color: #1e472d; margin-bottom: 6px; font-size: 16px; border-bottom: 2px solid #285c3b; padding-bottom: 4px;">
+          ${escapeHtml(tbl.tableName)} <span style="font-size: 12px; font-weight: normal; color: #666;">(${tbl.rows.length} records)</span>
+        </h3>
+        <table>
+          <thead>
+            <tr>${tableHeadersHtml}</tr>
+          </thead>
+          <tbody>
+            ${tableRowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }).join('');
+
+  const htmlContent = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>${escapeHtml(title || 'ArtisanAisle All Data')}</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+      <style>
+        table { border-collapse: collapse; width: 100%; margin-bottom: 12px; }
+        td, th { white-space: nowrap; }
+      </style>
+    </head>
+    <body>
+      <h1 style="font-family: Georgia, serif; color: #285c3b; margin-bottom: 4px;">ArtisanAisle - ${escapeHtml(title)}</h1>
+      <p style="font-family: Arial, sans-serif; font-size: 12px; color: #666; margin-top: 0; margin-bottom: 20px;">
+        Comprehensive Database Export • Generated on: ${new Date().toLocaleString('en-PH')}
+      </p>
+      ${tablesHtml}
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  triggerDownload(blob, `${filename}.xls`);
+}
+
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -141,5 +223,5 @@ function triggerDownload(blob, filename) {
 }
 
 if (typeof window !== 'undefined') {
-  window.ArtisanExport = { exportToExcel, exportToWord };
+  window.ArtisanExport = { exportToExcel, exportToWord, exportToJSON, exportMultiTableExcel };
 }

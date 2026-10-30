@@ -80,6 +80,10 @@ let searchQuery = '';
 let activeQuickViewProduct = null;
 let quickViewQuantity = 1;
 
+let liveFirestoreSellers = [];
+let liveDeletedArtisanIds = new Set();
+let hasReceivedSellersSnapshot = false;
+
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   initSubscriptions();
@@ -148,13 +152,23 @@ function setupEventListeners() {
 }
 
 function initSubscriptions() {
-  // 1. Subscribe to Live Sellers
+  // 1. Subscribe to Live Deleted Artisans Tombstones
+  if (typeof ArtisanDB.subscribeDeletedArtisans === 'function') {
+    ArtisanDB.subscribeDeletedArtisans((deletedIds) => {
+      liveDeletedArtisanIds = deletedIds || new Set();
+      refreshArtisans();
+    });
+  }
+
+  // 2. Subscribe to Live Sellers in Firestore
   ArtisanDB.subscribeSellers((sellers) => {
-    mergeArtisans(sellers);
+    hasReceivedSellersSnapshot = true;
+    liveFirestoreSellers = sellers || [];
+    refreshArtisans();
     checkRoute();
   });
 
-  // 2. Subscribe to Live Products for real-time stock sync
+  // 3. Subscribe to Live Products for real-time stock sync
   ArtisanDB.subscribeProducts((prods) => {
     allProducts = prods;
     // If shop view is currently visible, refresh its product cards and stock live
@@ -180,34 +194,41 @@ function initSubscriptions() {
   });
 }
 
-function mergeArtisans(firestoreSellers) {
+function refreshArtisans() {
   const map = new Map();
 
-  // Seed with default master artisans
-  DEFAULT_ARTISANS.forEach(a => map.set(a.id, { ...a }));
-
-  // Overlay / merge with Firestore sellers
-  if (Array.isArray(firestoreSellers)) {
-    firestoreSellers.forEach(s => {
+  // If Firestore has sellers, use Firestore as the authoritative source
+  if (Array.isArray(liveFirestoreSellers) && liveFirestoreSellers.length > 0) {
+    liveFirestoreSellers.forEach(s => {
       const sId = s.id || s.uid;
-      const existing = map.get(sId);
+      // Exclude if deleted in database, tombstoned, inactive, or suspended
+      if (!sId || liveDeletedArtisanIds.has(sId) || s.deleted === true || s.status === 'deleted' || s.status === 'Inactive' || s.status === 'suspended') {
+        return;
+      }
       map.set(sId, {
         id: sId,
-        name: s.name || s.applicantName || existing?.name || 'Artisan Seller',
-        shopName: s.shopName || existing?.shopName || 'Artisan Craft Workshop',
-        region: s.region || s.location || s.city || existing?.region || 'Philippines',
-        category: s.category || existing?.category || 'Handmade Crafts',
-        bio: s.bio || s.story || existing?.bio || 'Handcrafting authentic cultural treasures with passion and heritage.',
-        photo: s.photo || s.avatar || s.imageUrl || existing?.photo || 'images/emblem.svg',
+        name: s.name || s.applicantName || 'Artisan Seller',
+        shopName: s.shopName || 'Artisan Craft Workshop',
+        region: s.region || s.location || s.city || 'Philippines',
+        category: s.category || 'Handmade Crafts',
+        bio: s.bio || s.story || 'Handcrafting authentic cultural treasures with passion and heritage.',
+        photo: s.photo || s.avatar || s.imageUrl || 'images/emblem.svg',
         status: s.status || 'Active',
         gcashName: s.gcashName || '',
         gcashNumber: s.gcashNumber || '',
         verified: true
       });
     });
+  } else if (!hasReceivedSellersSnapshot || (liveFirestoreSellers.length === 0 && liveDeletedArtisanIds.size === 0)) {
+    // Only fall back to DEFAULT_ARTISANS on initial load before any database records or deletions exist
+    DEFAULT_ARTISANS.forEach(a => {
+      if (!liveDeletedArtisanIds.has(a.id)) {
+        map.set(a.id, { ...a });
+      }
+    });
   }
 
-  allArtisans = Array.from(map.values()).filter(a => a.status !== 'Inactive' && a.status !== 'suspended');
+  allArtisans = Array.from(map.values()).filter(a => a.status !== 'Inactive' && a.status !== 'suspended' && a.status !== 'deleted');
   renderArtisansGrid();
 }
 

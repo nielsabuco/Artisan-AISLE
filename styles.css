@@ -5198,6 +5198,25 @@ button.sidebar-btn.active svg {
   gap: 8px;
 }
 
+.btn-export-json {
+  background: #6f42c1 !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.btn-export-json:hover {
+  opacity: 0.9;
+}
+
 .btn-export-excel {
   background: #107c41 !important;
   color: white !important;

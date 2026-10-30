@@ -317,6 +317,12 @@
             <p>Welcome back, ${currentSellerProfile?.name || 'Artisan'}! Here is your live shop performance.</p>
           </div>
           <div class="export-btn-cluster">
+            <button type="button" class="btn-export-json" onclick="exportAllSellerData('json')" title="Download all shop data, catalog, and orders as structured JSON">
+              📥 Download All My Shop Data (JSON)
+            </button>
+            <button type="button" class="btn-export-excel" onclick="exportAllSellerData('excel')" title="Download complete shop workbook with catalog and orders in Excel">
+              📊 Download All My Shop Data (Excel)
+            </button>
             <button type="button" class="btn-export-excel" onclick="exportSellerSales('excel')">
               Export Sales (Excel)
             </button>
@@ -934,6 +940,102 @@
     window.submitSellerTrackingUpdate = submitSellerTrackingUpdate;
     window.exportSellerSales = exportSellerSales;
     window.exportSellerProducts = exportSellerProducts;
+
+    // Export All Seller Data (JSON & Comprehensive Multi-Table Excel)
+    function exportAllSellerData(format) {
+      if (!window.ArtisanExport) {
+        alert('Export utilities are initializing. Please try again in a moment.');
+        return;
+      }
+      const shopName = document.getElementById('sidebarShopName')?.innerText || 'Artisan_Shop';
+      const cleanShop = shopName.replace(/[^a-zA-Z0-9]/g, '_');
+      const totalRevenue = sellerOrders
+        .filter(o => o.paymentStatus === 'Paid')
+        .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+      if (format === 'json') {
+        const shopBackup = {
+          platform: "ArtisanAisle Filipino Handicraft Marketplace",
+          exportTimestamp: new Date().toISOString(),
+          exportDateFormatted: new Date().toLocaleString('en-PH'),
+          shopProfile: {
+            shopName: shopName,
+            artisanName: currentSellerProfile?.name || 'Verified Artisan',
+            email: currentSellerProfile?.email || '',
+            phone: currentSellerProfile?.phone || '',
+            region: currentSellerProfile?.region || currentSellerProfile?.location || 'Philippines',
+            category: currentSellerProfile?.category || 'Handmade Crafts',
+            bio: currentSellerProfile?.bio || '',
+            gcashName: currentSellerProfile?.gcashName || '',
+            gcashNumber: currentSellerProfile?.gcashNumber || ''
+          },
+          summaryMetrics: {
+            totalRevenue: totalRevenue,
+            totalRevenueFormatted: `PHP ${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+            totalOrders: sellerOrders.length,
+            totalProducts: sellerProducts.length,
+            inStockProducts: sellerProducts.filter(p => (Number(p.stock) || 0) > 0).length,
+            pendingOrders: sellerOrders.filter(o => o.orderStatus === 'Processing' || o.paymentStatus === 'Pending').length
+          },
+          productsCatalog: sellerProducts,
+          ordersReceived: sellerOrders
+        };
+
+        window.ArtisanExport.exportToJSON(`ArtisanAisle_${cleanShop}_CompleteShopBackup_${Date.now()}`, shopBackup);
+      } else {
+        const tables = [
+          {
+            tableName: 'Shop Overview & Performance Metrics',
+            headers: ['Metric / Profile Field', 'Details'],
+            rows: [
+              ['Shop / Workshop Name', shopName],
+              ['Artisan Creator', currentSellerProfile?.name || 'Verified Artisan'],
+              ['Email Address', currentSellerProfile?.email || '-'],
+              ['Contact Phone', currentSellerProfile?.phone || '-'],
+              ['Region / Province', currentSellerProfile?.region || currentSellerProfile?.location || 'Philippines'],
+              ['Total Verified Revenue', `PHP ${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`],
+              ['Total Orders Received', sellerOrders.length],
+              ['Total Listed Products', sellerProducts.length],
+              ['Export Date', new Date().toLocaleString('en-PH')]
+            ]
+          },
+          {
+            tableName: 'Products Catalog Inventory',
+            headers: ['Product ID', 'Item Name', 'Category', 'Price (PHP)', 'Stock Level', 'Status'],
+            rows: sellerProducts.map(p => [
+              p.id || '-',
+              p.name || 'Handcrafted Item',
+              p.category || 'Handicraft',
+              Number(p.price || 0).toFixed(2),
+              Number(p.stock || 0),
+              p.status || 'Active'
+            ])
+          },
+          {
+            tableName: 'Orders Received & Fulfillment Log',
+            headers: ['Order Number', 'Date', 'Customer Name', 'Customer Phone', 'City', 'Purchased Items', 'Total (PHP)', 'Payment Method', 'Payment Status', 'Order Status', 'Courier', 'Tracking Number'],
+            rows: sellerOrders.map(o => [
+              o.orderNumber || o.id,
+              o.createdAt ? new Date(o.createdAt.seconds * 1000).toLocaleDateString('en-PH') : 'Recent',
+              o.customerName || 'Customer',
+              o.customerPhone || '-',
+              o.deliveryAddress?.city || o.shippingAddress || '-',
+              Array.isArray(o.items) ? o.items.map(i => `${i.quantity}x ${i.name}`).join('; ') : '-',
+              Number(o.total || 0).toFixed(2),
+              o.paymentMethod || 'COD',
+              o.paymentStatus || 'Pending',
+              o.orderStatus || 'Processing',
+              o.courier || '-',
+              o.trackingNumber || '-'
+            ])
+          }
+        ];
+
+        window.ArtisanExport.exportMultiTableExcel(`ArtisanAisle_${cleanShop}_CompleteData_${Date.now()}`, `${shopName} - Complete Shop Data Backup`, tables);
+      }
+    }
+
+    window.exportAllSellerData = exportAllSellerData;
 
     // Logout Handler
     async function handleSellerLogout() {

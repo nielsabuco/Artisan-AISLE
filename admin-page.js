@@ -1,6 +1,6 @@
 import { ArtisanDB } from './firebase-config.js';
 import { updateHeaderAuth } from './header-auth.js';
-import { exportToExcel, exportToWord } from './export-utils.js';
+import { exportToExcel, exportToWord, exportToJSON, exportMultiTableExcel } from './export-utils.js';
 
 let currentAdmin = null;
 let allApplications = [];
@@ -747,6 +747,175 @@ function setupExportButtons() {
     exportToWord(`ArtisanAisle_Applications_Summary_${Date.now()}`, 'Seller Applications Verification Report', metadata, headers, rows);
   };
 
+  // 9. Export All Platform Data (Complete Database Backup in JSON)
+  const exportAllDataJSON = () => {
+    const gmv = allOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    const backupData = {
+      platform: "ArtisanAisle Filipino Handicraft Marketplace",
+      backupVersion: "2.0",
+      exportTimestamp: new Date().toISOString(),
+      exportDateFormatted: new Date().toLocaleString('en-PH'),
+      exportedBy: currentAdmin?.email || currentAdmin?.name || 'Platform Administrator',
+      summaryMetrics: {
+        totalGmv: gmv,
+        totalGmvFormatted: `PHP ${gmv.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+        totalOrders: allOrders.length,
+        totalUsers: allUsers.length,
+        totalActiveSellers: allUsers.filter(u => u.role === 'seller' || u.sellerStatus === 'approved').length,
+        totalProducts: allProducts.length,
+        totalMasterArtisans: allArtisans.length,
+        totalSellerApplications: allApplications.length,
+        pendingApplications: allApplications.filter(a => (a.status || '').toLowerCase() === 'pending').length
+      },
+      datasets: {
+        users: allUsers,
+        products: allProducts,
+        orders: allOrders,
+        artisans: allArtisans,
+        sellerApplications: allApplications
+      }
+    };
+
+    exportToJSON(`ArtisanAisle_CompleteDatabaseBackup_${Date.now()}`, backupData);
+  };
+
+  // 10. Export All Platform Data (Multi-Table Excel Workbook)
+  const exportAllDataExcel = () => {
+    const gmv = allOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    const tables = [
+      {
+        tableName: 'Platform Summary & KPIs',
+        headers: ['Metric Name', 'Value'],
+        rows: [
+          ['Platform Gross Merchandise Value (GMV)', `PHP ${gmv.toLocaleString('en-US', { minimumFractionDigits: 2 })}`],
+          ['Total Customer Orders', allOrders.length],
+          ['Total Registered Users', allUsers.length],
+          ['Total Active Sellers', allUsers.filter(u => u.role === 'seller' || u.sellerStatus === 'approved').length],
+          ['Total Products in Catalog', allProducts.length],
+          ['Total Master Artisans Directory', allArtisans.length],
+          ['Total Seller Applications', allApplications.length],
+          ['Pending Seller Applications', allApplications.filter(a => (a.status || '').toLowerCase() === 'pending').length],
+          ['Export Generated At', new Date().toLocaleString('en-PH')]
+        ]
+      },
+      {
+        tableName: 'Registered Users',
+        headers: ['User ID', 'Full Name', 'Email Address', 'Phone Number', 'Account Role', 'Seller Status', 'Location'],
+        rows: allUsers.map(u => [
+          u.uid || u.id || '-',
+          u.name || 'Anonymous User',
+          u.email || '-',
+          u.phone || '-',
+          u.role || 'user',
+          u.sellerStatus || 'none',
+          u.city || u.address || '-'
+        ])
+      },
+      {
+        tableName: 'Product Catalog Inventory',
+        headers: ['Product ID', 'Item Name', 'Category', 'Price (PHP)', 'Stock Level', 'Artisan Seller', 'Status'],
+        rows: allProducts.map(p => [
+          p.id || '-',
+          p.name || 'Untitled Craft',
+          p.category || 'General',
+          Number(p.price || 0).toFixed(2),
+          Number(p.stock || 0),
+          p.sellerName || p.sellerEmail || 'Artisan',
+          p.status || 'Active'
+        ])
+      },
+      {
+        tableName: 'Customer Orders & Fulfillment',
+        headers: ['Order Number', 'Date', 'Customer Name', 'Customer Phone', 'Purchased Items', 'Total (PHP)', 'Payment Method', 'Payment Status', 'Fulfillment Status', 'Courier', 'Tracking Number'],
+        rows: allOrders.map(o => [
+          o.orderNumber || o.id,
+          o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-PH') : 'Recent',
+          o.customerName || '-',
+          o.customerPhone || '-',
+          (o.items || []).map(i => `${i.quantity}x ${i.name}`).join('; '),
+          Number(o.total || 0).toFixed(2),
+          o.paymentMethod || 'COD',
+          o.paymentStatus || 'Pending',
+          o.orderStatus || 'Processing',
+          o.courier || '-',
+          o.trackingNumber || '-'
+        ])
+      },
+      {
+        tableName: 'Master Artisans Directory',
+        headers: ['Artisan ID', 'Full Name', 'Shop / Workshop Name', 'Region / Province', 'Specialization', 'GCash Name', 'GCash Number', 'Status'],
+        rows: allArtisans.map(a => [
+          a.id || '-',
+          a.name || '-',
+          a.shopName || '-',
+          a.region || '-',
+          a.category || '-',
+          a.gcashName || '-',
+          a.gcashNumber || '-',
+          a.status || 'Active'
+        ])
+      },
+      {
+        tableName: 'Seller Applications Log',
+        headers: ['Application ID', 'Applicant Name', 'Email', 'Shop Name', 'Craft Category', 'GCash Name', 'GCash Number', 'Government ID', 'Status'],
+        rows: allApplications.map(a => [
+          a.id || '-',
+          a.applicantName || a.name || '-',
+          a.applicantEmail || a.email || '-',
+          a.shopName || '-',
+          a.category || '-',
+          a.gcashName || '-',
+          a.gcashNumber || '-',
+          a.govId || a.permit || '-',
+          a.status || 'Pending'
+        ])
+      }
+    ];
+
+    exportMultiTableExcel(`ArtisanAisle_CompleteDatabase_${Date.now()}`, 'ArtisanAisle Platform Database Complete Backup', tables);
+  };
+
+  // 11. Export Artisans Directory (Excel)
+  const exportArtisansExcel = () => {
+    const headers = ['Artisan ID', 'Artisan Name', 'Shop / Workshop', 'Region / Province', 'Craft Specialization', 'GCash Name', 'GCash Number', 'Status'];
+    const rows = allArtisans.map(a => [
+      a.id || '-',
+      a.name || 'Artisan',
+      a.shopName || 'Workshop',
+      a.region || 'Philippines',
+      a.category || 'Handicrafts',
+      a.gcashName || '-',
+      a.gcashNumber || '-',
+      a.status || 'Active'
+    ]);
+
+    exportToExcel(`ArtisanAisle_Artisans_Directory_${Date.now()}`, 'Artisans Directory & Creator Profiles', headers, rows);
+  };
+
+  // 12. Export Artisans Directory (Word)
+  const exportArtisansWord = () => {
+    const headers = ['Artisan Name', 'Shop / Workshop', 'Region', 'Specialization', 'Status'];
+    const rows = allArtisans.map(a => [
+      a.name || 'Artisan',
+      a.shopName || 'Workshop',
+      a.region || 'Philippines',
+      a.category || 'Handicrafts',
+      a.status || 'Active'
+    ]);
+
+    const metadata = {
+      'Report Type': 'Master Artisans & Regional Workshops Directory',
+      'Total Verified Artisans': allArtisans.length,
+      'Active Workshops': allArtisans.filter(a => a.status === 'Active').length
+    };
+
+    exportToWord(`ArtisanAisle_Artisans_Report_${Date.now()}`, 'Master Artisans Directory Report', metadata, headers, rows);
+  };
+
+  // Event Listeners for Complete Database Backup
+  document.getElementById('exportAllDataJsonBtn')?.addEventListener('click', exportAllDataJSON);
+  document.getElementById('exportAllDataExcelBtn')?.addEventListener('click', exportAllDataExcel);
+
   // Event Listeners for Sales
   document.getElementById('exportSalesExcelBtn')?.addEventListener('click', exportSalesExcel);
   document.getElementById('exportOrdersExcelBtn')?.addEventListener('click', exportSalesExcel);
@@ -764,6 +933,10 @@ function setupExportButtons() {
   // Event Listeners for Applications
   document.getElementById('exportAppsExcelBtn')?.addEventListener('click', exportAppsExcel);
   document.getElementById('exportAppsWordBtn')?.addEventListener('click', exportAppsWord);
+
+  // Event Listeners for Artisans
+  document.getElementById('exportArtisansExcelBtn')?.addEventListener('click', exportArtisansExcel);
+  document.getElementById('exportArtisansWordBtn')?.addEventListener('click', exportArtisansWord);
 }
 
 function setupAdminPromotionModal() {
@@ -1660,14 +1833,14 @@ function renderArtisansTable(artisans) {
 
     // Delete button
     tr.querySelector('.delete-artisan-btn')?.addEventListener('click', async () => {
-      if (!confirm(`Are you sure you want to remove artisan "${a.name}" from the directory?`)) {
+      if (!confirm(`Are you sure you want to permanently delete artisan "${a.name}" from the database?\n\nThis will purge their profile from Firestore and remove any products listed under their workshop.`)) {
         return;
       }
       try {
-        await ArtisanDB.deleteArtisan(a.id);
-        alert(`Artisan "${a.name}" removed from directory.`);
+        await ArtisanDB.deleteArtisan(a.id, a.name);
+        alert(`Artisan "${a.name}" and their listed products have been completely deleted from the database.`);
       } catch (err) {
-        alert('Failed to remove artisan: ' + err.message);
+        alert('Failed to delete artisan: ' + err.message);
       }
     });
 
