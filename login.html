@@ -239,7 +239,8 @@
         } catch (e) {}
       }
 
-      if (freshProfile?.mustChangePassword) {
+      // Prompt to set permanent password ONCE and only if not already changed
+      if (freshProfile?.mustChangePassword === true && !freshProfile?.hasChangedInitialPassword) {
         authenticatedUserPendingPassword = freshProfile;
         const modal = document.getElementById('changePasswordModal');
         if (modal) {

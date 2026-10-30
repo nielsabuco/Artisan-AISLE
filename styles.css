@@ -142,7 +142,9 @@ header {
   transition: all 0.2s ease;
 }
 
-nav {
+nav:not(.sidebar-nav):not(.seller-nav),
+header + nav,
+body > nav {
   background: rgba(255, 255, 255, 0.96);
   padding: 12px 5%;
   display: flex;
@@ -153,8 +155,10 @@ nav {
   box-shadow: 0 8px 24px rgba(40, 92, 59, 0.04);
 }
 
-nav button,
-nav a {
+nav:not(.sidebar-nav):not(.seller-nav) button,
+nav:not(.sidebar-nav):not(.seller-nav) a,
+header + nav button,
+header + nav a {
   background: #fbf9f5;
   border: 1px solid #e7ded2;
   cursor: pointer;
@@ -4593,98 +4597,129 @@ footer {
   }
 }
 
-.dashboard-sidebar {
-  background: #0f271a;
-  border-right: 1.5px solid #1c4d32;
-  color: #ffffff;
-  padding: 24px 18px;
-  display: flex;
-  flex-direction: column;
+.dashboard-sidebar,
+aside.dashboard-sidebar {
+  background: #0d2818 !important;
+  border-right: 1.5px solid #1c4d32 !important;
+  color: #ffffff !important;
+  padding: 24px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .sidebar-brand-box {
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  margin-bottom: 12px;
+  background: transparent !important;
+  padding-bottom: 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  margin-bottom: 12px !important;
 }
 
 .sidebar-brand-box h2 {
-  font-size: 19px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 6px;
-  letter-spacing: -0.01em;
+  font-size: 19px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin: 0 0 6px !important;
+  letter-spacing: -0.01em !important;
 }
 
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 16px 0;
-  flex: 1;
+.sidebar-nav,
+nav.sidebar-nav,
+div.sidebar-nav {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  margin: 16px 0 !important;
+  flex: 1 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-.sidebar-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #f1f5f9;
-  font-size: 13.5px;
-  font-weight: 600;
-  padding: 12px 16px;
-  border-radius: 9px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.sidebar-btn,
+button.sidebar-btn,
+.sidebar-nav button,
+.sidebar-nav .sidebar-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  padding: 12px 16px !important;
+  border-radius: 9px !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  text-decoration: none !important;
 }
 
-.sidebar-btn svg {
-  stroke: #e2e8f0;
-  flex-shrink: 0;
-  transition: stroke 0.2s ease;
+.sidebar-btn svg,
+button.sidebar-btn svg,
+.sidebar-nav button svg {
+  stroke: #ffffff !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  flex-shrink: 0 !important;
+  transition: stroke 0.2s ease !important;
+  display: block !important;
 }
 
-.sidebar-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.32);
-  color: #ffffff;
-  transform: translateX(2px);
+.sidebar-btn:hover,
+button.sidebar-btn:hover,
+.sidebar-nav button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+  transform: translateX(2px) !important;
 }
 
-.sidebar-btn:hover svg {
-  stroke: #ffffff;
+.sidebar-btn:hover svg,
+button.sidebar-btn:hover svg {
+  stroke: #ffffff !important;
 }
 
-.sidebar-btn.active {
+.sidebar-btn.active,
+button.sidebar-btn.active,
+.sidebar-nav button.active {
   background: #d4af37 !important;
   border-color: #c29d2b !important;
-  color: #0f271a !important;
+  color: #0d2818 !important;
   font-weight: 800 !important;
   box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4) !important;
 }
 
-.sidebar-btn.active svg {
-  stroke: #0f271a !important;
+.sidebar-btn.active svg,
+button.sidebar-btn.active svg {
+  stroke: #0d2818 !important;
 }
 
-.sidebar-btn #pendingBadgeCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #ef4444;
-  color: #ffffff;
-  padding: 1px 7px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 800;
-  margin-left: 4px;
+.sidebar-btn #pendingBadgeCount,
+.sidebar-btn #artisansCountBadge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  padding: 1px 7px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  margin-left: auto !important;
 }
 
-.sidebar-btn.active #pendingBadgeCount {
-  background: #0f271a !important;
+.sidebar-btn.active #pendingBadgeCount,
+.sidebar-btn.active #artisansCountBadge {
+  background: #0d2818 !important;
   color: #d4af37 !important;
 }
 
@@ -6952,6 +6987,259 @@ button.toggle-password-btn svg,
 .btn-visit-artisan-shop:hover {
   background: #eef7f0;
   border-color: #1d4831;
+}
+
+/* ================= COMPREHENSIVE PHONE & MOBILE RESPONSIVE SUITE ================= */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  /* 1. Universal Form Rows: Stack on Mobile */
+  .form-row-2 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* 2. Modals: Maximize readable space on phones */
+  .modal-card,
+  .detail-modal-card {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    padding: 18px 14px !important;
+    margin: 10px auto !important;
+    border-radius: 16px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .detail-gallery {
+    max-height: 260px !important;
+  }
+
+  .detail-main-image-wrap img {
+    max-height: 240px !important;
+    object-fit: contain !important;
+  }
+
+  /* 3. Cart Page Responsive Overhaul */
+  .cart-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .cart-card-box {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .cart-item-card {
+    padding: 12px 10px !important;
+    gap: 10px !important;
+  }
+
+  .cart-item-thumb {
+    width: 68px !important;
+    height: 68px !important;
+    min-width: 68px !important;
+    min-height: 68px !important;
+  }
+
+  .cart-item-title {
+    font-size: 13.5px !important;
+  }
+
+  .cart-item-bottom-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* 4. Artisans Page Mobile View */
+  .artisan-header-hero {
+    padding: 28px 14px !important;
+    border-radius: 0 0 18px 18px !important;
+  }
+
+  .artisan-header-hero h1 {
+    font-size: 1.65rem !important;
+  }
+
+  .artisan-directory-container {
+    padding: 0 12px !important;
+  }
+
+  .artisans-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .artisan-shop-cover {
+    height: 100px !important;
+  }
+
+  .artisan-shop-profile-header {
+    margin-top: -45px !important;
+    padding: 0 14px 16px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .artisan-shop-photo {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .artisan-shop-title {
+    font-size: 20px !important;
+  }
+
+  /* 5. Admin & Seller Portal Mobile Layouts */
+  .dashboard-container {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-sidebar {
+    padding: 10px 14px !important;
+    border-bottom: 2px solid #d4af37 !important;
+  }
+
+  .dashboard-sidebar .sidebar-brand-box {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .dashboard-sidebar .sidebar-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    margin: 4px 0 0 !important;
+    padding-bottom: 4px !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .dashboard-sidebar .sidebar-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .dashboard-sidebar .sidebar-btn {
+    padding: 7px 12px !important;
+    font-size: 11.5px !important;
+    border-radius: 999px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    width: auto !important;
+    gap: 6px !important;
+  }
+
+  .dashboard-sidebar .sidebar-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    min-height: 14px !important;
+  }
+
+  .dashboard-main {
+    padding: 16px 12px !important;
+  }
+
+  .section-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .export-btn-cluster {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .export-btn-cluster button {
+    font-size: 11.5px !important;
+    padding: 6px 10px !important;
+  }
+
+  .table-responsive-box {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    border-radius: 8px !important;
+  }
+
+  .data-table {
+    min-width: 650px !important;
+  }
+
+  .seller-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    padding: 6px 0 !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .seller-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .seller-nav .nav-item {
+    padding: 6px 12px !important;
+    font-size: 11.5px !important;
+    border-radius: 999px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .seller-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Ultra-compact header for small phones */
+  .btn-header-install {
+    padding: 4px 7px !important;
+    font-size: 11px !important;
+  }
+
+  .btn-header-install span {
+    display: none !important;
+  }
+
+  .header-cart-btn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .cart-badge {
+    top: -4px !important;
+    right: -4px !important;
+  }
+
+  .summary-grid,
+  .metrics-grid,
+  .seller-stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
 }
 
 

@@ -196,14 +196,32 @@ export const ArtisanDB = {
         if (!snap.empty) {
           const userDoc = snap.docs[0];
           const userData = userDoc.data();
-          if (userData.mustChangePassword && userData.temporaryPassword && userData.temporaryPassword === password) {
-            // Legal temporary password recognized!
+
+          // 1. First-time login with temporary password: must change password once
+          if (userData.mustChangePassword && !userData.hasChangedInitialPassword && userData.temporaryPassword && userData.temporaryPassword === password) {
             const sessionData = {
               uid: userDoc.id,
               id: userDoc.id,
               ...userData,
               email: cleanEmail,
               mustChangePassword: true,
+              hasChangedInitialPassword: false,
+              role: userData.role || 'seller',
+              sellerStatus: userData.sellerStatus || 'approved'
+            };
+            this._saveLocalSession(sessionData);
+            return sessionData;
+          }
+
+          // 2. Subsequent logins: permanent password already set, never prompt to change password again
+          if (userData.hasChangedInitialPassword && userData.permanentPassword && userData.permanentPassword === password) {
+            const sessionData = {
+              uid: userDoc.id,
+              id: userDoc.id,
+              ...userData,
+              email: cleanEmail,
+              mustChangePassword: false,
+              hasChangedInitialPassword: true,
               role: userData.role || 'seller',
               sellerStatus: userData.sellerStatus || 'approved'
             };
@@ -212,7 +230,7 @@ export const ArtisanDB = {
           }
         }
       } catch (checkErr) {
-        console.warn('Temporary password verification check warning:', checkErr);
+        console.warn('Credentials verification check warning:', checkErr);
       }
       throw authErr;
     }
@@ -358,8 +376,8 @@ export const ArtisanDB = {
 
         const profile = await this.getUserProfile(user.uid);
 
-        // Security check: If newly approved seller must change password and is on a non-login page, log them out
-        if (profile?.mustChangePassword && !window.location.pathname.includes('login.html')) {
+        // Security check: Only if newly approved seller has NOT yet changed their initial password
+        if (profile?.mustChangePassword && !profile?.hasChangedInitialPassword && !window.location.pathname.includes('login.html')) {
           await signOut(auth).catch(() => {});
           localStorage.removeItem('handicraft_logged_in_user');
           localStorage.removeItem('handicraft_profile');
@@ -1505,14 +1523,20 @@ export const ArtisanDB = {
 
     if (auth.currentUser) {
       // 1. Update in Firebase Auth
-      await updatePassword(auth.currentUser, newPassword);
+      try {
+        await updatePassword(auth.currentUser, newPassword);
+      } catch (authErr) {
+        console.warn('Firebase Auth updatePassword warning:', authErr.message);
+      }
     }
 
-    // 2. Clear mustChangePassword and temporaryPassword in Firestore
+    // 2. Permanently clear mustChangePassword and mark hasChangedInitialPassword in Firestore
     if (uid) {
       await updateDoc(doc(db, 'users', uid), {
         mustChangePassword: false,
+        hasChangedInitialPassword: true,
         temporaryPassword: null,
+        permanentPassword: newPassword,
         passwordChangedAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }).catch(e => console.warn('User doc password flag update warning:', e));
@@ -1522,7 +1546,9 @@ export const ArtisanDB = {
     const cached = this.getLocalUser();
     if (cached) {
       cached.mustChangePassword = false;
+      cached.hasChangedInitialPassword = true;
       delete cached.temporaryPassword;
+      cached.permanentPassword = newPassword;
       localStorage.setItem('handicraft_logged_in_user', JSON.stringify(cached));
       localStorage.setItem('handicraft_profile', JSON.stringify(cached));
     }

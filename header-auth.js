@@ -138,6 +138,7 @@ export function handleAddToCart(product, quantity = 1) {
 }
 
 window.handleAddToCart = handleAddToCart;
+window.updateHeaderAuth = updateHeaderAuth;
 
 // Initialize on load and listen to auth/cart updates
 document.addEventListener('DOMContentLoaded', () => {

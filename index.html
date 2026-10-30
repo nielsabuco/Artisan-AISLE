@@ -2327,23 +2327,27 @@ async function handleLogout() {
 /* ================= HEADER USER STATE ================= */
 
 function updateHeaderUser(user) {
-    const loginButton = document.getElementById("loginButton");
     const cartButton = document.getElementById("headerCartBtn");
     const cartCount = getCart().reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
 
     if (cartButton) {
-        cartButton.innerText = `Cart (${cartCount})`;
+        let badge = cartButton.querySelector(".cart-badge");
+        if (badge) {
+            badge.innerText = cartCount;
+        } else {
+            cartButton.innerHTML = `
+                <svg class="header-cart-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span class="cart-badge">${cartCount}</span>
+            `;
+        }
     }
 
-    if (!loginButton) return;
-
-    if (user && user.name) {
-        // Clean label without emojis (Requirement 5)
-        loginButton.innerText = user.name.split(" ")[0];
-        loginButton.onclick = () => showScreen("profile");
-    } else {
-        loginButton.innerText = "Login";
-        loginButton.onclick = () => window.location.href = "login.html";
+    if (window.updateHeaderAuth) {
+        window.updateHeaderAuth();
     }
 }
 
