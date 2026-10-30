@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Portal | ArtisanAisle</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +16,11 @@
 <body class="dashboard-body">
   <!-- Header -->
   <header>
-    <a class="logo" href="index.html">Artisan<span>AISLE</span> <small class="portal-tag">Admin</small></a>
+    <a class="logo" href="index.html" title="Artisan Aisle Storefront">
+      <img class="logo-emblem" src="images/emblem.svg" alt="Artisan Aisle Emblem">
+      <span class="logo-text">Artisan<span>AISLE</span></span>
+      <small class="portal-tag">Admin</small>
+    </a>
     <div class="search">
       <input id="adminSearchInput" type="search" placeholder="Search orders, sellers, users..." aria-label="Search admin">
     </div>

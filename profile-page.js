@@ -37,7 +37,7 @@ function initProfileAuth() {
 function renderProfileData(user) {
   if (!user) return;
 
-  const defaultAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
+  const defaultAvatar = 'images/emblem.svg';
   const avatarUrl = user.avatar || user.photoURL || defaultAvatar;
 
   const avatarImg = document.getElementById('userAvatarImg');
@@ -205,7 +205,7 @@ function setupEditModal() {
     document.getElementById('editCity').value = currentUser.city || '';
     if (urlInput) urlInput.value = '';
     
-    const currentAvatar = currentUser.avatar || currentUser.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+    const currentAvatar = currentUser.avatar || currentUser.photoURL || 'images/emblem.svg';
     if (previewImg) previewImg.src = currentAvatar;
 
     modal.style.display = 'flex';

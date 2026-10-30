@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ArtisanAisle | Handcrafted Filipino Treasures</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="alternate icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta property="og:image" content="images/social-preview.png">
 <link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -13,8 +18,9 @@
 
 <header>
 
-    <a class="logo" href="index.html">
-        🧺 Artisan<span>AISLE</span>
+    <a class="logo" href="index.html" title="Artisan Aisle Storefront">
+        <img class="logo-emblem" src="images/emblem.svg" alt="Artisan Aisle Emblem">
+        <span class="logo-text">Artisan<span>AISLE</span></span>
     </a>
 
     <div class="search">
@@ -47,6 +53,10 @@
     <div class="hero">
 
         <div class="hero-text">
+
+            <div class="hero-brand-badge">
+                <img src="images/logo.svg" alt="Artisan Aisle Complete Logo" class="hero-logo-img">
+            </div>
 
             <h1 id="h11">
                 Discover Unique
@@ -104,7 +114,10 @@
     <!-- Dynamic Products loaded from Firebase Firestore -->
     <div id="homeProductGrid" class="product-grid">
         <div class="catalog-loading">
-            <div class="spinner"></div>
+            <div class="brand-loader-wrap">
+                <img src="images/emblem.svg" alt="Artisan Aisle Emblem" class="brand-loader-emblem">
+                <div class="brand-loader-ring"></div>
+            </div>
             <p>Loading handcrafted treasures...</p>
         </div>
     </div>
@@ -117,7 +130,10 @@
 
     <div id="popularProductGrid" class="product-grid">
         <div class="catalog-loading">
-            <div class="spinner"></div>
+            <div class="brand-loader-wrap">
+                <img src="images/emblem.svg" alt="Artisan Aisle Emblem" class="brand-loader-emblem">
+                <div class="brand-loader-ring"></div>
+            </div>
             <p>Loading popular artisan favorites...</p>
         </div>
     </div>
@@ -159,7 +175,10 @@
         <!-- Dynamic Catalog Grid loaded from Firebase Firestore -->
         <div id="catalogProductGrid" class="product-grid">
             <div class="catalog-loading">
-                <div class="spinner"></div>
+                <div class="brand-loader-wrap">
+                    <img src="images/emblem.svg" alt="Artisan Aisle Emblem" class="brand-loader-emblem">
+                    <div class="brand-loader-ring"></div>
+                </div>
                 <p>Loading products from artisans...</p>
             </div>
         </div>
@@ -772,8 +791,14 @@
 </div>
 
 
-<footer>
-    <p>© 2026 ArtisanAisle | Supporting Local Filipino Artisans</p>
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-brand">
+            <img src="images/logo.svg" alt="Artisan Aisle Complete Logo" class="footer-logo">
+            <p class="footer-tagline">Connecting local Filipino artisans with mindful patrons worldwide. Preserving cultural heritage, one handcrafted piece at a time.</p>
+        </div>
+        <p class="footer-copy">&copy; 2026 Artisan Aisle. All rights reserved. | Supporting Local Filipino Artisans &amp; Communities 🇵🇭</p>
+    </div>
 </footer>
 
 

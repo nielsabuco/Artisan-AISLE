@@ -38,7 +38,7 @@ export function updateHeaderAuth() {
       ? '<span class="header-role-badge admin">Admin</span>' 
       : (isSeller ? '<span class="header-role-badge seller">Seller</span>' : '');
 
-    const avatarUrl = user.avatar || user.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
+    const avatarUrl = user.avatar || user.photoURL || 'images/emblem.svg';
     const displayName = (user.name || (user.email ? user.email.split('@')[0] : 'User')).split(' ')[0];
 
     userMenu.innerHTML = `

@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Seller Portal | ArtisanAisle</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="alternate icon" href="favicon.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
   <script type="module" src="export-utils.js"></script>
 </head>
@@ -11,7 +15,10 @@
 
   <!-- Header -->
   <header>
-    <a class="logo" href="index.html">🧺 Artisan<span>AISLE</span></a>
+    <a class="logo" href="index.html" title="Artisan Aisle Storefront">
+      <img class="logo-emblem" src="images/emblem.svg" alt="Artisan Aisle Emblem" />
+      <span class="logo-text">Artisan<span>AISLE</span></span>
+    </a>
     <div class="seller-header-badge">
       <span class="portal-tag">Artisan Seller Portal</span>
     </div>
@@ -24,7 +31,9 @@
   <!-- Access Restricted Screen (Shown to non-sellers or unapproved accounts) -->
   <div id="sellerRestrictedGate" class="portal-gate" style="display: none;">
     <div class="gate-card">
-      <div class="gate-icon">🔒</div>
+      <div class="seller-brand-header">
+        <img src="images/logo.svg" alt="Artisan Aisle Logo" class="seller-portal-logo" />
+      </div>
       <h2>Seller Access Restricted</h2>
       <p id="gateMessage">Only approved artisan sellers can access the Seller Portal. If you have applied, your application is currently under admin review.</p>
       <div class="gate-actions">
@@ -36,7 +45,10 @@
 
   <!-- Loading State -->
   <div id="sellerLoading" class="portal-loading">
-    <div class="spinner"></div>
+    <div class="brand-loader-wrap">
+      <img src="images/emblem.svg" alt="Artisan Aisle Emblem" class="brand-loader-emblem" />
+      <div class="brand-loader-ring"></div>
+    </div>
     <p>Authenticating seller profile...</p>
   </div>
 
@@ -150,8 +162,14 @@
     </div>
   </div>
 
-  <footer>
-    <p>© 2026 ArtisanAisle | Empowering Local Filipino Artisans</p>
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <img src="images/logo.svg" alt="Artisan Aisle Complete Logo" class="footer-logo" />
+        <p class="footer-tagline">Empowering local Filipino artisans through fair commerce, sustainable livelihood, and cultural preservation.</p>
+      </div>
+      <p class="footer-copy">&copy; 2026 Artisan Aisle. All rights reserved. | Artisan Seller Portal 🇵🇭</p>
+    </div>
   </footer>
 
   <script type="module" src="firebase-config.js"></script>
