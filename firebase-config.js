@@ -1202,6 +1202,56 @@ export const ArtisanDB = {
     });
   },
 
+  // --- Seller Salary Payouts & 15% Platform Fee Tracking ---
+  subscribeSellerPayouts(sellerId, callback) {
+    if (!sellerId) {
+      callback([]);
+      return () => {};
+    }
+    const q = query(collection(db, 'seller_payouts'), where('sellerId', '==', sellerId));
+    return onSnapshot(q, (snap) => {
+      const payouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      payouts.sort((a, b) => (b.monthKey || '').localeCompare(a.monthKey || ''));
+      callback(payouts);
+    }, (err) => {
+      console.warn('Seller payouts listener warning:', err);
+      callback([]);
+    });
+  },
+
+  subscribeAllPayouts(callback) {
+    return onSnapshot(collection(db, 'seller_payouts'), (snap) => {
+      const payouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      payouts.sort((a, b) => (b.monthKey || '').localeCompare(a.monthKey || ''));
+      callback(payouts);
+    }, (err) => {
+      console.warn('All payouts listener warning:', err);
+      callback([]);
+    });
+  },
+
+  async recordOrUpdatePayout(payoutId, payoutData) {
+    if (!payoutId) return;
+    const ref = doc(db, 'seller_payouts', payoutId);
+    await setDoc(ref, {
+      ...payoutData,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  },
+
+  async disburseSellerPayout(payoutId, disburseInfo = {}) {
+    if (!payoutId) return;
+    const ref = doc(db, 'seller_payouts', payoutId);
+    await setDoc(ref, {
+      ...disburseInfo,
+      status: 'Disbursed',
+      referenceNumber: disburseInfo.referenceNumber || '',
+      disbursedAt: serverTimestamp(),
+      disbursedBy: disburseInfo.adminEmail || 'Admin',
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  },
+
   async updateOrderStatus(orderId, orderStatus, paymentStatus) {
     const updates = { updatedAt: serverTimestamp() };
     if (orderStatus) updates.orderStatus = orderStatus;

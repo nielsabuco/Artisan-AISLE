@@ -5255,6 +5255,187 @@ button.sidebar-btn.active svg {
   opacity: 0.9;
 }
 
+/* Salary & Payouts System */
+.payout-policy-banner {
+  background: linear-gradient(135deg, #fdfbf7 0%, #f4ede2 100%);
+  border: 1.5px solid #dcd1be;
+  border-left: 5px solid #166534;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.payout-policy-banner .notice-icon {
+  font-size: 26px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.payout-policy-banner .notice-content h4 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  color: #1e472d;
+  font-family: Georgia, serif;
+}
+
+.payout-policy-banner .notice-content p {
+  margin: 0 0 10px 0;
+  font-size: 13.5px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.payout-fee-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.fee-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.fee-chip.chip-gateway {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.fee-chip.chip-maint {
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+.fee-chip.chip-payout {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.payout-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.payout-stat-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px 20px;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.payout-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.payout-stat-card.highlight {
+  border-color: #22c55e;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+.payout-stat-card .card-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.payout-stat-card .card-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+  display: block;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.payout-stat-card.highlight .card-value {
+  color: #15803d;
+}
+
+.payout-stat-card .card-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.activity-chart-box {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.activity-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.activity-chart-header h3 {
+  margin: 0;
+  font-family: Georgia, serif;
+  color: #1e472d;
+  font-size: 18px;
+}
+
+.chart-canvas-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: #fdfcf9;
+  border: 1px solid #eef0ea;
+  padding: 12px;
+}
+
+.chart-canvas-wrap canvas {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.status-badge.status-disbursed {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+.status-badge.status-scheduled {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border: 1px solid #fde68a !important;
+}
+
 /* Universal Modal Styles */
 .modal-backdrop,
 .seller-login-modal {

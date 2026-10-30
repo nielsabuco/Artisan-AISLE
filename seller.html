@@ -69,6 +69,7 @@
           <button class="nav-item" data-view="products" onclick="setSellerView('products')">My Products</button>
           <button class="nav-item" data-view="add-product" onclick="setSellerView('add-product')">Add Product</button>
           <button class="nav-item" data-view="orders" onclick="setSellerView('orders')">Orders</button>
+          <button class="nav-item" data-view="payouts" onclick="setSellerView('payouts')">💰 Salary & Payouts</button>
           <button class="nav-item" data-view="settings" onclick="setSellerView('settings')">Shop Settings</button>
           <button class="nav-item" onclick="window.location.href='index.html'">Storefront</button>
           <button class="nav-item logout" onclick="handleSellerLogout()">Logout</button>
@@ -158,6 +159,23 @@
       <div class="modal-actions-row">
         <button type="button" class="secondary-btn" onclick="closeSellerTrackingModal()">Cancel</button>
         <button type="button" class="primary-btn" id="saveSellerTrackBtn" onclick="submitSellerTrackingUpdate()">Save Tracking & Broadcast</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seller Monthly Salary Payout Itemized Breakdown Modal -->
+  <div id="sellerPayoutBreakdownModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 720px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h2 style="margin: 0; font-size: 20px; color: #285c3b;" id="breakdownModalTitle">Monthly Salary Breakdown</h2>
+        <button type="button" class="close-modal-btn" onclick="closePayoutBreakdownModal()">&times;</button>
+      </div>
+      <p style="color: #666; font-size: 13px; margin-bottom: 16px;">
+        Itemized orders and fee breakdown for this monthly payout cycle (15% total deduction: 2% direct payment handling, 13% website maintenance).
+      </p>
+      <div id="breakdownModalContent" style="max-height: 400px; overflow-y: auto;"></div>
+      <div style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="secondary-btn" onclick="closePayoutBreakdownModal()">Close</button>
       </div>
     </div>
   </div>
@@ -296,6 +314,8 @@
         renderAddProductView(container);
       } else if (currentActiveView === 'orders') {
         renderOrdersView(container);
+      } else if (currentActiveView === 'payouts') {
+        renderPayoutsView(container);
       } else if (currentActiveView === 'settings') {
         renderSettingsView(container);
       }
@@ -308,6 +328,7 @@
       const totalRevenue = sellerOrders
         .filter(o => o.paymentStatus === 'Paid')
         .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+      const totalNetSalary = Math.round(totalRevenue * 0.85);
       const lowStockCount = sellerProducts.filter(p => (Number(p.stock) || 0) < 5).length;
 
       container.innerHTML = `
@@ -332,6 +353,22 @@
           </div>
         </div>
 
+        <!-- 15% Platform Deduction Policy Banner -->
+        <div class="payout-policy-banner">
+          <div class="notice-icon">📢</div>
+          <div class="notice-content">
+            <h4>Artisan Salary & Platform Fee Policy</h4>
+            <p>
+              Per Artisan Aisle creator terms, a transparent <strong>15% platform deduction</strong> is automatically applied to fulfilled item sales:
+            </p>
+            <div class="payout-fee-chips">
+              <span class="fee-chip chip-gateway">💳 2% Direct Payment Processing</span>
+              <span class="fee-chip chip-maint">🛠️ 13% Website Maintenance</span>
+              <span class="fee-chip chip-payout">💰 85% Net Take-Home Salary</span>
+            </div>
+          </div>
+        </div>
+
         <div class="summary-grid">
           <div class="summary-box">
             <h3>My Products</h3>
@@ -344,6 +381,11 @@
           <div class="summary-box">
             <h3>Verified Sales</h3>
             <p>₱${totalRevenue.toLocaleString()}.00</p>
+          </div>
+          <div class="summary-box" style="border-left: 4px solid #166534; cursor: pointer;" onclick="setSellerView('payouts')">
+            <h3>Net Salary (85%)</h3>
+            <p style="color: #166534;">₱${totalNetSalary.toLocaleString()}.00</p>
+            <small style="color: #666; font-size: 11px;">View Salary Payouts →</small>
           </div>
           <div class="summary-box">
             <h3>Low Stock Alerts</h3>
@@ -628,6 +670,589 @@
         </div>
       `;
     }
+
+    // ==========================================
+    // View: Salary Payouts & Monthly Activity
+    // ==========================================
+    let sellerMonthlyPayouts = [];
+
+    function computeSellerMonthlyPayouts() {
+      const map = new Map();
+
+      sellerOrders.forEach(o => {
+        const d = o.createdAt?.seconds ? new Date(o.createdAt.seconds * 1000) : (o.createdAt ? new Date(o.createdAt) : new Date());
+        const yearMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const monthLabel = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+        if (!map.has(yearMonth)) {
+          map.set(yearMonth, {
+            monthKey: yearMonth,
+            monthLabel: monthLabel,
+            year: d.getFullYear(),
+            monthIndex: d.getMonth(),
+            orders: [],
+            grossSales: 0,
+            gatewayFee: 0,
+            maintenanceFee: 0,
+            totalDeductions: 0,
+            netSalary: 0,
+            orderCount: 0
+          });
+        }
+
+        const mData = map.get(yearMonth);
+        mData.orders.push(o);
+        mData.orderCount++;
+
+        let orderGross = 0;
+        if (Array.isArray(o.items) && o.items.length > 0) {
+          const myItems = o.items.filter(it => 
+            !it.sellerId || 
+            it.sellerId === currentSellerUser.uid || 
+            (currentSellerProfile?.id && it.sellerId === currentSellerProfile.id) ||
+            (currentSellerProfile?.name && it.sellerName === currentSellerProfile.name)
+          );
+          if (myItems.length > 0) {
+            orderGross = myItems.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+          } else {
+            orderGross = Number(o.total || 0);
+          }
+        } else {
+          orderGross = Number(o.total || 0);
+        }
+
+        mData.grossSales += orderGross;
+      });
+
+      const result = Array.from(map.values()).map(m => {
+        m.gatewayFee = Math.round(m.grossSales * 0.02 * 100) / 100;
+        m.maintenanceFee = Math.round(m.grossSales * 0.13 * 100) / 100;
+        m.totalDeductions = Math.round(m.grossSales * 0.15 * 100) / 100;
+        m.netSalary = Math.round((m.grossSales - m.totalDeductions) * 100) / 100;
+        return m;
+      });
+
+      if (result.length === 0) {
+        const curD = new Date();
+        const curYM = `${curD.getFullYear()}-${String(curD.getMonth() + 1).padStart(2, '0')}`;
+        result.push({
+          monthKey: curYM,
+          monthLabel: curD.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
+          year: curD.getFullYear(),
+          monthIndex: curD.getMonth(),
+          orders: [],
+          grossSales: 0,
+          gatewayFee: 0,
+          maintenanceFee: 0,
+          totalDeductions: 0,
+          netSalary: 0,
+          orderCount: 0
+        });
+      }
+
+      result.sort((a, b) => b.monthKey.localeCompare(a.monthKey));
+      return result;
+    }
+
+    function renderPayoutsView(container) {
+      sellerMonthlyPayouts = computeSellerMonthlyPayouts();
+
+      const allTimeGross = sellerMonthlyPayouts.reduce((acc, m) => acc + m.grossSales, 0);
+      const allTimeGateway = sellerMonthlyPayouts.reduce((acc, m) => acc + m.gatewayFee, 0);
+      const allTimeMaint = sellerMonthlyPayouts.reduce((acc, m) => acc + m.maintenanceFee, 0);
+      const allTimeNet = sellerMonthlyPayouts.reduce((acc, m) => acc + m.netSalary, 0);
+
+      const gcashName = currentSellerProfile?.gcashName || currentSellerProfile?.name || 'Verified Artisan';
+      const gcashNumber = currentSellerProfile?.gcashNumber || currentSellerProfile?.phone || 'Not Configured';
+
+      container.innerHTML = `
+        <div class="admin-content-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+          <div>
+            <h1>Artisan Salary & Monthly Payouts</h1>
+            <p>Track your gross item revenue, 15% platform fee deduction, and net salary payouts disbursed to your GCash.</p>
+          </div>
+          <div class="export-btn-cluster">
+            <button type="button" class="btn-export-json" onclick="downloadMonthlyChartPng()" title="Download the monthly financial earnings chart as a PNG image">
+              📥 Download Activity Chart (PNG)
+            </button>
+            <button type="button" class="btn-export-excel" onclick="downloadMonthlyActivityExcel()" title="Export all monthly payout data to Excel">
+              📊 Export Monthly Report (Excel)
+            </button>
+            <button type="button" class="btn-export-word" onclick="downloadAllPayoutsWord()" title="Export complete salary statements to Word">
+              📄 Export Statements (Word)
+            </button>
+          </div>
+        </div>
+
+        <!-- 15% Platform Deduction Policy Banner -->
+        <div class="payout-policy-banner">
+          <div class="notice-icon">📢</div>
+          <div class="notice-content">
+            <h4>Artisan Salary & Platform Fee Policy</h4>
+            <p>
+              To maintain financial transparency and sustain digital marketplace infrastructure, a total of <strong>15% is deducted per fulfilled order</strong> from your gross item income:
+            </p>
+            <div class="payout-fee-chips">
+              <span class="fee-chip chip-gateway">💳 2% Direct Payment Handling (GCash & Gateway Processing)</span>
+              <span class="fee-chip chip-maint">🛠️ 13% Website Maintenance & Cloud Hosting</span>
+              <span class="fee-chip chip-payout">💰 85% Net Take-Home Salary (Disbursed to GCash)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Payout Metrics -->
+        <div class="payout-metrics-grid">
+          <div class="payout-stat-card">
+            <span class="card-label">All-Time Gross Sales (100%)</span>
+            <span class="card-value">₱${allTimeGross.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            <span class="card-badge" style="background:#fef3c7; color:#92400e;">Total Item Sales</span>
+          </div>
+          <div class="payout-stat-card">
+            <span class="card-label">Payment Handling (2%)</span>
+            <span class="card-value" style="color:#b45309;">-₱${allTimeGateway.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            <span class="card-badge" style="background:#fee2e2; color:#991b1b;">Gateway & Processing</span>
+          </div>
+          <div class="payout-stat-card">
+            <span class="card-label">Website Maintenance (13%)</span>
+            <span class="card-value" style="color:#4338ca;">-₱${allTimeMaint.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            <span class="card-badge" style="background:#e0e7ff; color:#3730a3;">Servers & Platform Support</span>
+          </div>
+          <div class="payout-stat-card highlight">
+            <span class="card-label">Net Salary Payout (85%)</span>
+            <span class="card-value">₱${allTimeNet.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            <span class="card-badge" style="background:#dcfce7; color:#15803d;">Your Net Take-Home</span>
+          </div>
+        </div>
+
+        <!-- Monthly Activity Chart Box -->
+        <div class="activity-chart-box">
+          <div class="activity-chart-header">
+            <div>
+              <h3>Monthly Activity & Net Salary Trend</h3>
+              <p style="margin:4px 0 0 0; color:#6b7280; font-size:12.5px;">Visual comparison of Gross Sales (100%), Net Salary Payout (85%), and Platform Deductions (15%)</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="action-btn" style="background:#166534; color:white; border:none; padding:7px 12px; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;" onclick="downloadMonthlyChartPng()">
+                📥 Download Chart (PNG)
+              </button>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="monthlyActivityChart" height="320"></canvas>
+          </div>
+        </div>
+
+        <!-- Monthly Salary Payout Statements Table -->
+        <div class="admin-panel" style="margin-top:25px;">
+          <div class="admin-panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2>Monthly Salary Payout Statements</h2>
+              <p style="margin:4px 0 0 0; color:#6b7280; font-size:12.5px;">Detailed breakdown of monthly earnings, itemized deductions, and downloadable statements.</p>
+            </div>
+            <div style="background: #fdfcf9; border: 1px solid #dcd1be; padding: 6px 12px; border-radius: 8px; font-size: 12.5px;">
+              <strong>GCash Payout Destination:</strong> ${gcashName} (<code>${gcashNumber}</code>)
+            </div>
+          </div>
+          <div class="table-box">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Payout Period</th>
+                  <th>Orders</th>
+                  <th>Gross Sales</th>
+                  <th>2% Gateway</th>
+                  <th>13% Maint.</th>
+                  <th>Total Fee (15%)</th>
+                  <th>Net Salary (85%)</th>
+                  <th>Payout Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sellerMonthlyPayouts.map(m => {
+                  const statusClass = m.grossSales > 0 ? 'status-active' : 'status-pending';
+                  const statusLabel = m.grossSales > 0 ? 'Disbursed / Scheduled' : 'Zero Balance';
+                  return `
+                    <tr>
+                      <td><strong>${m.monthLabel}</strong></td>
+                      <td>${m.orderCount} order(s)</td>
+                      <td>₱${m.grossSales.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                      <td style="color:#b45309;">-₱${m.gatewayFee.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                      <td style="color:#4338ca;">-₱${m.maintenanceFee.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                      <td style="color:#dc2626; font-weight:600;">-₱${m.totalDeductions.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                      <td style="color:#15803d; font-weight:bold; font-size:14px;">₱${m.netSalary.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                      <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                      <td>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                          <button type="button" class="action-btn" style="background:#185abd; color:white; border:none; padding:5px 9px; border-radius:5px; cursor:pointer; font-weight:600; font-size:11.5px;" onclick="downloadMonthlyStatementWord('${m.monthKey}')" title="Download Word Statement">
+                            Slip (.doc)
+                          </button>
+                          <button type="button" class="action-btn" style="background:#107c41; color:white; border:none; padding:5px 9px; border-radius:5px; cursor:pointer; font-weight:600; font-size:11.5px;" onclick="downloadMonthlyStatementExcel('${m.monthKey}')" title="Download Excel Statement">
+                            Sheet (.xls)
+                          </button>
+                          ${m.orderCount > 0 ? `
+                            <button type="button" class="action-btn" style="background:#285c3b; color:white; border:none; padding:5px 9px; border-radius:5px; cursor:pointer; font-weight:600; font-size:11.5px;" onclick="openPayoutBreakdownModal('${m.monthKey}')">
+                              Breakdown
+                            </button>
+                          ` : ''}
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        renderMonthlyActivityCanvasChart(sellerMonthlyPayouts);
+      }, 50);
+    }
+
+    function renderMonthlyActivityCanvasChart(monthlyData) {
+      const canvas = document.getElementById('monthlyActivityChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const displayWidth = canvas.parentElement?.clientWidth || 800;
+      const displayHeight = 320;
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+      ctx.scale(dpr, dpr);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, displayWidth, displayHeight);
+
+      const data = [...monthlyData].reverse().slice(-6);
+      if (data.length === 0) return;
+
+      const chartPadding = { top: 60, right: 30, bottom: 50, left: 75 };
+      const chartWidth = displayWidth - chartPadding.left - chartPadding.right;
+      const chartHeight = displayHeight - chartPadding.top - chartPadding.bottom;
+
+      const maxVal = Math.max(...data.map(d => Math.max(d.grossSales, d.netSalary, d.totalDeductions, 1000)), 5000);
+      const roundedMax = Math.ceil(maxVal / 1000) * 1000;
+
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.font = '11px Segoe UI, sans-serif';
+      ctx.fillStyle = '#6b7280';
+      ctx.textAlign = 'right';
+
+      const ySteps = 4;
+      for (let i = 0; i <= ySteps; i++) {
+        const val = (roundedMax / ySteps) * i;
+        const y = chartPadding.top + chartHeight - (val / roundedMax) * chartHeight;
+        ctx.beginPath();
+        ctx.moveTo(chartPadding.left, y);
+        ctx.lineTo(chartPadding.left + chartWidth, y);
+        ctx.stroke();
+        ctx.fillText(`₱${Math.round(val).toLocaleString()}`, chartPadding.left - 8, y + 4);
+      }
+
+      const groupWidth = chartWidth / data.length;
+      const barWidth = Math.min(22, Math.max(10, (groupWidth - 30) / 3));
+
+      data.forEach((m, idx) => {
+        const groupCenterX = chartPadding.left + idx * groupWidth + groupWidth / 2;
+        const startX = groupCenterX - (barWidth * 3 + 8) / 2;
+
+        const grossH = (m.grossSales / roundedMax) * chartHeight;
+        const netH = (m.netSalary / roundedMax) * chartHeight;
+        const feeH = (m.totalDeductions / roundedMax) * chartHeight;
+
+        const yBase = chartPadding.top + chartHeight;
+
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(startX, yBase - grossH, barWidth, grossH);
+
+        ctx.fillStyle = '#16a34a';
+        ctx.fillRect(startX + barWidth + 4, yBase - netH, barWidth, netH);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(startX + (barWidth + 4) * 2, yBase - feeH, barWidth, feeH);
+
+        ctx.fillStyle = '#374151';
+        ctx.font = 'bold 11px Segoe UI, sans-serif';
+        ctx.textAlign = 'center';
+        const labelParts = m.monthLabel.split(' ');
+        ctx.fillText(labelParts[0].substring(0, 3) + ' ' + (labelParts[1] || ''), groupCenterX, yBase + 20);
+
+        if (m.netSalary > 0) {
+          ctx.fillStyle = '#15803d';
+          ctx.font = 'bold 10px Segoe UI, sans-serif';
+          ctx.fillText(`₱${Math.round(m.netSalary).toLocaleString()}`, groupCenterX, yBase - Math.max(grossH, netH) - 8);
+        }
+      });
+
+      ctx.textAlign = 'left';
+      ctx.font = 'bold 14px Georgia, serif';
+      ctx.fillStyle = '#1e472d';
+      ctx.fillText('Monthly Financial Activity & Net Salary Trend', chartPadding.left, 24);
+
+      const legendY = 44;
+      let legendX = chartPadding.left;
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(legendX, legendY - 9, 12, 12);
+      ctx.fillStyle = '#4b5563';
+      ctx.font = '11px Segoe UI, sans-serif';
+      ctx.fillText('Gross Sales (100%)', legendX + 16, legendY);
+      legendX += 135;
+
+      ctx.fillStyle = '#16a34a';
+      ctx.fillRect(legendX, legendY - 9, 12, 12);
+      ctx.fillStyle = '#4b5563';
+      ctx.fillText('Net Salary (85%)', legendX + 16, legendY);
+      legendX += 125;
+
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(legendX, legendY - 9, 12, 12);
+      ctx.fillStyle = '#4b5563';
+      ctx.fillText('Fees Deducted (15%: 2% Gateway + 13% Maint)', legendX + 16, legendY);
+    }
+
+    function downloadMonthlyChartPng() {
+      const canvas = document.getElementById('monthlyActivityChart');
+      if (!canvas) {
+        alert('Chart is rendering. Please try again in a moment.');
+        return;
+      }
+      const shopName = document.getElementById('sidebarShopName')?.innerText || 'Artisan_Shop';
+      const cleanShop = shopName.replace(/[^a-zA-Z0-9]/g, '_');
+      const a = document.createElement('a');
+      a.download = `ArtisanAisle_${cleanShop}_Monthly_Activity_Chart_${Date.now()}.png`;
+      a.href = canvas.toDataURL('image/png');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function downloadMonthlyActivityExcel() {
+      if (!window.ArtisanExport) return;
+      const shopName = document.getElementById('sidebarShopName')?.innerText || 'Artisan_Shop';
+      const cleanShop = shopName.replace(/[^a-zA-Z0-9]/g, '_');
+      const headers = ['Monthly Period', 'Fulfilled Orders', 'Gross Item Sales (PHP)', 'Direct Payment Handling (2%)', 'Website Maintenance (13%)', 'Total Platform Deductions (15%)', 'Net Artisan Salary Payout (85%)', 'GCash Destination', 'Payout Status'];
+      const rows = sellerMonthlyPayouts.map(m => [
+        m.monthLabel,
+        m.orderCount,
+        m.grossSales.toFixed(2),
+        m.gatewayFee.toFixed(2),
+        m.maintenanceFee.toFixed(2),
+        m.totalDeductions.toFixed(2),
+        m.netSalary.toFixed(2),
+        `${currentSellerProfile?.gcashName || currentSellerProfile?.name || 'Artisan'} (${currentSellerProfile?.gcashNumber || currentSellerProfile?.phone || '-'})`,
+        m.grossSales > 0 ? 'Scheduled / Processed' : 'Zero Balance'
+      ]);
+      window.ArtisanExport.exportToExcel(`ArtisanAisle_${cleanShop}_MonthlyActivityReport_${Date.now()}`, `${shopName} - Monthly Activity & Salary Payouts Report`, headers, rows);
+    }
+
+    function downloadMonthlyStatementWord(monthKey) {
+      if (!window.ArtisanExport) return;
+      const m = sellerMonthlyPayouts.find(item => item.monthKey === monthKey);
+      if (!m) return;
+      const shopName = document.getElementById('sidebarShopName')?.innerText || 'Artisan_Shop';
+      const cleanShop = shopName.replace(/[^a-zA-Z0-9]/g, '_');
+
+      const metadata = {
+        'Document Type': 'Artisan Monthly Salary Payout Statement',
+        'Artisan / Shop': shopName,
+        'Creator Name': currentSellerProfile?.name || 'Verified Artisan',
+        'Payout Period': m.monthLabel,
+        'Disbursement Destination': `GCash - ${currentSellerProfile?.gcashName || currentSellerProfile?.name || '-'} (${currentSellerProfile?.gcashNumber || currentSellerProfile?.phone || '-'})`,
+        'Gross Item Income (100%)': `PHP ${m.grossSales.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+        'Direct Payment Handling Fee (2%)': `-PHP ${m.gatewayFee.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+        'Website Maintenance & Cloud Fee (13%)': `-PHP ${m.maintenanceFee.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+        'Total Platform Deductions (15%)': `-PHP ${m.totalDeductions.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+        'FINAL NET SALARY PAYOUT (85%)': `PHP ${m.netSalary.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+        'Payout Status': m.grossSales > 0 ? 'Disbursed / Scheduled' : 'Zero Balance',
+        'Deduction Policy Notice': '2% fee covers direct payment handling and 13% supports continuous website hosting and security.'
+      };
+
+      const headers = ['Order #', 'Order Date', 'Customer', 'Items Sold', 'Item Gross (PHP)', '2% Gateway Fee', '13% Website Fee', 'Net Salary (85%)'];
+      const rows = (m.orders || []).map(o => {
+        let orderGross = 0;
+        let itemSummary = '';
+        if (Array.isArray(o.items) && o.items.length > 0) {
+          const myItems = o.items.filter(it => !it.sellerId || it.sellerId === currentSellerUser.uid || (currentSellerProfile?.id && it.sellerId === currentSellerProfile.id));
+          const targetItems = myItems.length > 0 ? myItems : o.items;
+          orderGross = targetItems.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+          itemSummary = targetItems.map(it => `${it.quantity}x ${it.name}`).join('; ');
+        } else {
+          orderGross = Number(o.total || 0);
+          itemSummary = 'Handcrafted Item';
+        }
+        const gFee = (orderGross * 0.02).toFixed(2);
+        const mFee = (orderGross * 0.13).toFixed(2);
+        const net = (orderGross * 0.85).toFixed(2);
+        return [
+          o.orderNumber || o.id,
+          o.createdAt?.seconds ? new Date(o.createdAt.seconds * 1000).toLocaleDateString('en-PH') : 'Recent',
+          o.customerName || 'Customer',
+          itemSummary,
+          orderGross.toFixed(2),
+          `-${gFee}`,
+          `-${mFee}`,
+          net
+        ];
+      });
+
+      window.ArtisanExport.exportToWord(`ArtisanAisle_${cleanShop}_SalarySlip_${m.monthKey}_${Date.now()}`, `Artisan Monthly Salary Payout Slip - ${m.monthLabel}`, metadata, headers, rows);
+    }
+
+    function downloadMonthlyStatementExcel(monthKey) {
+      if (!window.ArtisanExport) return;
+      const m = sellerMonthlyPayouts.find(item => item.monthKey === monthKey);
+      if (!m) return;
+      const shopName = document.getElementById('sidebarShopName')?.innerText || 'Artisan_Shop';
+      const cleanShop = shopName.replace(/[^a-zA-Z0-9]/g, '_');
+
+      const headers = ['Order #', 'Order Date', 'Customer Name', 'Items Summary', 'Gross Sales (PHP)', '2% Gateway Fee', '13% Website Maint.', 'Total Deductions (15%)', 'Net Take-Home (85%)'];
+      const rows = (m.orders || []).map(o => {
+        let orderGross = 0;
+        let itemSummary = '';
+        if (Array.isArray(o.items) && o.items.length > 0) {
+          const myItems = o.items.filter(it => !it.sellerId || it.sellerId === currentSellerUser.uid || (currentSellerProfile?.id && it.sellerId === currentSellerProfile.id));
+          const targetItems = myItems.length > 0 ? myItems : o.items;
+          orderGross = targetItems.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+          itemSummary = targetItems.map(it => `${it.quantity}x ${it.name}`).join('; ');
+        } else {
+          orderGross = Number(o.total || 0);
+          itemSummary = 'Handcrafted Item';
+        }
+        const gFee = (orderGross * 0.02).toFixed(2);
+        const mFee = (orderGross * 0.13).toFixed(2);
+        const totFee = (orderGross * 0.15).toFixed(2);
+        const net = (orderGross * 0.85).toFixed(2);
+        return [
+          o.orderNumber || o.id,
+          o.createdAt?.seconds ? new Date(o.createdAt.seconds * 1000).toLocaleDateString('en-PH') : 'Recent',
+          o.customerName || 'Customer',
+          itemSummary,
+          orderGross.toFixed(2),
+          `-${gFee}`,
+          `-${mFee}`,
+          `-${totFee}`,
+          net
+        ];
+      });
+
+      window.ArtisanExport.exportToExcel(`ArtisanAisle_${cleanShop}_SalaryStatement_${m.monthKey}_${Date.now()}`, `${shopName} - Payout Statement (${m.monthLabel})`, headers, rows);
+    }
+
+    function downloadAllPayoutsWord() {
+      if (!window.ArtisanExport) return;
+      const shopName = document.getElementById('sidebarShopName')?.innerText || 'Artisan_Shop';
+      const cleanShop = shopName.replace(/[^a-zA-Z0-9]/g, '_');
+      const allTimeGross = sellerMonthlyPayouts.reduce((acc, m) => acc + m.grossSales, 0);
+      const allTimeNet = sellerMonthlyPayouts.reduce((acc, m) => acc + m.netSalary, 0);
+
+      const metadata = {
+        'Report Type': 'Artisan Lifetime Salary Payouts & Platform Fee Log',
+        'Shop Name': shopName,
+        'Creator': currentSellerProfile?.name || 'Verified Artisan',
+        'Destination Account': `GCash - ${currentSellerProfile?.gcashName || currentSellerProfile?.name || '-'} (${currentSellerProfile?.gcashNumber || currentSellerProfile?.phone || '-'})`,
+        'All-Time Gross Sales': `PHP ${allTimeGross.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+        'Total Platform Deductions (15%)': `PHP ${(allTimeGross * 0.15).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+        'Total Net Take-Home Salary (85%)': `PHP ${allTimeNet.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+        'Policy': '15% fee breakdown: 2% payment gateway handling, 13% website maintenance and servers.'
+      };
+
+      const headers = ['Monthly Period', 'Orders Count', 'Gross Sales (PHP)', '2% Gateway Fee', '13% Website Fee', 'Total 15% Deductions', 'Net Salary Payout (85%)'];
+      const rows = sellerMonthlyPayouts.map(m => [
+        m.monthLabel,
+        m.orderCount,
+        `PHP ${m.grossSales.toFixed(2)}`,
+        `-PHP ${m.gatewayFee.toFixed(2)}`,
+        `-PHP ${m.maintenanceFee.toFixed(2)}`,
+        `-PHP ${m.totalDeductions.toFixed(2)}`,
+        `PHP ${m.netSalary.toFixed(2)}`
+      ]);
+
+      window.ArtisanExport.exportToWord(`ArtisanAisle_${cleanShop}_AllPayoutsReport_${Date.now()}`, `${shopName} - Lifetime Salary & Payouts Report`, metadata, headers, rows);
+    }
+
+    function openPayoutBreakdownModal(monthKey) {
+      const m = sellerMonthlyPayouts.find(item => item.monthKey === monthKey);
+      if (!m) return;
+
+      document.getElementById('breakdownModalTitle').innerText = `Salary Breakdown - ${m.monthLabel}`;
+      const container = document.getElementById('breakdownModalContent');
+
+      const rowsHtml = (m.orders || []).map(o => {
+        let orderGross = 0;
+        let itemsHtml = '';
+        if (Array.isArray(o.items) && o.items.length > 0) {
+          const myItems = o.items.filter(it => !it.sellerId || it.sellerId === currentSellerUser.uid || (currentSellerProfile?.id && it.sellerId === currentSellerProfile.id));
+          const targetItems = myItems.length > 0 ? myItems : o.items;
+          orderGross = targetItems.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+          itemsHtml = targetItems.map(it => `<div>• <strong>${it.name}</strong> x ${it.quantity} (₱${Number(it.price).toFixed(2)})</div>`).join('');
+        } else {
+          orderGross = Number(o.total || 0);
+          itemsHtml = '<div>Handcrafted Item</div>';
+        }
+        const gFee = (orderGross * 0.02).toFixed(2);
+        const mFee = (orderGross * 0.13).toFixed(2);
+        const net = (orderGross * 0.85).toFixed(2);
+
+        return `
+          <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:10px 8px;">
+              <strong>${o.orderNumber || o.id}</strong><br>
+              <small style="color:#666;">${o.customerName || 'Customer'}</small>
+            </td>
+            <td style="padding:10px 8px; font-size:12.5px;">${itemsHtml}</td>
+            <td style="padding:10px 8px;">₱${orderGross.toFixed(2)}</td>
+            <td style="padding:10px 8px; color:#b45309;">-₱${gFee}</td>
+            <td style="padding:10px 8px; color:#4338ca;">-₱${mFee}</td>
+            <td style="padding:10px 8px; color:#15803d; font-weight:bold;">₱${net}</td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div style="background:#f4f9f4; border:1px solid #bbf7d0; padding:12px; border-radius:8px; margin-bottom:14px; font-size:13px;">
+          <strong>Monthly Summary:</strong> Gross Item Sales: <strong>₱${m.grossSales.toFixed(2)}</strong> | 
+          Gateway (2%): <strong style="color:#b45309;">-₱${m.gatewayFee.toFixed(2)}</strong> | 
+          Maintenance (13%): <strong style="color:#4338ca;">-₱${m.maintenanceFee.toFixed(2)}</strong> | 
+          <strong>Net Salary (85%): <span style="color:#15803d;">₱${m.netSalary.toFixed(2)}</span></strong>
+        </div>
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#285c3b; color:white; text-align:left;">
+              <th style="padding:8px;">Order / Customer</th>
+              <th style="padding:8px;">Items</th>
+              <th style="padding:8px;">Gross</th>
+              <th style="padding:8px;">2% Gateway</th>
+              <th style="padding:8px;">13% Maint.</th>
+              <th style="padding:8px;">Net (85%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById('sellerPayoutBreakdownModal').style.display = 'flex';
+    }
+
+    function closePayoutBreakdownModal() {
+      const modal = document.getElementById('sellerPayoutBreakdownModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    window.downloadMonthlyChartPng = downloadMonthlyChartPng;
+    window.downloadMonthlyActivityExcel = downloadMonthlyActivityExcel;
+    window.downloadMonthlyStatementWord = downloadMonthlyStatementWord;
+    window.downloadMonthlyStatementExcel = downloadMonthlyStatementExcel;
+    window.downloadAllPayoutsWord = downloadAllPayoutsWord;
+    window.openPayoutBreakdownModal = openPayoutBreakdownModal;
+    window.closePayoutBreakdownModal = closePayoutBreakdownModal;
 
     // Product Creation Handler
     async function handleSellerAddProduct(event) {

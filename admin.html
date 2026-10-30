@@ -95,6 +95,10 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
           Payment Gateway
         </button>
+        <button type="button" class="sidebar-btn" data-tab="payouts">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="6" x2="12" y2="8"></line><line x1="12" y1="16" x2="12" y2="18"></line></svg>
+          Salary Payouts
+        </button>
       </div>
 
       <div class="sidebar-footer">
@@ -466,6 +470,92 @@
           </ol>
         </div>
       </section>
+
+      <!-- SECTION: SELLER SALARY PAYOUTS & PLATFORM REVENUE -->
+      <section id="tab-payouts" class="admin-tab-section" style="display: none;">
+        <div class="section-header-row">
+          <div>
+            <h1>Seller Salary Payouts & Platform Fee Revenue</h1>
+            <p>15% platform deduction policy (2% direct payment handling, 13% website maintenance) and monthly artisan salary disbursements.</p>
+          </div>
+          <div class="export-btn-cluster">
+            <button type="button" class="btn-export-excel" id="exportAdminPayoutsExcelBtn">
+              Export Payouts (Excel)
+            </button>
+            <button type="button" class="btn-export-word" id="exportAdminPayoutsWordBtn">
+              Export Payouts (Word)
+            </button>
+          </div>
+        </div>
+
+        <div class="payout-policy-banner">
+          <div class="notice-icon">📢</div>
+          <div class="notice-content">
+            <h4>Seller Salary Payout & 15% Platform Deduction Structure</h4>
+            <p>
+              Every artisan order automatically incurs a 15% fee on item gross revenue: <strong>2% direct payment handling</strong> covers payment gateway fees, and <strong>13% website maintenance</strong> funds hosting, continuous security, and craft promotion. Net salary of <strong>85%</strong> is disbursed to the artisan's registered GCash account.
+            </p>
+            <div class="payout-fee-chips">
+              <span class="fee-chip chip-gateway">💳 2% Direct Payment Processing Fund</span>
+              <span class="fee-chip chip-maint">🛠️ 13% Platform & Website Maintenance Fund</span>
+              <span class="fee-chip chip-payout">💰 85% Total Net Artisan Salaries Payable</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="payout-metrics-grid">
+          <div class="payout-stat-card">
+            <span class="card-label">Total Platform Volume</span>
+            <span class="card-value" id="adminTotalGrossSales">₱0.00</span>
+            <span class="card-badge" style="background:#fef3c7; color:#92400e;">Gross Sales</span>
+          </div>
+          <div class="payout-stat-card">
+            <span class="card-label">Payment Handling Fees (2%)</span>
+            <span class="card-value" id="adminTotalGatewayFee" style="color:#b45309;">₱0.00</span>
+            <span class="card-badge" style="background:#fee2e2; color:#991b1b;">Gateway Reserve</span>
+          </div>
+          <div class="payout-stat-card">
+            <span class="card-label">Website Maintenance (13%)</span>
+            <span class="card-value" id="adminTotalMaintFee" style="color:#4338ca;">₱0.00</span>
+            <span class="card-badge" style="background:#e0e7ff; color:#3730a3;">Platform Operations</span>
+          </div>
+          <div class="payout-stat-card highlight">
+            <span class="card-label">Total Net Artisan Salaries (85%)</span>
+            <span class="card-value" id="adminTotalNetSalaries">₱0.00</span>
+            <span class="card-badge" style="background:#dcfce7; color:#15803d;">Net Artisan Earnings</span>
+          </div>
+        </div>
+
+        <div class="filter-toolbar">
+          <div class="search-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="adminPayoutSearchInput" placeholder="Filter by artisan name, shop, or month...">
+          </div>
+        </div>
+
+        <div class="table-responsive-box">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Artisan / Shop</th>
+                <th>Period</th>
+                <th>Orders</th>
+                <th>Gross Income</th>
+                <th>2% Gateway</th>
+                <th>13% Maint.</th>
+                <th>Total Fee (15%)</th>
+                <th>Net Salary (85%)</th>
+                <th>GCash Payout Info</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminPayoutsTableBody">
+              <tr><td colspan="11" class="loading-td">Loading seller salary payouts...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -784,6 +874,44 @@
       <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #eee; padding-top: 14px;">
         <button type="button" class="secondary-btn" id="cancelAdminArtisanModalBtn">Cancel</button>
         <button type="button" class="primary-btn" id="saveAdminArtisanBtn">Save Artisan Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Disburse Payout Modal -->
+  <div id="adminDisburseModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 500px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h2 style="margin: 0; font-size: 20px; color: #285c3b;">Disburse Artisan Salary via GCash</h2>
+        <button type="button" class="close-modal-btn" id="closeAdminDisburseModalBtn">&times;</button>
+      </div>
+      <p style="color: #666; font-size: 13px; margin-bottom: 16px;">
+        Confirm GCash salary disbursement to the artisan (net 85% of item gross income).
+      </p>
+
+      <input type="hidden" id="disburseSellerId">
+      <input type="hidden" id="disburseMonthKey">
+      <input type="hidden" id="disburseNetSalary">
+
+      <div style="background: #fdfcf9; border: 1px solid #dcd1be; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">
+        <div><strong>Artisan / Shop:</strong> <span id="disburseShopName">-</span></div>
+        <div style="margin-top: 4px;"><strong>GCash Account:</strong> <span id="disburseGcashAccount">-</span></div>
+        <div style="margin-top: 6px;"><strong>Net Salary to Send (85%):</strong> <strong style="color: #15803d; font-size: 18px;" id="disburseAmountDisplay">₱0.00</strong></div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">GCash Reference / Transaction No. *</label>
+        <input type="text" id="disburseRefNumber" placeholder="e.g. 100982736451" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-family: monospace;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 18px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Disbursement Notes</label>
+        <input type="text" id="disburseNotes" value="Monthly salary payout transferred via GCash Express Send" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit;">
+      </div>
+
+      <div class="modal-actions-row" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="secondary-btn" id="cancelAdminDisburseBtn">Cancel</button>
+        <button type="button" class="primary-btn" id="confirmDisburseBtn">Confirm Disbursement</button>
       </div>
     </div>
   </div>
