@@ -53,35 +53,60 @@
   </div>
 
   <!-- Main Seller Portal (Only for approved sellers) -->
-  <main id="sellerPortalMain" class="dashboard-wrap" style="display: none;">
-    <div class="dashboard">
-      
-      <!-- Sidebar Navigation (Clean, professional labels without emojis) -->
-      <aside class="sidebar">
-        <div class="seller-sidebar-profile">
-          <h3 id="sidebarShopName">My Artisan Shop</h3>
-          <p id="sidebarSellerName">Verified Artisan</p>
-          <span class="status-badge status-active">Approved Seller</span>
+  <main id="sellerPortalMain" class="dashboard-container" style="display: none;">
+    <!-- Sidebar Navigation (Matching Admin Portal Design) -->
+    <aside class="dashboard-sidebar seller-sidebar">
+      <div class="sidebar-brand-box seller-brand-box">
+        <h2 id="sidebarShopName">My Artisan Shop</h2>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px;">
+          <span id="sidebarSellerName" style="font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 500;">Verified Artisan</span>
+          <span class="portal-badge" style="background: #d4af37; color: #0d2818; font-weight: 700; font-size: 10.5px; padding: 2px 8px; border-radius: 999px;">Approved Seller</span>
         </div>
+      </div>
 
-        <div class="seller-nav">
-          <button class="nav-item active" data-view="dashboard" onclick="setSellerView('dashboard')">Dashboard</button>
-          <button class="nav-item" data-view="products" onclick="setSellerView('products')">My Products</button>
-          <button class="nav-item" data-view="add-product" onclick="setSellerView('add-product')">Add Product</button>
-          <button class="nav-item" data-view="orders" onclick="setSellerView('orders')">Orders</button>
-          <button class="nav-item" data-view="payouts" onclick="setSellerView('payouts')">💰 Salary & Payouts</button>
-          <button class="nav-item" data-view="settings" onclick="setSellerView('settings')">Shop Settings</button>
-          <button class="nav-item" onclick="window.location.href='index.html'">Storefront</button>
-          <button class="nav-item logout" onclick="handleSellerLogout()">Logout</button>
-        </div>
-      </aside>
+      <div class="sidebar-nav seller-nav">
+        <button type="button" class="sidebar-btn nav-item active" data-view="dashboard" onclick="setSellerView('dashboard')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </button>
+        <button type="button" class="sidebar-btn nav-item" data-view="products" onclick="setSellerView('products')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          My Products (<span id="sidebarProductsBadge">0</span>)
+        </button>
+        <button type="button" class="sidebar-btn nav-item" data-view="add-product" onclick="setSellerView('add-product')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          Add Product
+        </button>
+        <button type="button" class="sidebar-btn nav-item" data-view="orders" onclick="setSellerView('orders')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+          Orders (<span id="sidebarOrdersBadge">0</span>)
+        </button>
+        <button type="button" class="sidebar-btn nav-item" data-view="payouts" onclick="setSellerView('payouts')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="6" x2="12" y2="8"></line><line x1="12" y1="16" x2="12" y2="18"></line></svg>
+          Salary & Payouts
+        </button>
+        <button type="button" class="sidebar-btn nav-item" data-view="settings" onclick="setSellerView('settings')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Shop Settings
+        </button>
+      </div>
 
-      <!-- Dashboard Content View Area -->
-      <section class="dashboard-content">
-        <div id="sellerViewContainer"></div>
-      </section>
+      <div class="sidebar-footer">
+        <a href="index.html" class="sidebar-exit-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Return to Storefront
+        </a>
+        <button type="button" class="sidebar-exit-link logout-link" onclick="handleSellerLogout()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
 
-    </div>
+    <!-- Dashboard Content View Area -->
+    <section class="dashboard-main dashboard-content">
+      <div id="sellerViewContainer"></div>
+    </section>
   </main>
 
   <!-- Edit Stock Modal -->
@@ -186,7 +211,7 @@
         <img src="images/logo.svg" alt="Artisan Aisle Complete Logo" class="footer-logo" />
         <p class="footer-tagline">Empowering local Filipino artisans through fair commerce, sustainable livelihood, and cultural preservation.</p>
       </div>
-      <p class="footer-copy">&copy; 2026 Artisan Aisle. All rights reserved. | Artisan Seller Portal 🇵🇭</p>
+      <p class="footer-copy">&copy; 2026 Artisan Aisle. All rights reserved. | Artisan Seller Portal</p>
     </div>
   </footer>
 
@@ -253,7 +278,7 @@
 
         // Approved! Show Seller Portal Main
         document.getElementById('sellerRestrictedGate').style.display = 'none';
-        document.getElementById('sellerPortalMain').style.display = 'block';
+        document.getElementById('sellerPortalMain').style.display = 'grid';
 
         // Load seller info
         const sellerDoc = await window.ArtisanDB.getSeller(user.uid);
@@ -266,19 +291,23 @@
         // Listen to live products for this seller
         window.ArtisanDB.subscribeProducts((allProducts) => {
           sellerProducts = allProducts.filter(p => p.sellerId === user.uid || (p.sellerEmail && p.sellerEmail.toLowerCase() === user.email.toLowerCase()));
+          const pBadge = document.getElementById('sidebarProductsBadge');
+          if (pBadge) pBadge.textContent = sellerProducts.length;
           renderCurrentView();
         });
 
         // Listen to live orders for this seller
         window.ArtisanDB.subscribeSellerOrders(user.uid, (orders) => {
           sellerOrders = orders;
+          const oBadge = document.getElementById('sidebarOrdersBadge');
+          if (oBadge) oBadge.textContent = sellerOrders.length;
           renderCurrentView();
         });
 
         // Check URL parameters for direct view routing (e.g. ?view=add-product)
         const urlParams = new URLSearchParams(window.location.search);
         const requestedView = urlParams.get('view');
-        if (requestedView && ['dashboard', 'products', 'add-product', 'orders', 'analytics', 'settings'].includes(requestedView)) {
+        if (requestedView && ['dashboard', 'products', 'add-product', 'orders', 'payouts', 'analytics', 'settings'].includes(requestedView)) {
           setSellerView(requestedView);
         } else {
           renderCurrentView();
@@ -296,7 +325,7 @@
 
     function setSellerView(viewName) {
       currentActiveView = viewName;
-      document.querySelectorAll('.seller-nav .nav-item').forEach(btn => {
+      document.querySelectorAll('.seller-nav .sidebar-btn, .seller-nav .nav-item').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-view') === viewName);
       });
       renderCurrentView();
@@ -339,15 +368,19 @@
           </div>
           <div class="export-btn-cluster">
             <button type="button" class="btn-export-json" onclick="exportAllSellerData('json')" title="Download all shop data, catalog, and orders as structured JSON">
-              📥 Download All My Shop Data (JSON)
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Download Shop Data (JSON)
             </button>
             <button type="button" class="btn-export-excel" onclick="exportAllSellerData('excel')" title="Download complete shop workbook with catalog and orders in Excel">
-              📊 Download All My Shop Data (Excel)
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+              Download Shop Data (Excel)
             </button>
             <button type="button" class="btn-export-excel" onclick="exportSellerSales('excel')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
               Export Sales (Excel)
             </button>
             <button type="button" class="btn-export-word" onclick="exportSellerSales('word')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               Export Report (Word)
             </button>
           </div>
@@ -355,16 +388,27 @@
 
         <!-- 15% Platform Deduction Policy Banner -->
         <div class="payout-policy-banner">
-          <div class="notice-icon">📢</div>
+          <div class="notice-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </div>
           <div class="notice-content">
             <h4>Artisan Salary & Platform Fee Policy</h4>
             <p>
               Per Artisan Aisle creator terms, a transparent <strong>15% platform deduction</strong> is automatically applied to fulfilled item sales:
             </p>
             <div class="payout-fee-chips">
-              <span class="fee-chip chip-gateway">💳 2% Direct Payment Processing</span>
-              <span class="fee-chip chip-maint">🛠️ 13% Website Maintenance</span>
-              <span class="fee-chip chip-payout">💰 85% Net Take-Home Salary</span>
+              <span class="fee-chip chip-gateway">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                2% Direct Payment Processing
+              </span>
+              <span class="fee-chip chip-maint">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                13% Website Maintenance
+              </span>
+              <span class="fee-chip chip-payout">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="6" x2="12" y2="8"></line><line x1="12" y1="16" x2="12" y2="18"></line></svg>
+                85% Net Take-Home Salary
+              </span>
             </div>
           </div>
         </div>
@@ -602,7 +646,7 @@
                       <span class="status-badge ${trackingClass}">${o.orderStatus || 'Processing'}</span><br>
                       <small style="color:#555;">${o.courier || 'Local Logistics'}</small><br>
                       <small>${o.trackingNumber ? `<code>${o.trackingNumber}</code>` : 'Pending Pickup'}</small>
-                      ${o.currentLocation ? `<br><small style="color:#285c3b;">📍 ${o.currentLocation}</small>` : ''}
+                      ${o.currentLocation ? `<br><small style="color:#285c3b; display:inline-flex; align-items:center; gap:3px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${o.currentLocation}</small>` : ''}
                     </td>
                     <td>
                       <span class="status-badge ${o.orderStatus === 'Delivered' ? 'status-active' : o.orderStatus === 'Shipped' ? 'status-active' : 'status-pending'}">
@@ -773,29 +817,43 @@
           </div>
           <div class="export-btn-cluster">
             <button type="button" class="btn-export-json" onclick="downloadMonthlyChartPng()" title="Download the monthly financial earnings chart as a PNG image">
-              📥 Download Activity Chart (PNG)
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Download Activity Chart (PNG)
             </button>
             <button type="button" class="btn-export-excel" onclick="downloadMonthlyActivityExcel()" title="Export all monthly payout data to Excel">
-              📊 Export Monthly Report (Excel)
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+              Export Monthly Report (Excel)
             </button>
             <button type="button" class="btn-export-word" onclick="downloadAllPayoutsWord()" title="Export complete salary statements to Word">
-              📄 Export Statements (Word)
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              Export Statements (Word)
             </button>
           </div>
         </div>
 
         <!-- 15% Platform Deduction Policy Banner -->
         <div class="payout-policy-banner">
-          <div class="notice-icon">📢</div>
+          <div class="notice-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </div>
           <div class="notice-content">
             <h4>Artisan Salary & Platform Fee Policy</h4>
             <p>
               To maintain financial transparency and sustain digital marketplace infrastructure, a total of <strong>15% is deducted per fulfilled order</strong> from your gross item income:
             </p>
             <div class="payout-fee-chips">
-              <span class="fee-chip chip-gateway">💳 2% Direct Payment Handling (GCash & Gateway Processing)</span>
-              <span class="fee-chip chip-maint">🛠️ 13% Website Maintenance & Cloud Hosting</span>
-              <span class="fee-chip chip-payout">💰 85% Net Take-Home Salary (Disbursed to GCash)</span>
+              <span class="fee-chip chip-gateway">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                2% Direct Payment Handling (GCash & Gateway Processing)
+              </span>
+              <span class="fee-chip chip-maint">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                13% Website Maintenance & Cloud Hosting
+              </span>
+              <span class="fee-chip chip-payout">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="6" x2="12" y2="8"></line><line x1="12" y1="16" x2="12" y2="18"></line></svg>
+                85% Net Take-Home Salary (Disbursed to GCash)
+              </span>
             </div>
           </div>
         </div>
@@ -832,8 +890,9 @@
               <p style="margin:4px 0 0 0; color:#6b7280; font-size:12.5px;">Visual comparison of Gross Sales (100%), Net Salary Payout (85%), and Platform Deductions (15%)</p>
             </div>
             <div style="display:flex; gap:8px;">
-              <button type="button" class="action-btn" style="background:#166534; color:white; border:none; padding:7px 12px; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;" onclick="downloadMonthlyChartPng()">
-                📥 Download Chart (PNG)
+              <button type="button" class="action-btn" style="background:#166534; color:white; border:none; padding:7px 14px; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; display:inline-flex; align-items:center; gap:6px;" onclick="downloadMonthlyChartPng()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download Chart (PNG)
               </button>
             </div>
           </div>

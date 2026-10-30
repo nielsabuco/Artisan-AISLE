@@ -4734,7 +4734,9 @@ button.sidebar-btn.active svg {
 }
 
 .sidebar-btn #pendingBadgeCount,
-.sidebar-btn #artisansCountBadge {
+.sidebar-btn #artisansCountBadge,
+.sidebar-btn #sidebarProductsBadge,
+.sidebar-btn #sidebarOrdersBadge {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -4748,9 +4750,58 @@ button.sidebar-btn.active svg {
 }
 
 .sidebar-btn.active #pendingBadgeCount,
-.sidebar-btn.active #artisansCountBadge {
+.sidebar-btn.active #artisansCountBadge,
+.sidebar-btn.active #sidebarProductsBadge,
+.sidebar-btn.active #sidebarOrdersBadge {
   background: #0d2818 !important;
   color: #d4af37 !important;
+}
+
+.sidebar-footer {
+  margin-top: auto !important;
+  padding-top: 16px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.sidebar-exit-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  color: #c7d8ce !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.sidebar-exit-link svg {
+  stroke: currentColor !important;
+}
+
+.sidebar-exit-link:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.sidebar-exit-link.logout-link {
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+}
+
+.sidebar-exit-link.logout-link:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #ffffff !important;
 }
 
 .dashboard-main {
@@ -7397,6 +7448,10 @@ button.toggle-password-btn svg,
     height: 14px !important;
     min-width: 14px !important;
     min-height: 14px !important;
+  }
+
+  .dashboard-sidebar .sidebar-footer {
+    display: none !important;
   }
 
   .dashboard-main {
