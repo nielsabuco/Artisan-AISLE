@@ -217,13 +217,14 @@
         // Strict Enforcement: Grant access if approved, role is seller, or user is platform admin
         const sellerStatus = String(profile?.sellerStatus || '').toLowerCase();
         const userRole = String(profile?.role || '').toLowerCase();
-        const isApproved = sellerStatus === 'approved' ||
-                           userRole === 'seller' ||
-                           userRole === 'admin' ||
-                           (user.email && window.ArtisanDB?.isEmailAdmin && window.ArtisanDB.isEmailAdmin(user.email));
+        const isApproved = (sellerStatus === 'approved' || userRole === 'seller' || userRole === 'admin' || (user.email && window.ArtisanDB?.isEmailAdmin && window.ArtisanDB.isEmailAdmin(user.email))) && sellerStatus !== 'suspended' && sellerStatus !== 'revoked';
 
         if (!isApproved) {
-          const statusText = sellerStatus === 'pending'
+          const statusText = sellerStatus === 'suspended'
+            ? `Your seller account has been temporarily suspended by the platform administrator.\n\nReason: ${profile?.sellerSuspendReason || 'Account policy compliance review.'}\nPlease contact support for resolution.`
+            : sellerStatus === 'revoked'
+            ? "Your seller access has been revoked by administration. If you have questions, please reach out to administrator support."
+            : sellerStatus === 'pending'
             ? "Your seller application is currently pending admin review. You cannot manage products until approved."
             : sellerStatus === 'rejected'
             ? `Your seller application was not approved. Reason: ${profile?.sellerRejectionReason || 'Requirements not met.'}`

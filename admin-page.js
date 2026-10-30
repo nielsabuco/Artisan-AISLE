@@ -272,8 +272,41 @@ function renderUsersTable(users) {
       }
     } else if (roleClass === 'seller' || u.sellerStatus === 'approved') {
       badgeHtml = `<span class="role-badge seller">ARTISAN SELLER</span>`;
+    } else if (u.sellerStatus === 'suspended') {
+      badgeHtml = `<span class="role-badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">SELLER (SUSPENDED)</span>`;
+    } else if (u.sellerStatus === 'revoked') {
+      badgeHtml = `<span class="role-badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">SELLER (REVOKED)</span>`;
     } else {
       badgeHtml = `<span class="role-badge user">CUSTOMER</span>`;
+    }
+
+    const isSeller = roleClass === 'seller' || u.sellerStatus === 'approved' || u.sellerStatus === 'suspended' || u.sellerStatus === 'revoked';
+    const isSuspended = u.sellerStatus === 'suspended' || u.isSuspended;
+    const isRevoked = u.sellerStatus === 'revoked';
+
+    let sellerControlsHtml = '';
+    if (isSeller) {
+      sellerControlsHtml = `
+        <div class="user-seller-actions-cluster" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px;">
+          ${isSuspended ? `
+            <button type="button" class="action-btn unsuspend-seller-btn" title="Reactivate this seller account and restore their products" style="background: #10b981; color: white; border: none; padding: 5px 9px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer;">
+              ✓ Unsuspend
+            </button>
+          ` : `
+            <button type="button" class="action-btn suspend-seller-btn" title="Temporarily suspend seller privileges and hide products" style="background: #f59e0b; color: #1e293b; border: none; padding: 5px 9px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer;">
+              ⚠️ Suspend
+            </button>
+          `}
+          ${!isRevoked ? `
+            <button type="button" class="action-btn revoke-seller-btn" title="Revoke seller privileges and demote back to customer" style="background: #f1ebd8; color: #78350f; border: 1px solid #dcd1be; padding: 5px 9px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer;">
+              🚫 Revoke Seller
+            </button>
+          ` : ''}
+          <button type="button" class="action-btn delete-seller-btn" title="Permanently delete this seller account and remove all their listed products" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 5px 9px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">
+            🗑️ Delete Seller & Products
+          </button>
+        </div>
+      `;
     }
 
     tr.innerHTML = `
@@ -285,14 +318,70 @@ function renderUsersTable(users) {
       <td>${badgeHtml}</td>
       <td><span class="status-badge ${(u.sellerStatus || 'none').toLowerCase()}">${u.sellerStatus || 'none'}</span></td>
       <td>
-        <button type="button" class="action-btn manage-promo-btn" style="background: ${isAdmin ? '#185abd' : '#285c3b'}; color: white; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; white-space: nowrap;">
-          ${isAdmin ? 'Manage Admin Rights' : 'Promote to Admin'}
-        </button>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div>
+            <button type="button" class="action-btn manage-promo-btn" style="background: ${isAdmin ? '#185abd' : '#285c3b'}; color: white; border: none; padding: 6px 11px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 11.5px; white-space: nowrap;">
+              ${isAdmin ? '👑 Manage Admin Rights' : '+ Promote to Admin'}
+            </button>
+          </div>
+          ${sellerControlsHtml}
+        </div>
       </td>
     `;
 
     tr.querySelector('.manage-promo-btn')?.addEventListener('click', () => {
       openAdminPromotionModal(u);
+    });
+
+    // Suspend Seller
+    tr.querySelector('.suspend-seller-btn')?.addEventListener('click', async () => {
+      const reason = prompt(`Enter reason for suspending seller "${u.name || u.email}":`, 'Policy compliance review');
+      if (reason === null) return;
+      try {
+        const res = await ArtisanDB.suspendSeller(u.id || u.uid, u.email, reason);
+        alert(`Seller "${u.name || u.email}" has been suspended.\n${res.affectedProducts || 0} product(s) are now hidden from the storefront.`);
+      } catch (err) {
+        alert('Failed to suspend seller: ' + err.message);
+      }
+    });
+
+    // Unsuspend Seller
+    tr.querySelector('.unsuspend-seller-btn')?.addEventListener('click', async () => {
+      if (!confirm(`Reactivate seller "${u.name || u.email}"?\n\nTheir seller portal access and ${u.name || 'their'}'s products will be restored to Active status.`)) return;
+      try {
+        const res = await ArtisanDB.unsuspendSeller(u.id || u.uid, u.email);
+        alert(`Seller "${u.name || u.email}" has been reactivated successfully.\n${res.restoredProducts || 0} product(s) are active once again.`);
+      } catch (err) {
+        alert('Failed to unsuspend seller: ' + err.message);
+      }
+    });
+
+    // Revoke Seller Access
+    tr.querySelector('.revoke-seller-btn')?.addEventListener('click', async () => {
+      if (!confirm(`Revoke seller privileges for "${u.name || u.email}"?\n\nThey will be demoted to a regular customer and their products will be deactivated.`)) return;
+      try {
+        const res = await ArtisanDB.revokeSellerAccess(u.id || u.uid, u.email);
+        alert(`Seller access revoked for "${u.name || u.email}".\n${res.updatedProductsCount || 0} product(s) were set to Inactive.`);
+      } catch (err) {
+        alert('Failed to revoke seller access: ' + err.message);
+      }
+    });
+
+    // Delete Seller & All Products
+    tr.querySelector('.delete-seller-btn')?.addEventListener('click', async () => {
+      const warningText = `⚠️ CRITICAL ACTION ⚠️\n\nAre you sure you want to permanently DELETE seller "${u.name || u.email}"?\n\nThis will permanently delete their account AND delete all products they listed from the database!\n\nType DELETE to confirm:`;
+      const confirmed = prompt(warningText);
+      if (confirmed !== 'DELETE') {
+        if (confirmed !== null) alert('Action cancelled: You must type DELETE in capital letters to confirm.');
+        return;
+      }
+
+      try {
+        const res = await ArtisanDB.deleteSellerAndProducts(u.id || u.uid, u.email);
+        alert(`Seller "${u.name || u.email}" and ${res.deletedProductsCount || 0} listed product(s) were permanently deleted from the database.`);
+      } catch (err) {
+        alert('Failed to delete seller and products: ' + err.message);
+      }
     });
 
     tbody.appendChild(tr);

@@ -698,6 +698,239 @@ export const ArtisanDB = {
     return { success: true };
   },
 
+  async revokeSellerAccess(userId, userEmail) {
+    if (!userId) throw new Error('User ID is required');
+
+    // 1. Update user record
+    await updateDoc(doc(db, 'users', userId), {
+      role: 'user',
+      sellerStatus: 'revoked',
+      sellerRevokedAt: serverTimestamp()
+    }).catch(e => console.warn('User revoke warning:', e));
+
+    // 2. Update seller profile if exists
+    try {
+      await updateDoc(doc(db, 'sellers', userId), {
+        status: 'revoked',
+        updatedAt: serverTimestamp()
+      });
+    } catch (e) {}
+
+    // 3. Deactivate products listed by this seller so they no longer appear on storefront
+    let updatedProductsCount = 0;
+    try {
+      const q = query(collection(db, 'products'), where('sellerId', '==', userId));
+      const snap = await getDocs(q);
+      for (const d of snap.docs) {
+        await updateDoc(d.ref, { status: 'Inactive', updatedAt: serverTimestamp() });
+        updatedProductsCount++;
+      }
+
+      if (userEmail) {
+        const q2 = query(collection(db, 'products'), where('sellerEmail', '==', userEmail.toLowerCase()));
+        const snap2 = await getDocs(q2);
+        for (const d of snap2.docs) {
+          await updateDoc(d.ref, { status: 'Inactive', updatedAt: serverTimestamp() });
+          updatedProductsCount++;
+        }
+      }
+    } catch (e) {
+      console.warn('Deactivating products warning:', e);
+    }
+
+    // 4. Send notification
+    await addDoc(collection(db, 'notifications'), {
+      userId,
+      recipientEmail: userEmail || '',
+      title: 'Seller Access Revoked',
+      message: 'Your seller privileges have been revoked by the administration. Your listed products have been set to Inactive.',
+      type: 'seller_revoked',
+      read: false,
+      createdAt: serverTimestamp()
+    }).catch(() => {});
+
+    return { success: true, updatedProductsCount };
+  },
+
+  async suspendSeller(userId, userEmail, reason = 'Account under policy review.') {
+    if (!userId) throw new Error('User ID is required');
+
+    // 1. Update user record
+    await updateDoc(doc(db, 'users', userId), {
+      sellerStatus: 'suspended',
+      isSuspended: true,
+      sellerSuspendReason: reason,
+      sellerSuspendedAt: serverTimestamp()
+    });
+
+    // 2. Update seller doc
+    try {
+      await updateDoc(doc(db, 'sellers', userId), {
+        status: 'suspended',
+        suspendReason: reason,
+        updatedAt: serverTimestamp()
+      });
+    } catch (e) {}
+
+    // 3. Set their products to Suspended
+    let affectedProducts = 0;
+    try {
+      const q = query(collection(db, 'products'), where('sellerId', '==', userId));
+      const snap = await getDocs(q);
+      for (const d of snap.docs) {
+        await updateDoc(d.ref, { status: 'Suspended', updatedAt: serverTimestamp() });
+        affectedProducts++;
+      }
+
+      if (userEmail) {
+        const q2 = query(collection(db, 'products'), where('sellerEmail', '==', userEmail.toLowerCase()));
+        const snap2 = await getDocs(q2);
+        for (const d of snap2.docs) {
+          await updateDoc(d.ref, { status: 'Suspended', updatedAt: serverTimestamp() });
+          affectedProducts++;
+        }
+      }
+    } catch (e) {
+      console.warn('Suspending seller products warning:', e);
+    }
+
+    // 4. Send notification
+    await addDoc(collection(db, 'notifications'), {
+      userId,
+      recipientEmail: userEmail || '',
+      title: 'Seller Account Suspended',
+      message: `Your seller privileges have been temporarily suspended. Reason: ${reason}. Please contact platform support for resolution.`,
+      type: 'seller_suspended',
+      read: false,
+      createdAt: serverTimestamp()
+    }).catch(() => {});
+
+    return { success: true, affectedProducts };
+  },
+
+  async unsuspendSeller(userId, userEmail) {
+    if (!userId) throw new Error('User ID is required');
+
+    await updateDoc(doc(db, 'users', userId), {
+      sellerStatus: 'approved',
+      isSuspended: false,
+      sellerSuspendReason: null,
+      sellerSuspendedAt: null,
+      updatedAt: serverTimestamp()
+    });
+
+    try {
+      await updateDoc(doc(db, 'sellers', userId), {
+        status: 'approved',
+        updatedAt: serverTimestamp()
+      });
+    } catch (e) {}
+
+    // Restore products to Active
+    let restoredProducts = 0;
+    try {
+      const q = query(collection(db, 'products'), where('sellerId', '==', userId));
+      const snap = await getDocs(q);
+      for (const d of snap.docs) {
+        await updateDoc(d.ref, { status: 'Active', updatedAt: serverTimestamp() });
+        restoredProducts++;
+      }
+
+      if (userEmail) {
+        const q2 = query(collection(db, 'products'), where('sellerEmail', '==', userEmail.toLowerCase()));
+        const snap2 = await getDocs(q2);
+        for (const d of snap2.docs) {
+          await updateDoc(d.ref, { status: 'Active', updatedAt: serverTimestamp() });
+          restoredProducts++;
+        }
+      }
+    } catch (e) {
+      console.warn('Restoring seller products warning:', e);
+    }
+
+    await addDoc(collection(db, 'notifications'), {
+      userId,
+      recipientEmail: userEmail || '',
+      title: 'Seller Account Reactivated',
+      message: 'Your seller privileges have been restored by the administration. Your products are active once again.',
+      type: 'seller_reactivated',
+      read: false,
+      createdAt: serverTimestamp()
+    }).catch(() => {});
+
+    return { success: true, restoredProducts };
+  },
+
+  async deleteSellerAndProducts(userId, userEmail) {
+    if (!userId) throw new Error('User ID is required');
+
+    let deletedProductsCount = 0;
+    const deletedProductIds = new Set();
+
+    // 1. Delete all products listed by this seller by sellerId
+    try {
+      const q1 = query(collection(db, 'products'), where('sellerId', '==', userId));
+      const snap1 = await getDocs(q1);
+      for (const d of snap1.docs) {
+        if (!deletedProductIds.has(d.id)) {
+          deletedProductIds.add(d.id);
+          await deleteDoc(d.ref);
+          deletedProductsCount++;
+        }
+      }
+    } catch (e) {
+      console.warn('Error deleting products by sellerId:', e);
+    }
+
+    // 2. Delete all products listed by this seller by sellerEmail
+    if (userEmail) {
+      try {
+        const q2 = query(collection(db, 'products'), where('sellerEmail', '==', userEmail.toLowerCase()));
+        const snap2 = await getDocs(q2);
+        for (const d of snap2.docs) {
+          if (!deletedProductIds.has(d.id)) {
+            deletedProductIds.add(d.id);
+            await deleteDoc(d.ref);
+            deletedProductsCount++;
+          }
+        }
+      } catch (e) {
+        console.warn('Error deleting products by sellerEmail:', e);
+      }
+    }
+
+    // 3. Delete from 'sellers' collection
+    try {
+      await deleteDoc(doc(db, 'sellers', userId));
+    } catch (e) {}
+
+    // 4. Delete user document from 'users' collection (or mark deleted)
+    try {
+      await deleteDoc(doc(db, 'users', userId));
+    } catch (e) {
+      await updateDoc(doc(db, 'users', userId), {
+        role: 'user',
+        sellerStatus: 'deleted',
+        isDeleted: true,
+        updatedAt: serverTimestamp()
+      }).catch(() => {});
+    }
+
+    // 5. Delete any pending or reviewed applications from this user
+    try {
+      const appQ = query(collection(db, 'seller_applications'), where('userId', '==', userId));
+      const appSnap = await getDocs(appQ);
+      for (const a of appSnap.docs) {
+        await deleteDoc(a.ref);
+      }
+    } catch (e) {}
+
+    return {
+      success: true,
+      deletedProductsCount
+    };
+  },
+
   // --- Orders & Payments ---
   async createOrder(orderPayload) {
     const colRef = collection(db, 'orders');

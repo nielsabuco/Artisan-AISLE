@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function startProductsSubscription() {
   ArtisanDB.subscribeProducts((products) => {
     // Only display active products that are not deleted
-    liveProducts = products.filter(p => !p.deleted && p.status !== 'Hidden');
+    liveProducts = products.filter(p => !p.deleted && p.status !== 'Hidden' && p.status !== 'Inactive' && p.status !== 'Suspended');
     renderProducts();
   });
 }
