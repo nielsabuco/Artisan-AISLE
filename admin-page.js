@@ -181,16 +181,34 @@ function renderApplicationsTable(apps) {
     // Attach actions
     if (isPending) {
       tr.querySelector('.approve-btn')?.addEventListener('click', async () => {
-        if (confirm(`Approve seller application for "${app.shopName}"?\n\nThis will elevate their account to Seller and activate their shop profile.`)) {
+        if (confirm(`Approve seller application for "${app.shopName}"?\n\nThis will elevate their account to Seller, generate their temporary login credentials, and dispatch the auto-generated onboarding email.`)) {
           try {
             const res = await ArtisanDB.approveSellerApplication(app.id, app);
-            let msg = `Application for "${app.shopName}" has been APPROVED!\n\nStatus: Seller account is now ACTIVE.\n\nIMPORTANT: The applicant can access the Seller Portal immediately with their current password or Google account!`;
-            if (res.emailSent) {
-              msg += `\n\nA password reset email was dispatched to ${app.email} (advise applicant to check Spam/Junk folder if not in inbox).`;
-            } else if (res.emailError) {
-              msg += `\n\n(Note: Automated email was not sent by Firebase: ${res.emailError}. The seller can log in directly with their current account credentials).`;
+            
+            // Populate and show the dedicated approval success modal
+            const modal = document.getElementById('sellerApprovalSuccessModal');
+            if (modal) {
+              document.getElementById('modalApprovedShopName').textContent = res.shopName || app.shopName;
+              document.getElementById('modalApprovedEmail').textContent = res.cleanEmail || app.email;
+              document.getElementById('modalApprovedPassword').textContent = res.temporaryPassword || 'Generated';
+
+              const copyBtn = document.getElementById('copyApprovedCredentialsBtn');
+              if (copyBtn) {
+                copyBtn.onclick = () => {
+                  const copyText = `Artisan Aisle Seller Credentials\nShop: ${res.shopName}\nEmail: ${res.cleanEmail}\nTemporary Password: ${res.temporaryPassword}\nLogin URL: ${res.loginUrl}`;
+                  navigator.clipboard.writeText(copyText).then(() => {
+                    copyBtn.textContent = '✓ Copied to Clipboard!';
+                    setTimeout(() => { copyBtn.textContent = '📋 Copy Credentials'; }, 2500);
+                  }).catch(() => {
+                    alert('Credentials:\n' + copyText);
+                  });
+                };
+              }
+
+              modal.style.display = 'flex';
+            } else {
+              alert(`Application for "${app.shopName}" has been APPROVED!\n\nEmail: ${res.cleanEmail}\nTemporary Password: ${res.temporaryPassword}\n\nAuto-generated email was dispatched with their login link.`);
             }
-            alert(msg);
           } catch (e) {
             alert('Approval error: ' + e.message);
           }

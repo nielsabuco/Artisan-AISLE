@@ -596,6 +596,43 @@
     </div>
   </div>
 
+  <!-- Seller Approval & Auto-Generated Email Confirmation Modal -->
+  <div id="sellerApprovalSuccessModal" class="modal-backdrop" style="display: none;" onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal-card" style="max-width: 520px; text-align: left;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: #e8f5e9; color: #1d4831; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700;">✓</div>
+        <div>
+          <h3 style="margin: 0; color: #1d4831; font-size: 19px;">Seller Application Approved!</h3>
+          <p style="margin: 2px 0 0; color: #666; font-size: 13px;">Auto-generated email dispatched with temporary credentials</p>
+        </div>
+      </div>
+
+      <div style="background: #fdfaf5; border: 1.5px dashed #c88937; border-radius: 10px; padding: 16px; margin: 16px 0;">
+        <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: #c88937; letter-spacing: 0.5px; margin-bottom: 8px;">Dispatched Seller Credentials</div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px;">
+          <span style="color: #666;">Shop Name:</span>
+          <strong id="modalApprovedShopName" style="color: #1d4831;">Shop Name</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px;">
+          <span style="color: #666;">Recipient Email:</span>
+          <code id="modalApprovedEmail" style="color: #1d4831; background: #ebd9c8; padding: 2px 6px; border-radius: 4px;">email@example.com</code>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px;">
+          <span style="color: #666;">Temporary Password:</span>
+          <code id="modalApprovedPassword" style="color: #c53030; background: #fee2e2; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Artisan#1234</code>
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; color: #744210; background: #fff8e6; padding: 8px 10px; border-radius: 6px;">
+          ℹ️ When the seller logs in with this temporary password, they will automatically be prompted to set a new permanent password before entering the Seller Portal.
+        </div>
+      </div>
+
+      <div class="modal-actions-row">
+        <button type="button" class="secondary-btn" id="copyApprovedCredentialsBtn">📋 Copy Credentials</button>
+        <button type="button" class="primary-btn" onclick="document.getElementById('sellerApprovalSuccessModal').style.display='none'">Done</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="header-auth.js"></script>
   <script type="module" src="admin-page.js"></script>
 </body>

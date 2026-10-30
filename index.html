@@ -292,7 +292,7 @@
 
       <div class="detail-info">
         <h2 id="quickViewName" style="font-family:'Cinzel', serif; font-size:24px; color:#1e3d29; margin:0 0 10px;">Product Name</h2>
-        <div class="detail-rating">★★★★★ <span style="color:#666; font-size:13px;">(Artisan Verified)</span></div>
+        <div id="quickViewRatingBlock" class="detail-rating">★★★★★ <span style="color:#666; font-size:13px;">(Artisan Verified)</span></div>
         <div id="quickViewPrice" class="detail-price">₱0.00</div>
 
         <div class="detail-seller-card">
@@ -1199,6 +1199,20 @@ function openProductQuickView(productId) {
     document.getElementById("quickViewCategory").innerText = (product.category || "Handicraft").toUpperCase();
     document.getElementById("quickViewQuantity").innerText = quickViewQty;
 
+    const qvRatingVal = Number(product.rating || 5).toFixed(1);
+    const qvCount = Number(product.reviewsCount || product.reviews || 0);
+    const qvRatingEl = document.getElementById("quickViewRatingBlock");
+    if (qvRatingEl) {
+      qvRatingEl.innerHTML = `
+        <span style="color:#c88937;">★★★★★</span>
+        <strong style="color:#1d4831; margin-left:4px;">${qvRatingVal}</strong>
+        <span style="color:#666; font-size:12.5px; margin-left:4px;">(${qvCount > 0 ? qvCount + ' reviews' : 'Verified'})</span>
+        <a href="review.html?productId=${product.id || ''}&productName=${encodeURIComponent(product.name)}" style="margin-left:10px; color:#1d4831; font-weight:700; font-size:12px; text-decoration:underline;">
+          ★ Write Review
+        </a>
+      `;
+    }
+
     const stock = Number(product.stock || 0);
     const stockEl = document.getElementById("quickViewStockIndicator");
     const addBtn = document.getElementById("quickViewAddCartBtn");
@@ -1270,6 +1284,20 @@ function showProduct(productId) {
     document.getElementById("detailSellerInitial").innerText = (product.sellerName || "A").charAt(0).toUpperCase();
     document.getElementById("detailCategory").innerText = (product.category || "Handicraft").toUpperCase();
     document.getElementById("quantity").innerText = quantity;
+
+    const ratingVal = Number(product.rating || 5).toFixed(1);
+    const reviewsCount = Number(product.reviewsCount || product.reviews || 0);
+    const reviewEl = document.getElementById("detailReviews");
+    if (reviewEl) {
+      reviewEl.innerHTML = `
+        <span style="color:#c88937; font-size:16px;">★★★★★</span>
+        <strong style="color:#1d4831; margin-left:4px;">${ratingVal}</strong>
+        <span style="color:#666; font-size:13px; margin-left:4px;">(${reviewsCount > 0 ? reviewsCount + ' verified reviews' : 'Community Reviewed'})</span>
+        <a href="review.html?productId=${product.id || ''}&productName=${encodeURIComponent(product.name)}" style="margin-left:12px; color:#1d4831; font-weight:700; font-size:13px; text-decoration:underline;">
+          ★ Write a Review
+        </a>
+      `;
+    }
 
     const stock = Number(product.stock || 0);
     const stockEl = document.getElementById("detailStockStatus");

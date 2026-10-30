@@ -17,6 +17,16 @@
         <img src="images/logo.svg" alt="Artisan Aisle Complete Logo" class="auth-brand-logo" />
       </a>
     </div>
+    <div id="sellerApprovedNotice" style="display: none; background: #e8f5e9; border: 1.5px solid #2e7d32; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; text-align: left;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-size: 18px;">🎉</span>
+        <strong style="color: #1b5e20; font-size: 15px;">Seller Account Approved!</strong>
+      </div>
+      <p style="margin: 0; font-size: 13px; color: #2e7d32; line-height: 1.5;">
+        Welcome to the Artisan Aisle Seller Network! Please log in using the temporary password sent to your email. You will automatically be prompted to choose your permanent password.
+      </p>
+    </div>
+
     <h1>Login</h1>
     <p style="color:#666; font-size:14px; margin-bottom:15px;">Sign in to your ArtisanAisle account.</p>
 
@@ -42,6 +52,39 @@
     </div>
     <div class="link" style="margin-top:10px;">
       <a href="index.html">Back to Storefront</a>
+    </div>
+  </div>
+
+  <!-- Mandatory Change Password Modal for Newly Approved Sellers -->
+  <div id="changePasswordModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 440px; text-align: left;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: #fef3c7; color: #92400e; display: flex; align-items: center; justify-content: center; font-size: 22px;">🔐</div>
+        <div>
+          <h2 style="margin: 0; color: #1d4831; font-size: 20px;">Set Permanent Password</h2>
+          <p style="margin: 2px 0 0; color: #666; font-size: 13px;">Required security step for approved sellers</p>
+        </div>
+      </div>
+
+      <p style="font-size: 13.5px; color: #444; line-height: 1.5; margin-bottom: 18px;">
+        Congratulations on your seller approval! Because you logged in using your temporary credentials, please choose a permanent, secure password to access your Seller Portal.
+      </p>
+
+      <form id="changePasswordForm" onsubmit="handleSetNewPassword(event)">
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-weight: 600; font-size: 13px; color: #333; margin-bottom: 6px;">New Permanent Password (min. 6 characters)</label>
+          <input type="password" id="newPermanentPass" placeholder="Enter new secure password" required minlength="6" style="width: 100%; padding: 10px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box;" />
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-weight: 600; font-size: 13px; color: #333; margin-bottom: 6px;">Confirm New Password</label>
+          <input type="password" id="confirmPermanentPass" placeholder="Re-enter new password" required minlength="6" style="width: 100%; padding: 10px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box;" />
+        </div>
+
+        <button type="submit" id="saveNewPassBtn" class="primary-btn" style="width: 100%; padding: 12px; font-size: 15px; font-weight: 700;">
+          Save Password &amp; Enter Seller Portal →
+        </button>
+      </form>
     </div>
   </div>
 
@@ -123,7 +166,9 @@
       }
     }
 
-    function handlePostAuthRedirect(user) {
+    let authenticatedUserPendingPassword = null;
+
+    async function handlePostAuthRedirect(user) {
       const urlParams = new URLSearchParams(window.location.search);
       const redirectTarget = urlParams.get('redirect');
 
@@ -133,6 +178,25 @@
       }
 
       const db = window.ArtisanDB || window.firebaseApi;
+
+      // Check if user is required to change their temporary password
+      let freshProfile = user;
+      if (db && db.getUserProfile && user?.uid) {
+        try {
+          const fetched = await db.getUserProfile(user.uid);
+          if (fetched) freshProfile = { ...user, ...fetched };
+        } catch (e) {}
+      }
+
+      if (freshProfile?.mustChangePassword) {
+        authenticatedUserPendingPassword = freshProfile;
+        const modal = document.getElementById('changePasswordModal');
+        if (modal) {
+          modal.style.display = 'flex';
+          return;
+        }
+      }
+
       const isAdmin = user && (String(user.role || '').toLowerCase() === 'admin' || (db && db.isEmailAdmin && db.isEmailAdmin(user.email)));
 
       if (isAdmin) {
@@ -140,19 +204,72 @@
         return;
       }
 
-      if (user && (user.role === 'seller' || user.sellerStatus === 'approved')) {
-        const gotoSeller = confirm('Welcome back, Artisan! Would you like to go to your Seller Portal?');
-        if (gotoSeller) {
-          window.location.href = 'seller.html';
-          return;
-        }
+      if (freshProfile && (freshProfile.role === 'seller' || freshProfile.sellerStatus === 'approved')) {
+        window.location.href = 'seller.html';
+        return;
       }
 
       window.location.href = 'profile.html';
     }
 
+    async function handleSetNewPassword(event) {
+      event.preventDefault();
+      const newPass = document.getElementById('newPermanentPass').value;
+      const confirmPass = document.getElementById('confirmPermanentPass').value;
+      const btn = document.getElementById('saveNewPassBtn');
+
+      if (newPass.length < 6) {
+        alert('Password must be at least 6 characters.');
+        return;
+      }
+      if (newPass !== confirmPass) {
+        alert('Passwords do not match. Please re-enter.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Securing account...';
+
+      try {
+        const db = window.ArtisanDB || window.firebaseApi;
+        if (db && db.changePassword) {
+          await db.changePassword(newPass);
+        } else {
+          throw new Error('Database service is not ready. Please refresh and try again.');
+        }
+
+        alert('Password successfully updated! Welcome to the Artisan Aisle Seller Portal.');
+        window.location.href = 'seller.html';
+      } catch (err) {
+        console.error('Password change error:', err);
+        alert('Could not update password: ' + err.message);
+        btn.disabled = false;
+        btn.innerText = 'Save Password & Enter Seller Portal →';
+      }
+    }
+
+    // On page load: check URL parameters for prefill & notifications
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const emailParam = params.get('email');
+      const isSellerApproved = params.get('sellerApproved') === 'true' || params.get('sellerLogin') === 'true';
+
+      if (emailParam) {
+        const input = document.getElementById('loginInput');
+        if (input) input.value = emailParam;
+        const pass = document.getElementById('passwordInput');
+        if (pass) pass.focus();
+      }
+
+      if (isSellerApproved) {
+        const notice = document.getElementById('sellerApprovedNotice');
+        if (notice) notice.style.display = 'block';
+      }
+    });
+
     window.loginUser = loginUser;
     window.loginWithGoogle = loginWithGoogle;
+    window.handleSetNewPassword = handleSetNewPassword;
   </script>
 </body>
 </html>

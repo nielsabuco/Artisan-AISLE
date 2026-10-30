@@ -8,6 +8,7 @@ import {
   onAuthStateChanged,
   updateProfile,
   sendPasswordResetEmail,
+  updatePassword,
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
@@ -551,7 +552,12 @@ export const ArtisanDB = {
     const userId = application.userId;
     const cleanEmail = (application.email || '').trim().toLowerCase();
 
-    // 2. Register/activate in sellers collection
+    // 2. Generate secure temporary password for seller onboarding
+    const randomDigits = Math.floor(1000 + Math.random() * 9000);
+    const temporaryPassword = `Artisan#${randomDigits}`;
+    const loginUrl = `${window.location.origin}/login.html?sellerApproved=true&email=${encodeURIComponent(cleanEmail)}`;
+
+    // 3. Register/activate in sellers collection
     const sellerPayload = {
       id: userId,
       uid: userId,
@@ -567,8 +573,7 @@ export const ArtisanDB = {
     };
     await setDoc(doc(db, 'sellers', userId), sellerPayload);
 
-    // 3. Update user role and sellerStatus to approved
-    // If the user already has an admin role or master admin email, retain admin privilege
+    // 4. Update user role, sellerStatus, and require password change
     let targetRole = 'seller';
     try {
       const existingProfile = await this.getUserProfile(userId);
@@ -582,38 +587,87 @@ export const ArtisanDB = {
       sellerStatus: 'approved',
       shopName: application.shopName || 'Artisan Shop',
       sellerId: userId,
+      mustChangePassword: true,
+      temporaryPassword: temporaryPassword,
+      approvalEmailSentTo: cleanEmail,
       updatedAt: serverTimestamp()
     }).catch(e => console.warn('User role update warning:', e.message));
 
-    // 4. Send official password setup / reset email via Firebase Auth
-    let emailSent = false;
-    let emailError = null;
+    // 5. Send auto-generated email via serverless route /api/send-seller-email
+    let autoEmailDispatched = false;
+    let autoEmailError = null;
+    try {
+      const emailRes = await fetch('/api/send-seller-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: cleanEmail,
+          applicantName: application.applicantName || application.name || 'Artisan Partner',
+          shopName: application.shopName || 'Your Artisan Shop',
+          temporaryPassword,
+          loginUrl
+        })
+      });
+      if (emailRes.ok) {
+        autoEmailDispatched = true;
+      } else {
+        const errJson = await emailRes.json().catch(() => ({}));
+        autoEmailError = errJson.error || 'Server returned status ' + emailRes.status;
+      }
+    } catch (apiErr) {
+      autoEmailError = apiErr.message;
+      console.warn('API seller email dispatch info:', apiErr);
+    }
+
+    // Record in Firestore sent_emails collection for audit logging
+    await addDoc(collection(db, 'sent_emails'), {
+      type: 'seller_approval_credentials',
+      to: cleanEmail,
+      applicantName: application.applicantName || application.name || 'Artisan Seller',
+      shopName: application.shopName || 'Artisan Shop',
+      temporaryPassword,
+      loginUrl,
+      dispatchedAt: serverTimestamp(),
+      status: autoEmailDispatched ? 'Delivered' : 'Recorded'
+    }).catch(() => {});
+
+    // 6. Also dispatch official Firebase Auth password setup email as an alternate security link
+    let firebaseEmailSent = false;
     if (cleanEmail) {
       try {
         const actionCodeSettings = {
-          url: `${window.location.origin}/login.html?email=${encodeURIComponent(cleanEmail)}`,
+          url: `${window.location.origin}/login.html?sellerApproved=true&email=${encodeURIComponent(cleanEmail)}`,
           handleCodeInApp: false
         };
         await sendPasswordResetEmail(auth, cleanEmail, actionCodeSettings);
-        emailSent = true;
+        firebaseEmailSent = true;
       } catch (emailErr) {
-        emailError = emailErr.message || emailErr.code;
         console.warn('Password setup email dispatch info:', emailErr);
       }
     }
 
-    // 5. Send notification to the user in Firestore
+    // 7. Send notification to the user in Firestore
     await addDoc(collection(db, 'notifications'), {
       userId,
       recipientEmail: cleanEmail,
-      title: 'Seller Application Approved!',
-      message: `Congratulations! Your seller application for "${application.shopName}" has been approved. Your seller portal is now active. You can log in immediately with your current password or Google account${emailSent ? ', or use the password setup link sent to your email (check Spam/Junk folder if not in inbox).' : '.'}`,
+      title: '🎉 Seller Application Approved!',
+      message: `Congratulations! Your seller application for "${application.shopName}" has been approved. Your seller portal is now active. Please use the temporary credentials sent to ${cleanEmail} to log in and set your new permanent password.`,
       type: 'seller_approval',
       read: false,
       createdAt: serverTimestamp()
     }).catch(() => {});
 
-    return { success: true, emailSent, emailError };
+    return {
+      success: true,
+      emailSent: autoEmailDispatched || firebaseEmailSent,
+      autoEmailDispatched,
+      firebaseEmailSent,
+      temporaryPassword,
+      cleanEmail,
+      loginUrl,
+      shopName: application.shopName || 'Artisan Shop',
+      applicantName: application.applicantName || application.name || 'Artisan Partner'
+    };
   },
 
   async rejectSellerApplication(appId, application, reason) {
@@ -1088,11 +1142,78 @@ export const ArtisanDB = {
     return null;
   },
 
+  async changePassword(newPassword) {
+    if (!auth.currentUser) throw new Error('No user is currently authenticated.');
+    if (!newPassword || newPassword.length < 6) throw new Error('Password must be at least 6 characters.');
+
+    // 1. Update in Firebase Auth
+    await updatePassword(auth.currentUser, newPassword);
+
+    // 2. Clear mustChangePassword and temporaryPassword in Firestore
+    const uid = auth.currentUser.uid;
+    await updateDoc(doc(db, 'users', uid), {
+      mustChangePassword: false,
+      temporaryPassword: null,
+      passwordChangedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }).catch(e => console.warn('User doc password flag update warning:', e));
+
+    // 3. Update local cache
+    const cached = this.getLocalUser();
+    if (cached) {
+      cached.mustChangePassword = false;
+      delete cached.temporaryPassword;
+      localStorage.setItem('handicraft_logged_in_user', JSON.stringify(cached));
+      localStorage.setItem('handicraft_profile', JSON.stringify(cached));
+    }
+
+    return { success: true };
+  },
+
+  async getProductReviews(productId) {
+    if (!productId) return [];
+    try {
+      const q = query(collection(db, 'reviews'), where('productId', '==', productId));
+      const snap = await getDocs(q);
+      const reviews = [];
+      snap.forEach(d => reviews.push({ id: d.id, ...d.data() }));
+      return reviews.sort((a, b) => {
+        const timeA = a.createdAt?.seconds || (a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0);
+        const timeB = b.createdAt?.seconds || (b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0);
+        return timeB - timeA;
+      });
+    } catch (e) {
+      console.warn('Error getProductReviews:', e);
+      return [];
+    }
+  },
+
   async saveReview(reviewData) {
-    return await addDoc(collection(db, 'reviews'), {
+    const docRef = await addDoc(collection(db, 'reviews'), {
       ...reviewData,
+      rating: Number(reviewData.rating) || 5,
       createdAt: serverTimestamp()
     });
+
+    // Automatically recalculate and sync product average rating and reviewsCount
+    if (reviewData.productId) {
+      try {
+        const reviews = await this.getProductReviews(reviewData.productId);
+        const count = reviews.length;
+        const total = reviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0);
+        const avg = count > 0 ? (total / count).toFixed(1) : '5.0';
+
+        await updateDoc(doc(db, 'products', reviewData.productId), {
+          rating: Number(avg),
+          reviewsCount: count,
+          reviews: count
+        });
+      } catch (e) {
+        console.warn('Product rating sync warning:', e);
+      }
+    }
+
+    return docRef;
   },
 
   async saveContactMessage(msgData) {

@@ -207,6 +207,13 @@
         const profile = await window.ArtisanDB.getUserProfile(user.uid);
         currentSellerProfile = profile || user;
 
+        // If user must change their temporary password, redirect to login change password modal
+        if (profile?.mustChangePassword) {
+          alert('Security Notice: You must change your temporary password before accessing the Seller Portal.');
+          window.location.href = `login.html?email=${encodeURIComponent(user.email || '')}`;
+          return;
+        }
+
         // Strict Enforcement: Grant access if approved, role is seller, or user is platform admin
         const sellerStatus = String(profile?.sellerStatus || '').toLowerCase();
         const userRole = String(profile?.role || '').toLowerCase();

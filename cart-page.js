@@ -891,6 +891,9 @@ function loadUserOrders(userId) {
                 <span class="mini-item-title">${item.name}</span>
                 <span class="mini-item-meta">Qty: ${item.quantity} × ₱${Number(item.price).toFixed(2)}</span>
               </div>
+              <a href="review.html?orderId=${order.id}&productId=${item.productId || item.id || ''}&productName=${encodeURIComponent(item.name || 'Craft Item')}" class="btn-review-item" style="margin-left: auto; text-decoration: none; padding: 6px 12px; background: #fdfaf5; border: 1.5px solid #c88937; color: #1d4831; border-radius: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                ⭐ Review Item
+              </a>
             </div>
           `).join('')}
         </div>

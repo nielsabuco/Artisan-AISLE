@@ -413,9 +413,16 @@ function loadProfileOrders(userId) {
           <div style="font-size: 15px; font-weight: 700; color: #285c3b; margin-bottom: 6px;">
             ₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </div>
-          <a href="cart.html#orders" class="secondary-btn" style="padding: 5px 12px; font-size: 12px; text-decoration: none; border-radius: 6px;">
-            Live Tracking Stepper →
-          </a>
+          <div style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+            ${(order.items && order.items.length > 0) ? `
+              <a href="review.html?orderId=${order.id}&productId=${order.items[0].productId || order.items[0].id || ''}&productName=${encodeURIComponent(order.items[0].name || '')}" class="secondary-btn" style="padding: 5px 12px; font-size: 12px; text-decoration: none; border-radius: 6px; border-color: #c88937; color: #1d4831; font-weight: 600;">
+                ⭐ Review Craft
+              </a>
+            ` : ''}
+            <a href="cart.html#orders" class="secondary-btn" style="padding: 5px 12px; font-size: 12px; text-decoration: none; border-radius: 6px;">
+              Tracking Stepper →
+            </a>
+          </div>
         </div>
       `;
       container.appendChild(itemEl);

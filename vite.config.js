@@ -62,6 +62,35 @@ function paymongoDevPlugin() {
           }
         });
       });
+
+      server.middlewares.use('/api/send-seller-email', async (req, res) => {
+        if (req.method === 'OPTIONS') {
+          res.statusCode = 200;
+          res.end();
+          return;
+        }
+        let bodyStr = '';
+        req.on('data', chunk => { bodyStr += chunk; });
+        req.on('end', async () => {
+          try {
+            req.body = bodyStr ? JSON.parse(bodyStr) : {};
+          } catch (e) {
+            req.body = {};
+          }
+          res.status = code => { res.statusCode = code; return res; };
+          res.json = data => {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(data));
+          };
+          try {
+            const { default: handler } = await import('./api/send-seller-email.js');
+            await handler(req, res);
+          } catch (err) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: err.message }));
+          }
+        });
+      });
     }
   };
 }

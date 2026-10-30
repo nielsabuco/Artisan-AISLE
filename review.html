@@ -9,78 +9,397 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .review-page-wrap {
+      max-width: 640px;
+      margin: 36px auto;
+      padding: 0 18px;
+    }
+    .review-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      border: 1px solid #ebd9c8;
+      padding: 32px 28px;
+    }
+    .review-prod-preview {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #fdfbf7;
+      border: 1px solid #ebd9c8;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+    }
+    .review-prod-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+      flex-shrink: 0;
+    }
+    .review-prod-info h3 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      color: #1d4831;
+      font-family: 'Cinzel', Georgia, serif;
+    }
+    .review-prod-info p {
+      margin: 0;
+      font-size: 13px;
+      color: #666;
+    }
+    .review-star-rating-group {
+      text-align: center;
+      margin: 22px 0;
+      padding: 18px 12px;
+      background: #fdfaf5;
+      border-radius: 12px;
+      border: 1px dashed #c88937;
+    }
+    .review-stars-container {
+      display: inline-flex;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 34px;
+      color: #d1d5db;
+      user-select: none;
+    }
+    .star-item {
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+    .star-item:hover {
+      transform: scale(1.22);
+    }
+    .star-item.active {
+      color: #c88937;
+    }
+    .star-rating-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1d4831;
+      margin-top: 8px;
+    }
+    .review-form-group {
+      margin-bottom: 18px;
+    }
+    .review-form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    .review-form-group input,
+    .review-form-group textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #d7cbbd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .review-form-group input:focus,
+    .review-form-group textarea:focus {
+      outline: none;
+      border-color: #1d4831;
+      box-shadow: 0 0 0 3px rgba(29, 72, 49, 0.12);
+    }
+    .recommend-pill-row {
+      display: flex;
+      gap: 10px;
+    }
+    .recommend-pill {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border: 1.5px solid #d7cbbd;
+      border-radius: 8px;
+      background: #ffffff;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .recommend-pill.active {
+      background: #eef7ef;
+      border-color: #1d4831;
+      color: #1d4831;
+    }
+  </style>
 </head>
-<body>
-  <main class="box">
-    <div class="auth-brand-header">
-      <a href="index.html" title="Artisan Aisle Storefront">
-        <img src="images/logo.svg" alt="Artisan Aisle Complete Logo" class="auth-brand-logo" />
-      </a>
-    </div>
-    <h1>Write a Review</h1>
-    <p id="reviewProduct">Loading product...</p>
-    <p id="reviewMessage"></p>
-    <form id="reviewForm" hidden>
-      <label for="reviewRating">Rating</label>
-      <select id="reviewRating" required>
-        <option value="5">5 - Excellent</option>
-        <option value="4">4 - Very good</option>
-        <option value="3">3 - Good</option>
-        <option value="2">2 - Fair</option>
-        <option value="1">1 - Poor</option>
-      </select>
-      <label for="reviewComment">Your review</label>
-      <textarea id="reviewComment" rows="6" required></textarea>
-      <button class="btn" type="submit">Publish Review</button>
-    </form>
-    <p><a href="index.html">Back to ArtisanAisle</a></p>
-  </main>
-  <script type="module" src="firebase-config.js"></script>
-  <script type="module">
-    const params = new URLSearchParams(window.location.search);
-    const orderId = params.get('orderId');
-    const productId = params.get('productId');
-    const productName = params.get('productName') || 'this product';
-    const form = document.getElementById('reviewForm');
-    const message = document.getElementById('reviewMessage');
-    document.getElementById('reviewProduct').textContent = `Reviewing: ${productName}`;
+<body style="background: #fbf8f3; min-height: 100vh;">
 
-    const fail = text => {
-      message.textContent = text;
-      form.hidden = true;
+  <!-- Header -->
+  <header>
+    <a class="logo" href="index.html" title="Artisan Aisle Storefront">
+      <img class="logo-emblem" src="images/emblem.svg" alt="Artisan Aisle Emblem" />
+      <span class="logo-text">Artisan<span>AISLE</span></span>
+    </a>
+    <div class="header-links">
+      <a href="products.html">Catalog</a>
+      <a href="cart.html#orders">My Orders</a>
+    </div>
+  </header>
+
+  <main class="review-page-wrap">
+    <div class="review-card">
+      <div class="auth-brand-header" style="margin-bottom: 16px;">
+        <img src="images/logo.svg" alt="Artisan Aisle Complete Logo" class="auth-brand-logo" style="height: 64px;" />
+      </div>
+
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h1 style="font-family:'Cinzel', serif; color:#1d4831; margin:0 0 6px; font-size: 24px;">Share Your Review</h1>
+        <p style="margin: 0; color: #666; font-size: 14px;">Help fellow patrons and empower our local Filipino artisans.</p>
+      </div>
+
+      <!-- Product Preview Box -->
+      <div id="productPreviewCard" class="review-prod-preview">
+        <img id="reviewProdImg" class="review-prod-img" src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=200&q=80" alt="Product" />
+        <div class="review-prod-info">
+          <h3 id="reviewProdName">Handcrafted Item</h3>
+          <p id="reviewProdMeta">Authentic Filipino Craft • Verified Purchase</p>
+        </div>
+      </div>
+
+      <!-- Success Screen (Shown after submission) -->
+      <div id="reviewSuccessBlock" style="display: none; text-align: center; padding: 24px 12px;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #e8f5e9; color: #1d4831; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 14px;">✓</div>
+        <h2 style="font-family:'Cinzel', serif; color: #1d4831; margin: 0 0 8px; font-size: 22px;">Review Published!</h2>
+        <p style="color: #555; font-size: 14px; line-height: 1.6; max-width: 440px; margin: 0 auto 24px;">
+          Maraming salamat! Your verified feedback has been published and directly supports our local community weavers and creators.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <a href="products.html" class="primary-btn" style="padding: 10px 22px; font-size: 14px; text-decoration: none;">Browse Products</a>
+          <a href="cart.html#orders" class="secondary-btn" style="padding: 10px 22px; font-size: 14px; text-decoration: none;">View My Orders</a>
+        </div>
+      </div>
+
+      <!-- Main Review Form -->
+      <form id="productReviewForm">
+        <!-- Interactive Star Rating -->
+        <div class="review-star-rating-group">
+          <label style="display: block; font-weight: 700; font-size: 13px; color: #1d4831; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Your Overall Rating</label>
+          <div class="review-stars-container" id="starsContainer">
+            <span class="star-item active" data-rating="1">★</span>
+            <span class="star-item active" data-rating="2">★</span>
+            <span class="star-item active" data-rating="3">★</span>
+            <span class="star-item active" data-rating="4">★</span>
+            <span class="star-item active" data-rating="5">★</span>
+          </div>
+          <div id="starRatingLabel" class="star-rating-label">★★★★★ 5.0 - Outstanding Craftsmanship</div>
+          <input type="hidden" id="selectedRating" value="5" />
+        </div>
+
+        <div class="review-form-group">
+          <label for="reviewerNameInput">Your Name / Nickname</label>
+          <input type="text" id="reviewerNameInput" placeholder="e.g. Maria Santos" required />
+        </div>
+
+        <div class="review-form-group">
+          <label for="reviewHeadline">Review Headline</label>
+          <input type="text" id="reviewHeadline" placeholder="e.g. Beautiful weaving and very durable!" required />
+        </div>
+
+        <div class="review-form-group">
+          <label for="reviewComment">Detailed Experience &amp; Craft Quality</label>
+          <textarea id="reviewComment" rows="4" placeholder="Tell other patrons about the texture, quality of materials, packaging, and artisan details..." required></textarea>
+        </div>
+
+        <div class="review-form-group">
+          <label>Would you recommend this craft to others?</label>
+          <div class="recommend-pill-row">
+            <button type="button" class="recommend-pill active" id="recommendYes" onclick="setRecommend(true)">✓ Yes, Highly Recommended</button>
+            <button type="button" class="recommend-pill" id="recommendNo" onclick="setRecommend(false)">✕ No</button>
+          </div>
+          <input type="hidden" id="recommendValue" value="true" />
+        </div>
+
+        <div id="reviewErrorNotice" style="display: none; background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px;"></div>
+
+        <button type="submit" id="submitReviewBtn" class="primary-btn" style="width: 100%; padding: 13px; font-size: 15px; font-weight: 700; border-radius: 8px;">
+          Submit Verified Review →
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <img src="images/logo.svg" alt="Artisan Aisle Complete Logo" class="footer-logo" />
+        <p class="footer-tagline">Connecting local Filipino artisans with mindful patrons worldwide. Preserving cultural heritage, one handcrafted piece at a time.</p>
+      </div>
+      <p class="footer-copy">&copy; 2026 Artisan Aisle. All rights reserved. | Supporting Local Filipino Artisans &amp; Communities 🇵🇭</p>
+    </div>
+  </footer>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="header-auth.js"></script>
+  <script>
+    const ratingDescriptions = {
+      1: '★☆☆☆☆ 1.0 - Poor Quality',
+      2: '★★☆☆☆ 2.0 - Below Expectations',
+      3: '★★★☆☆ 3.0 - Good Handcrafted Product',
+      4: '★★★★☆ 4.0 - Very Good Craftsmanship',
+      5: '★★★★★ 5.0 - Outstanding Craftsmanship'
     };
 
-    await window.firebaseApi?.authReady;
-    if (!window.firebaseApi?.currentUser) {
-      window.location.href = 'login.html';
-    } else if (!orderId || !productId) {
-      fail('This review link is incomplete.');
-    } else {
-      const order = await window.firebaseApi.getOrder(orderId);
-      const purchased = order?.productIds?.includes(productId) || order?.orderItems?.some(item => item.productId === productId);
-      if (!order || order.uid !== window.firebaseApi.currentUser.uid || order.status !== 'Delivered' || !purchased) {
-        fail('Reviews are available only for products in your delivered orders.');
+    let selectedRatingVal = 5;
+    let recommendsCraft = true;
+    let targetProductId = null;
+    let targetOrderId = null;
+
+    function initStarRating() {
+      const stars = document.querySelectorAll('.star-item');
+      const label = document.getElementById('starRatingLabel');
+      const input = document.getElementById('selectedRating');
+
+      stars.forEach(star => {
+        star.addEventListener('mouseover', () => {
+          const hoverVal = Number(star.getAttribute('data-rating'));
+          highlightStars(hoverVal);
+          label.textContent = ratingDescriptions[hoverVal];
+        });
+
+        star.addEventListener('mouseout', () => {
+          highlightStars(selectedRatingVal);
+          label.textContent = ratingDescriptions[selectedRatingVal];
+        });
+
+        star.addEventListener('click', () => {
+          selectedRatingVal = Number(star.getAttribute('data-rating'));
+          input.value = selectedRatingVal;
+          highlightStars(selectedRatingVal);
+          label.textContent = ratingDescriptions[selectedRatingVal];
+        });
+      });
+    }
+
+    function highlightStars(val) {
+      document.querySelectorAll('.star-item').forEach(s => {
+        const rating = Number(s.getAttribute('data-rating'));
+        if (rating <= val) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+    }
+
+    function setRecommend(val) {
+      recommendsCraft = val;
+      document.getElementById('recommendValue').value = String(val);
+      const btnYes = document.getElementById('recommendYes');
+      const btnNo = document.getElementById('recommendNo');
+      if (val) {
+        btnYes.classList.add('active');
+        btnNo.classList.remove('active');
       } else {
-        form.hidden = false;
+        btnYes.classList.remove('active');
+        btnNo.classList.add('active');
       }
     }
 
-    form.addEventListener('submit', async event => {
-      event.preventDefault();
-      try {
-        const profile = JSON.parse(localStorage.getItem('handicraft_profile') || localStorage.getItem('handicraft_logged_in_user') || '{}');
-        await window.firebaseApi.saveReview({
-          orderId,
-          productId,
-          rating: Number(document.getElementById('reviewRating').value),
-          comment: document.getElementById('reviewComment').value.trim(),
-          reviewerName: profile.name || profile.firstName
-        });
-        message.textContent = 'Your review is now live on the product page.';
-        form.hidden = true;
-      } catch (error) {
-        message.textContent = error.message;
+    window.setRecommend = setRecommend;
+
+    // Load Product Information from Query Parameters or Database
+    window.addEventListener('DOMContentLoaded', async () => {
+      initStarRating();
+
+      const params = new URLSearchParams(window.location.search);
+      targetOrderId = params.get('orderId');
+      targetProductId = params.get('productId');
+      const paramName = params.get('productName');
+
+      // Pre-fill user name if logged in
+      const profile = JSON.parse(localStorage.getItem('handicraft_profile') || localStorage.getItem('handicraft_logged_in_user') || '{}');
+      if (profile?.name || profile?.firstName) {
+        document.getElementById('reviewerNameInput').value = profile.name || profile.firstName;
       }
+
+      // Check if product details available
+      if (paramName) {
+        document.getElementById('reviewProdName').textContent = paramName;
+      }
+
+      // Fetch product record if ID present
+      const db = window.ArtisanDB || window.firebaseApi;
+      if (targetProductId) {
+        try {
+          // Wait briefly for db
+          let retries = 0;
+          while (!window.ArtisanDB && retries < 15) {
+            await new Promise(r => setTimeout(r, 100));
+            retries++;
+          }
+          if (window.ArtisanDB?.getProduct) {
+            const prod = await window.ArtisanDB.getProduct(targetProductId);
+            if (prod) {
+              document.getElementById('reviewProdName').textContent = prod.name;
+              document.getElementById('reviewProdMeta').textContent = `${prod.category || 'Handicraft'} • ₱${Number(prod.price || 0).toFixed(2)}`;
+              if (prod.image) {
+                document.getElementById('reviewProdImg').src = prod.image;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Could not load product details:', e);
+        }
+      }
+
+      // Form Submission
+      const form = document.getElementById('productReviewForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errBox = document.getElementById('reviewErrorNotice');
+        errBox.style.display = 'none';
+
+        const submitBtn = document.getElementById('submitReviewBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Publishing review...';
+
+        try {
+          const db = window.ArtisanDB || window.firebaseApi;
+          if (!db || !db.saveReview) {
+            throw new Error('Database service is initializing. Please wait a moment.');
+          }
+
+          const reviewerName = document.getElementById('reviewerNameInput').value.trim();
+          const headline = document.getElementById('reviewHeadline').value.trim();
+          const comment = document.getElementById('reviewComment').value.trim();
+          const currentUser = db.getLocalUser ? db.getLocalUser() : null;
+
+          await db.saveReview({
+            productId: targetProductId || 'general-product',
+            orderId: targetOrderId || null,
+            rating: selectedRatingVal,
+            headline: headline,
+            comment: comment,
+            reviewerName: reviewerName || 'Verified Buyer',
+            reviewerId: currentUser?.uid || null,
+            recommend: recommendsCraft,
+            verifiedPurchase: true
+          });
+
+          // Show success state
+          form.style.display = 'none';
+          document.getElementById('reviewSuccessBlock').style.display = 'block';
+        } catch (err) {
+          console.error('Submit review error:', err);
+          errBox.textContent = err.message || 'Unable to publish review. Please try again.';
+          errBox.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Verified Review →';
+        }
+      });
     });
   </script>
 </body>

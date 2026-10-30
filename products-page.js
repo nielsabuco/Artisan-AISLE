@@ -194,6 +194,20 @@ function openQuickView(product) {
   document.getElementById('quickViewSellerInitial').textContent = (product.sellerName || 'A').charAt(0).toUpperCase();
   document.getElementById('quickViewQuantity').textContent = activeModalQty;
 
+  const rVal = Number(product.rating || 5).toFixed(1);
+  const rCount = Number(product.reviewsCount || product.reviews || 0);
+  const ratingBlock = document.getElementById('productsQuickViewRating');
+  if (ratingBlock) {
+    ratingBlock.innerHTML = `
+      <span style="color:#c88937;">★★★★★</span>
+      <strong style="color:#1d4831; margin-left:4px;">${rVal}</strong>
+      <span style="color:#666; font-size:12.5px; margin-left:4px;">(${rCount > 0 ? rCount + ' reviews' : 'Verified'})</span>
+      <a href="review.html?productId=${product.id || ''}&productName=${encodeURIComponent(product.name)}" style="margin-left:10px; color:#1d4831; font-weight:700; font-size:12px; text-decoration:underline;">
+        ★ Write a Review
+      </a>
+    `;
+  }
+
   const defaultImg = 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=500&q=80';
   const imgEl = document.getElementById('quickViewImage');
   if (imgEl) {
