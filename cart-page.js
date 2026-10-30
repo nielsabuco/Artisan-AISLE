@@ -6,10 +6,12 @@ let isSubmitting = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
   initTabs();
+  setupCourierAutoDetect();
   renderCart();
   setupPaymentListener();
   setupPlaceOrder();
   loadSavedShipping();
+  setupRealtimeStockSync();
   await checkPaymentCallback();
 
   // Listen to external cart updates
@@ -187,9 +189,11 @@ async function renderCart() {
     });
   }
 
-  // Update Summary Sidebar
+  // Update Summary Sidebar with Courier Distance Rate
   const subtotal = cart.reduce((acc, i) => acc + (Number(i.price) * Number(i.quantity)), 0);
-  const shipping = subtotal >= 1000 ? 0 : 50;
+  const courierInfo = getCourierRateInfo();
+  // Free shipping promo if subtotal >= 2500, otherwise courier rate based on distance
+  const shipping = (cart.length > 0 && subtotal >= 2500) ? 0 : (cart.length > 0 ? courierInfo.rate : 0);
   const grandTotal = subtotal + shipping;
 
   const subtotalEl = document.getElementById('summarySubtotal');
@@ -197,7 +201,15 @@ async function renderCart() {
   const grandTotalEl = document.getElementById('summaryGrandTotal');
 
   if (subtotalEl) subtotalEl.textContent = `₱${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-  if (shippingEl) shippingEl.textContent = shipping === 0 ? 'FREE' : `₱${shipping.toFixed(2)}`;
+  if (shippingEl) {
+    if (cart.length === 0) {
+      shippingEl.textContent = '₱0.00';
+    } else if (shipping === 0) {
+      shippingEl.textContent = 'FREE (Promo ₱2,500+)';
+    } else {
+      shippingEl.textContent = `₱${shipping.toFixed(2)} (${courierInfo.label})`;
+    }
+  }
   if (grandTotalEl) grandTotalEl.textContent = `₱${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 }
 
@@ -329,9 +341,10 @@ function setupPlaceOrder() {
         }
       }
 
-      // 2. Prepare Order Payload
+      // 2. Prepare Order Payload with Courier Distance Rate
       const subtotal = cart.reduce((acc, i) => acc + (Number(i.price) * Number(i.quantity)), 0);
-      const shipping = subtotal >= 1000 ? 0 : 50;
+      const courierInfo = getCourierRateInfo();
+      const shipping = subtotal >= 2500 ? 0 : courierInfo.rate;
       const total = subtotal + shipping;
       const sellerIds = Array.from(new Set(cart.map(i => i.sellerId).filter(Boolean)));
 
@@ -349,7 +362,11 @@ function setupPlaceOrder() {
         orderStatus,
         subtotal,
         shipping,
-        total
+        total,
+        courierZone: courierInfo.zone,
+        courierRate: courierInfo.rate,
+        shippingRegion: courierInfo.label,
+        courierPartner: 'J&T Express / LBC Express'
       };
 
       // 3. Write to Firestore via ArtisanDB
@@ -969,5 +986,84 @@ function loadUserOrders(userId) {
       `;
       container.appendChild(card);
     });
+  });
+}
+
+/* ================= COURIER DISTANCE SHIPPING & REAL-TIME STOCK ================= */
+export function getCourierRateInfo() {
+  const select = document.getElementById('shippingCourierRegion');
+  if (!select) return { rate: 60, label: 'Metro Manila (NCR)', zone: 'ncr' };
+  const opt = select.options[select.selectedIndex];
+  const rate = Number(opt?.dataset.rate || 60);
+  const label = opt?.dataset.label || 'Metro Manila (NCR)';
+  const zone = select.value || 'ncr';
+  return { rate, label, zone };
+}
+
+function setupCourierAutoDetect() {
+  const cityInput = document.getElementById('shippingCity');
+  const courierSelect = document.getElementById('shippingCourierRegion');
+  const courierTag = document.getElementById('shippingCourierTag');
+
+  if (courierSelect) {
+    courierSelect.addEventListener('change', () => {
+      const info = getCourierRateInfo();
+      if (courierTag) courierTag.textContent = `Tier: ₱${info.rate.toFixed(2)}`;
+      renderCart();
+    });
+  }
+
+  if (cityInput && courierSelect) {
+    cityInput.addEventListener('input', () => {
+      const val = cityInput.value.toLowerCase().trim();
+      let matchedZone = null;
+      if (val.match(/manila|quezon|makati|taguig|pasig|mandaluyong|paranaque|pasay|valenzuela|caloocan|marikina|las pinas|muntinlupa|malabon|navotas|san juan|pateros|ncr/i)) {
+        matchedZone = 'ncr';
+      } else if (val.match(/cavite|laguna|batangas|rizal|bulacan|antipolo|calamba|santa rosa|dasmarinas|bacoor|imus/i)) {
+        matchedZone = 'gma';
+      } else if (val.match(/baguio|benguet|ilocos|la union|pangasinan|pampanga|tarlac|zambales|bataan|nueva ecija|albay|camarines|sorsogon|bicol|vigan|clark|angeles|legazpi|naga/i)) {
+        matchedZone = 'luzon';
+      } else if (val.match(/cebu|mandaue|lapu-lapu|bohol|tagbilaran|iloilo|bacolod|leyte|tacloban|samar|calbiga|catbalogan|borongan|panay|negros|dumaguete/i)) {
+        matchedZone = 'visayas';
+      } else if (val.match(/davao|cagayan de oro|cdo|zamboanga|general santos|gensan|bukidnon|butuan|cotabato|iligan|koronadal/i)) {
+        matchedZone = 'mindanao';
+      } else if (val.match(/palawan|puerto princesa|coron|batanes|basilan|sulu|tawi-tawi|catanduanes|marinduque|romblon|siargao/i)) {
+        matchedZone = 'island';
+      }
+
+      if (matchedZone && courierSelect.value !== matchedZone) {
+        courierSelect.value = matchedZone;
+        const info = getCourierRateInfo();
+        if (courierTag) courierTag.textContent = `Tier: ₱${info.rate.toFixed(2)}`;
+        renderCart();
+      }
+    });
+  }
+}
+
+function setupRealtimeStockSync() {
+  ArtisanDB.subscribeProducts((prods) => {
+    const cart = ArtisanDB.getCart();
+    if (!cart || cart.length === 0) return;
+
+    let modified = false;
+    cart.forEach(item => {
+      const live = prods.find(p => p.id === (item.productId || item.id));
+      if (live) {
+        const liveStock = Number(live.stock) || 0;
+        if (item.stock !== liveStock) {
+          item.stock = liveStock;
+          if (item.quantity > liveStock && liveStock > 0) {
+            item.quantity = liveStock;
+          }
+          modified = true;
+        }
+      }
+    });
+
+    if (modified) {
+      ArtisanDB.saveCart(cart);
+      renderCart();
+    }
   });
 }

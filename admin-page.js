@@ -7,6 +7,7 @@ let allApplications = [];
 let allUsers = [];
 let allProducts = [];
 let allOrders = [];
+let allArtisans = [];
 
 document.addEventListener('DOMContentLoaded', () => {
   initAdminAuth();
@@ -15,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupAdminTrackingModal();
   setupAdminPromotionModal();
   setupAdminProductManagement();
+  setupAdminArtisansManagement();
 });
 
 function initAdminAuth() {
@@ -113,6 +115,14 @@ function startAdminListeners() {
     allOrders = orders;
     renderOrdersTable(orders);
     updateMetrics();
+  });
+
+  // 5. Artisans Directory
+  ArtisanDB.subscribeSellers((sellers) => {
+    allArtisans = sellers;
+    renderArtisansTable(sellers);
+    const badge = document.getElementById('artisansCountBadge');
+    if (badge) badge.textContent = sellers.length;
   });
 }
 
@@ -1316,6 +1326,355 @@ async function initPaymentGatewaySettings() {
     }
   });
 }
+
+/* ================= ARTISANS DIRECTORY & PHOTO MANAGEMENT ================= */
+function setupAdminArtisansManagement() {
+  const searchInput = document.getElementById('adminArtisanSearchInput');
+  const openAddBtn = document.getElementById('openAddArtisanModalBtn');
+  const closeBtn = document.getElementById('closeAdminArtisanModalBtn');
+  const cancelBtn = document.getElementById('cancelAdminArtisanModalBtn');
+  const saveBtn = document.getElementById('saveAdminArtisanBtn');
+  const seedBtn = document.getElementById('seedArtisansBtn');
+  const photoFileInput = document.getElementById('adminArtisanPhotoFile');
+  const photoUrlInput = document.getElementById('adminArtisanPhotoUrl');
+  const photoPreview = document.getElementById('adminArtisanPhotoPreview');
+
+  // Search filter
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      renderArtisansTable(allArtisans);
+    });
+  }
+
+  // Open Add Artisan Modal
+  if (openAddBtn) {
+    openAddBtn.addEventListener('click', () => {
+      openArtisanModal(null);
+    });
+  }
+
+  // Close modal buttons
+  if (closeBtn) closeBtn.addEventListener('click', closeArtisanModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeArtisanModal);
+
+  // File Upload with FileReader to base64 data URL
+  if (photoFileInput) {
+    photoFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Please choose an image smaller than 2MB.');
+        photoFileInput.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target.result;
+        if (photoPreview) photoPreview.src = base64;
+        if (photoUrlInput) photoUrlInput.value = base64;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Manual URL input change
+  if (photoUrlInput) {
+    photoUrlInput.addEventListener('input', () => {
+      const val = photoUrlInput.value.trim();
+      if (photoPreview) photoPreview.src = val || 'images/emblem.svg';
+    });
+  }
+
+  // Save Artisan
+  if (saveBtn) {
+    saveBtn.addEventListener('click', async () => {
+      const aId = document.getElementById('adminArtisanId').value;
+      const name = document.getElementById('adminArtisanNameInput').value.trim();
+      const shopName = document.getElementById('adminArtisanShopInput').value.trim();
+      const region = document.getElementById('adminArtisanRegionInput').value.trim();
+      const category = document.getElementById('adminArtisanCategoryInput').value.trim();
+      const bio = document.getElementById('adminArtisanBioInput').value.trim();
+      const gcashName = document.getElementById('adminArtisanGCashNameInput').value.trim();
+      const gcashNumber = document.getElementById('adminArtisanGCashNumberInput').value.trim();
+      const status = document.getElementById('adminArtisanStatusInput').value;
+      const photo = photoUrlInput.value.trim() || 'images/emblem.svg';
+
+      if (!name || !shopName) {
+        alert('Please provide both the Artisan Name and Shop/Collective Name.');
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving Artisan...';
+
+      try {
+        const payload = {
+          name,
+          shopName,
+          region: region || 'Philippines',
+          category: category || 'Handmade Crafts',
+          bio: bio || 'Dedicated local artisan preserving traditional craftsmanship.',
+          gcashName: gcashName || name,
+          gcashNumber: gcashNumber || '',
+          status: status || 'Active',
+          photo: photo,
+          verified: true
+        };
+
+        if (aId) {
+          await ArtisanDB.saveSellerProfile(aId, payload);
+          alert(`Artisan profile "${name}" successfully updated!`);
+        } else {
+          await ArtisanDB.createArtisan(payload);
+          alert(`New artisan "${name}" successfully registered into directory!`);
+        }
+        closeArtisanModal();
+      } catch (err) {
+        alert('Failed to save artisan profile: ' + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Artisan Profile';
+      }
+    });
+  }
+
+  // Seed default authentic Philippine artisans into Firestore
+  if (seedBtn) {
+    seedBtn.addEventListener('click', async () => {
+      if (!confirm('Populate the 6 master Philippine artisans with verified stories, regional workshop details, and photos into Firestore?')) {
+        return;
+      }
+
+      seedBtn.disabled = true;
+      seedBtn.textContent = 'Seeding Artisans...';
+
+      const SEED_ARTISANS = [
+        {
+          id: 'artisan-jerusalem',
+          name: 'Eugene Marciene M. Jerusalem',
+          shopName: 'Bicol Heritage Weavers',
+          region: 'Albay, Bicol (Luzon)',
+          category: 'Traditional Handloom Weaving & Abaca Bags',
+          bio: 'Preserving over three generations of authentic Bicolano abaca weaving. Each bag, basket, and runner is crafted with natural fiber sustainably harvested in Albay.',
+          photo: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=400&q=80',
+          gcashName: 'Eugene Marciene Jerusalem',
+          gcashNumber: '09764948458',
+          status: 'Active',
+          verified: true
+        },
+        {
+          id: 'artisan-sabuco',
+          name: 'Reniel M. Sabuco',
+          shopName: 'Samar Community Crafters',
+          region: 'Calbiga, Western Samar (Visayas)',
+          category: 'Handcrafted Woodworks & Heritage Decor',
+          bio: 'Rooted in Calbiga, Samar woodcraft traditions. Shaping sustainable Philippine mahogany and acacia into functional home decor and polished ancestral keepsakes.',
+          photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+          gcashName: 'Reniel Sabuco',
+          gcashNumber: '09853551524',
+          status: 'Active',
+          verified: true
+        },
+        {
+          id: 'artisan-dacdac',
+          name: 'Robert G. Dacdac',
+          shopName: 'Cordillera Wood Carvers',
+          region: 'Benguet, Cordillera (Luzon)',
+          category: 'Carved Wooden Statues, Bowls & Wall Art',
+          bio: 'Honoring indigenous Ifugao and Igorot wood carving traditions. Every chisel mark pays homage to the misty mountain ranges and ancestral craftsmanship of Northern Luzon.',
+          photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+          gcashName: 'Robert Dacdac',
+          gcashNumber: '09175551234',
+          status: 'Active',
+          verified: true
+        },
+        {
+          id: 'artisan-estrada',
+          name: 'Pierce P. Estrada',
+          shopName: 'Panay Shell & Woodworks',
+          region: 'Iloilo, Panay (Visayas)',
+          category: 'Capiz Shell Decor & Handcrafted Souvenirs',
+          bio: 'Master artisan transforming translucent indigenous Capiz shells and coastal driftwood into radiant lamps, jewelry holders, and Philippine cultural keepsakes.',
+          photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80',
+          gcashName: 'Pierce Estrada',
+          gcashNumber: '09175551234',
+          status: 'Active',
+          verified: true
+        },
+        {
+          id: 'artisan-acbo',
+          name: 'Kia Vanette A. Acbo',
+          shopName: 'Visayan Coastal Crafts',
+          region: 'Cebu, Central Visayas',
+          category: 'Macrame, Shell Accents & Native Accessories',
+          bio: 'Coordinating artisan women weavers in Cebu to produce contemporary beachwear accessories, handmade shell tassels, and modern eco-friendly lifestyle crafts.',
+          photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+          gcashName: 'Kia Vanette Acbo',
+          gcashNumber: '09853551524',
+          status: 'Active',
+          verified: true
+        },
+        {
+          id: 'artisan-mindanao',
+          name: 'Nanay Lucia B. & Yakan Guild',
+          shopName: 'Basilan Yakan Weavers',
+          region: 'Lamitan, Basilan (Mindanao)',
+          category: 'Intricate Yakan Tennun Textile & Tribal Tapestry',
+          bio: 'Master of the backstrap loom. Weaving kaleidoscopic geometric motifs (Seputangan and Sinaluan) handed down through centuries of indigenous Mindanao Yakan heritage.',
+          photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
+          gcashName: 'Lucia Basilan',
+          gcashNumber: '09764948458',
+          status: 'Active',
+          verified: true
+        }
+      ];
+
+      try {
+        for (const item of SEED_ARTISANS) {
+          const { id, ...data } = item;
+          await ArtisanDB.saveSellerProfile(id, data);
+        }
+        alert('Master artisans successfully seeded into the directory!');
+      } catch (err) {
+        alert('Seeding error: ' + err.message);
+      } finally {
+        seedBtn.disabled = false;
+        seedBtn.textContent = '🌱 Seed Master Artisans';
+      }
+    });
+  }
+}
+
+function openArtisanModal(artisan) {
+  const modal = document.getElementById('adminArtisanModal');
+  if (!modal) return;
+
+  const titleEl = document.getElementById('adminArtisanModalTitle');
+  const idInput = document.getElementById('adminArtisanId');
+  const nameInput = document.getElementById('adminArtisanNameInput');
+  const shopInput = document.getElementById('adminArtisanShopInput');
+  const regionInput = document.getElementById('adminArtisanRegionInput');
+  const catInput = document.getElementById('adminArtisanCategoryInput');
+  const bioInput = document.getElementById('adminArtisanBioInput');
+  const gcashNameInput = document.getElementById('adminArtisanGCashNameInput');
+  const gcashNumInput = document.getElementById('adminArtisanGCashNumberInput');
+  const statusInput = document.getElementById('adminArtisanStatusInput');
+  const photoUrlInput = document.getElementById('adminArtisanPhotoUrl');
+  const photoPreview = document.getElementById('adminArtisanPhotoPreview');
+  const fileInput = document.getElementById('adminArtisanPhotoFile');
+
+  if (fileInput) fileInput.value = '';
+
+  if (artisan) {
+    titleEl.textContent = `Edit Artisan: ${artisan.name || 'Artisan'}`;
+    idInput.value = artisan.id || '';
+    nameInput.value = artisan.name || '';
+    shopInput.value = artisan.shopName || '';
+    regionInput.value = artisan.region || '';
+    catInput.value = artisan.category || '';
+    bioInput.value = artisan.bio || '';
+    gcashNameInput.value = artisan.gcashName || '';
+    gcashNumInput.value = artisan.gcashNumber || '';
+    statusInput.value = artisan.status || 'Active';
+    const photo = artisan.photo || artisan.avatar || 'images/emblem.svg';
+    photoUrlInput.value = photo;
+    photoPreview.src = photo;
+  } else {
+    titleEl.textContent = 'Add Master Artisan';
+    idInput.value = '';
+    nameInput.value = '';
+    shopInput.value = '';
+    regionInput.value = '';
+    catInput.value = '';
+    bioInput.value = '';
+    gcashNameInput.value = '';
+    gcashNumInput.value = '';
+    statusInput.value = 'Active';
+    photoUrlInput.value = '';
+    photoPreview.src = 'images/emblem.svg';
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeArtisanModal() {
+  const modal = document.getElementById('adminArtisanModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function renderArtisansTable(artisans) {
+  const tbody = document.getElementById('adminArtisansTableBody');
+  if (!tbody) return;
+
+  const query = (document.getElementById('adminArtisanSearchInput')?.value || '').toLowerCase().trim();
+
+  let filtered = artisans || [];
+  if (query) {
+    filtered = filtered.filter(a => {
+      const text = `${a.name || ''} ${a.shopName || ''} ${a.region || ''} ${a.category || ''}`.toLowerCase();
+      return text.includes(query);
+    });
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-table-cell">No artisans found. Click "+ Add New Artisan" or "Seed Master Artisans" to add.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  filtered.forEach(a => {
+    const tr = document.createElement('tr');
+    const photoUrl = a.photo || a.avatar || 'images/emblem.svg';
+    const statusClass = a.status === 'Inactive' || a.status === 'suspended' ? 'inactive' : 'active';
+    const shopLink = `artisans.html?sellerId=${encodeURIComponent(a.id)}&sellerName=${encodeURIComponent(a.shopName || a.name)}`;
+
+    tr.innerHTML = `
+      <td>
+        <img src="${photoUrl}" alt="${a.name}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid #dcd1be; background: #eee;" onerror="this.src='images/emblem.svg'">
+      </td>
+      <td>
+        <strong>${a.name || 'Artisan Seller'}</strong>
+        <div style="font-size: 11px; color: #888;">ID: ${a.id}</div>
+      </td>
+      <td>
+        <span style="font-weight: 600; color: #1d4831;">${a.shopName || 'Workshop'}</span>
+      </td>
+      <td>${a.region || 'Philippines'}</td>
+      <td><span class="role-badge" style="background:#eef7f0; color:#1d4831;">${a.category || 'Handicrafts'}</span></td>
+      <td><span class="status-badge ${statusClass}">${a.status || 'Active'}</span></td>
+      <td>
+        <div class="row-actions" style="display: flex; gap: 6px; align-items: center;">
+          <button type="button" class="action-btn edit edit-artisan-btn">Edit</button>
+          <a href="${shopLink}" target="_blank" class="action-btn" style="text-decoration: none; padding: 4px 8px; font-size: 11.5px;">View Shop 🏬</a>
+          <button type="button" class="action-btn delete delete-artisan-btn">Delete</button>
+        </div>
+      </td>
+    `;
+
+    // Edit button
+    tr.querySelector('.edit-artisan-btn')?.addEventListener('click', () => {
+      openArtisanModal(a);
+    });
+
+    // Delete button
+    tr.querySelector('.delete-artisan-btn')?.addEventListener('click', async () => {
+      if (!confirm(`Are you sure you want to remove artisan "${a.name}" from the directory?`)) {
+        return;
+      }
+      try {
+        await ArtisanDB.deleteArtisan(a.id);
+        alert(`Artisan "${a.name}" removed from directory.`);
+      } catch (err) {
+        alert('Failed to remove artisan: ' + err.message);
+      }
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
 
 
 

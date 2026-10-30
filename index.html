@@ -239,6 +239,9 @@
                 <div class="detail-seller-meta">
                     <h4 id="detailSellerName">Artisan Partner</h4>
                     <p>Verified Community Weaver / Craftsman</p>
+                    <a href="artisans.html" id="detailArtisanShopLink" class="btn-visit-artisan-shop" title="Visit Artisan Shop">
+                        🏬 Visit Artisan Shop & Profile →
+                    </a>
                 </div>
             </div>
 
@@ -312,6 +315,9 @@
           <div class="detail-seller-meta">
             <h4 id="quickViewSellerName">Artisan Partner</h4>
             <p>Verified Community Artisan</p>
+            <a href="artisans.html" id="indexQuickViewArtisanShopLink" class="btn-visit-artisan-shop" title="Visit Artisan Shop">
+              🏬 Visit Artisan Shop & Profile →
+            </a>
           </div>
         </div>
 
@@ -464,7 +470,22 @@
             <div class="form-group">
                 <label>City / Municipality</label>
                 <input id="checkoutCity" type="text"
-                placeholder="Enter municipality or city" required>
+                placeholder="Enter municipality or city" required oninput="autoDetectCheckoutCourier(this.value)">
+            </div>
+
+            <div class="form-group">
+                <label>Courier Destination & Distance Tier</label>
+                <select id="checkoutCourierRegion" onchange="renderCart()">
+                    <option value="ncr" data-rate="60" selected>Metro Manila (NCR) — ₱60.00 (1-2 Days • J&T/LBC)</option>
+                    <option value="gma" data-rate="85">Greater Manila Area (Cavite/Laguna/Batangas/Rizal) — ₱85.00</option>
+                    <option value="luzon" data-rate="120">Rest of Luzon Provinces — ₱120.00 (3-5 Days)</option>
+                    <option value="visayas" data-rate="160">Visayas Region (Cebu, Iloilo, Samar, Leyte) — ₱160.00</option>
+                    <option value="mindanao" data-rate="190">Mindanao Region (Davao, CDO, GenSan) — ₱190.00</option>
+                    <option value="island" data-rate="240">Island & Remote Provinces (Palawan, Batanes) — ₱240.00</option>
+                </select>
+                <small style="color: #666; font-size: 11.5px; display: block; margin-top: 4px;">
+                    🚚 Rates adjust dynamically based on shipping distance from artisan workshops.
+                </small>
             </div>
 
             <div class="form-group">
@@ -855,6 +876,7 @@
 
 <!-- Connect Firebase backend service layer & universal header auth -->
 <script type="module" src="firebase-config.js"></script>
+<script type="module" src="pwa-install.js"></script>
 <script type="module" src="header-auth.js"></script>
 
 <!-- Main Storefront Application Script -->
@@ -1024,7 +1046,7 @@ function bootstrapApplication() {
         }
     });
 
-    // 2. Subscribe live products from Firestore (Requirement 1)
+    // 2. Subscribe live products from Firestore (Requirement 1 & Real-time stock update)
     window.ArtisanDB.subscribeProducts((products) => {
         if (products && products.length > 0) {
             liveProducts = products;
@@ -1032,6 +1054,58 @@ function bootstrapApplication() {
             liveProducts = fallbackProducts;
         }
         renderAllProductGrids();
+
+        // Real-time stock update for open Product Detail modal
+        if (selectedProduct) {
+            const updated = liveProducts.find(p => p.id === selectedProduct.id);
+            if (updated) {
+                selectedProduct.stock = updated.stock;
+                const stock = Number(updated.stock || 0);
+                const stockEl = document.getElementById("detailStockStatus");
+                const addBtn = document.getElementById("addToCartBtn");
+                if (stockEl) {
+                    if (stock <= 0) {
+                        stockEl.innerText = "Out of Stock";
+                        stockEl.style.color = "#c53030";
+                        if (addBtn) { addBtn.disabled = true; addBtn.innerText = "Sold Out"; }
+                    } else if (stock <= 3) {
+                        stockEl.innerText = `Low Stock (${stock} left)`;
+                        stockEl.style.color = "#b45309";
+                        if (addBtn) { addBtn.disabled = false; addBtn.innerText = "Add to Cart"; }
+                    } else {
+                        stockEl.innerText = `In Stock (${stock} available)`;
+                        stockEl.style.color = "green";
+                        if (addBtn) { addBtn.disabled = false; addBtn.innerText = "Add to Cart"; }
+                    }
+                }
+            }
+        }
+
+        // Real-time stock update for open Quick View modal
+        if (quickViewProduct) {
+            const updated = liveProducts.find(p => p.id === quickViewProduct.id);
+            if (updated) {
+                quickViewProduct.stock = updated.stock;
+                const stock = Number(updated.stock || 0);
+                const stockEl = document.getElementById("quickViewStockIndicator");
+                const addBtn = document.getElementById("quickViewAddCartBtn");
+                if (stockEl) {
+                    if (stock <= 0) {
+                        stockEl.innerText = "Out of Stock";
+                        stockEl.style.color = "#c53030";
+                        if (addBtn) { addBtn.disabled = true; addBtn.innerText = "Sold Out"; }
+                    } else if (stock <= 3) {
+                        stockEl.innerText = `Low Stock (${stock} left)`;
+                        stockEl.style.color = "#b45309";
+                        if (addBtn) { addBtn.disabled = false; addBtn.innerText = "Add to Cart"; }
+                    } else {
+                        stockEl.innerText = `In Stock (${stock} items available)`;
+                        stockEl.style.color = "green";
+                        if (addBtn) { addBtn.disabled = false; addBtn.innerText = "Add to Cart"; }
+                    }
+                }
+            }
+        }
     });
 
     // 3. Subscribe live sellers from Firestore
@@ -1250,6 +1324,11 @@ function openProductQuickView(productId) {
     document.getElementById("quickViewCategory").innerText = (product.category || "Handicraft").toUpperCase();
     document.getElementById("quickViewQuantity").innerText = quickViewQty;
 
+    const qvShopLink = document.getElementById("indexQuickViewArtisanShopLink");
+    if (qvShopLink) {
+        qvShopLink.href = `artisans.html?sellerId=${encodeURIComponent(product.sellerId || '')}&sellerName=${encodeURIComponent(product.sellerName || '')}`;
+    }
+
     const qvRatingVal = Number(product.rating || 5).toFixed(1);
     const qvCount = Number(product.reviewsCount || product.reviews || 0);
     const qvRatingEl = document.getElementById("quickViewRatingBlock");
@@ -1335,6 +1414,11 @@ function showProduct(productId) {
     document.getElementById("detailSellerInitial").innerText = (product.sellerName || "A").charAt(0).toUpperCase();
     document.getElementById("detailCategory").innerText = (product.category || "Handicraft").toUpperCase();
     document.getElementById("quantity").innerText = quantity;
+
+    const detailShopLink = document.getElementById("detailArtisanShopLink");
+    if (detailShopLink) {
+        detailShopLink.href = `artisans.html?sellerId=${encodeURIComponent(product.sellerId || '')}&sellerName=${encodeURIComponent(product.sellerName || '')}`;
+    }
 
     const ratingVal = Number(product.rating || 5).toFixed(1);
     const reviewsCount = Number(product.reviewsCount || product.reviews || 0);
@@ -1480,12 +1564,18 @@ function renderCart() {
     }
 
     const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
-    const shipping = cart.length > 0 ? 60 : 0;
+    const courier = getIndexCourierRate();
+    const shipping = cart.length > 0 ? (subtotal >= 2500 ? 0 : courier.rate) : 0;
     const total = subtotal + shipping;
 
     if (cartSubtotal) cartSubtotal.innerText = `₱${subtotal.toLocaleString()}.00`;
-    if (cartShipping) cartShipping.innerText = `₱${shipping.toLocaleString()}.00`;
+    if (cartShipping) cartShipping.innerText = shipping === 0 && cart.length > 0 ? 'FREE' : `₱${shipping.toLocaleString()}.00`;
     if (cartTotal) cartTotal.innerText = `₱${total.toLocaleString()}.00`;
+
+    const checkoutShippingEl = document.getElementById("checkoutShipping");
+    if (checkoutShippingEl) {
+        checkoutShippingEl.innerText = shipping === 0 && cart.length > 0 ? 'FREE (Promo)' : `₱${shipping.toLocaleString()}.00 (${courier.label.split('—')[0].trim()})`;
+    }
 
     if (checkoutSummaryItems) {
         if (cart.length === 0) {
@@ -1502,6 +1592,40 @@ function renderCart() {
 
     if (checkoutTotal) checkoutTotal.innerText = `₱${total.toLocaleString()}.00`;
 }
+
+function getIndexCourierRate() {
+    const sel = document.getElementById("checkoutCourierRegion");
+    if (!sel) return { rate: 60, label: "Metro Manila (NCR)" };
+    const opt = sel.options[sel.selectedIndex];
+    const rate = Number(opt?.dataset.rate || 60);
+    const label = opt?.innerText || "Metro Manila (NCR)";
+    return { rate, label };
+}
+
+function autoDetectCheckoutCourier(val) {
+    const courierSel = document.getElementById("checkoutCourierRegion");
+    if (!courierSel) return;
+    const v = (val || "").toLowerCase();
+    let target = null;
+    if (v.match(/manila|quezon|makati|taguig|pasig|mandaluyong|paranaque|pasay|valenzuela|caloocan|marikina|las pinas|muntinlupa|malabon|navotas|san juan|pateros|ncr/i)) {
+        target = "ncr";
+    } else if (v.match(/cavite|laguna|batangas|rizal|bulacan|antipolo|calamba|santa rosa|dasmarinas|bacoor|imus/i)) {
+        target = "gma";
+    } else if (v.match(/baguio|benguet|ilocos|la union|pangasinan|pampanga|tarlac|zambales|bataan|nueva ecija|albay|camarines|sorsogon|bicol|vigan|angeles|legazpi|naga/i)) {
+        target = "luzon";
+    } else if (v.match(/cebu|mandaue|lapu-lapu|bohol|tagbilaran|iloilo|bacolod|leyte|tacloban|samar|calbiga|catbalogan|borongan|panay|negros|dumaguete/i)) {
+        target = "visayas";
+    } else if (v.match(/davao|cagayan de oro|cdo|zamboanga|general santos|gensan|bukidnon|butuan|cotabato|iligan|koronadal/i)) {
+        target = "mindanao";
+    } else if (v.match(/palawan|puerto princesa|coron|batanes|basilan|sulu|tawi-tawi|catanduanes|marinduque|romblon|siargao/i)) {
+        target = "island";
+    }
+    if (target && courierSel.value !== target) {
+        courierSel.value = target;
+        renderCart();
+    }
+}
+window.autoDetectCheckoutCourier = autoDetectCheckoutCourier;
 
 
 /* ================= CHECKOUT & GCASH PAYMENT (Requirements 6 & 7) ================= */
@@ -1604,7 +1728,8 @@ async function initiateOrderPlacement() {
     }
 
     const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
-    const shipping = 60;
+    const courier = getIndexCourierRate();
+    const shipping = subtotal >= 2500 ? 0 : courier.rate;
     const total = subtotal + shipping;
 
     // Collect all seller IDs involved in this order

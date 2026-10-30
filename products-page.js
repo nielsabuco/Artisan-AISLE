@@ -23,6 +23,31 @@ function startProductsSubscription() {
     // Only display active products that are not deleted
     liveProducts = products.filter(p => !p.deleted && p.status !== 'Hidden' && p.status !== 'Inactive' && p.status !== 'Suspended');
     renderProducts();
+
+    // Real-time stock update for open Quick View modal
+    if (activeModalProduct) {
+      const current = liveProducts.find(p => p.id === activeModalProduct.id);
+      if (current) {
+        activeModalProduct.stock = current.stock;
+        const stock = Number(current.stock) || 0;
+        const stockIndicator = document.getElementById('quickViewStockIndicator');
+        const addCartBtn = document.getElementById('quickViewAddCartBtn');
+        const buyNowBtn = document.getElementById('quickViewBuyNowBtn');
+        if (stock <= 0) {
+          if (stockIndicator) { stockIndicator.textContent = 'Out of Stock'; stockIndicator.style.color = '#c53030'; }
+          if (addCartBtn) { addCartBtn.disabled = true; addCartBtn.textContent = 'Sold Out'; }
+          if (buyNowBtn) { buyNowBtn.disabled = true; }
+        } else if (stock <= 3) {
+          if (stockIndicator) { stockIndicator.textContent = `Low Stock (${stock} left)`; stockIndicator.style.color = '#b45309'; }
+          if (addCartBtn) { addCartBtn.disabled = false; addCartBtn.textContent = 'Add to Cart'; }
+          if (buyNowBtn) { buyNowBtn.disabled = false; }
+        } else {
+          if (stockIndicator) { stockIndicator.textContent = `In Stock (${stock} available)`; stockIndicator.style.color = 'green'; }
+          if (addCartBtn) { addCartBtn.disabled = false; addCartBtn.textContent = 'Add to Cart'; }
+          if (buyNowBtn) { buyNowBtn.disabled = false; }
+        }
+      }
+    }
   });
 }
 
@@ -76,6 +101,8 @@ function renderProducts() {
     const imageUrl = product.image || defaultImage;
     const priceFormatted = `₱${Number(product.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
+    const artisanShopUrl = `artisans.html?sellerId=${encodeURIComponent(product.sellerId || '')}&sellerName=${encodeURIComponent(product.sellerName || '')}`;
+
     card.style.cursor = 'pointer';
     card.innerHTML = `
       <div class="product-thumb-wrap">
@@ -85,7 +112,7 @@ function renderProducts() {
       <div class="product-info">
         <span class="product-card-category">${product.category || 'Handicrafts'}</span>
         <h3 class="product-card-title">${product.name}</h3>
-        <p class="product-card-artisan">By <strong>${product.sellerName || 'Artisan Partner'}</strong></p>
+        <p class="product-card-artisan">By <a href="${artisanShopUrl}" class="artisan-link" title="Visit ${product.sellerName || 'Artisan'}'s Shop" onclick="event.stopPropagation()"><strong>${product.sellerName || 'Artisan Partner'}</strong> 🏬</a></p>
         <div class="product-card-pricing">
           <span class="price-val">${priceFormatted}</span>
         </div>
@@ -193,6 +220,11 @@ function openQuickView(product) {
   document.getElementById('quickViewSellerName').textContent = product.sellerName || 'Artisan Partner';
   document.getElementById('quickViewSellerInitial').textContent = (product.sellerName || 'A').charAt(0).toUpperCase();
   document.getElementById('quickViewQuantity').textContent = activeModalQty;
+
+  const artisanShopLink = document.getElementById('quickViewArtisanShopLink');
+  if (artisanShopLink) {
+    artisanShopLink.href = `artisans.html?sellerId=${encodeURIComponent(product.sellerId || '')}&sellerName=${encodeURIComponent(product.sellerName || '')}`;
+  }
 
   const rVal = Number(product.rating || 5).toFixed(1);
   const rCount = Number(product.reviewsCount || product.reviews || 0);

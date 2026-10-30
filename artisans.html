@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Artisans | ArtisanAisle</title>
+  <title>Artisans & Handcrafted Shops | Artisan Aisle</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="alternate icon" href="favicon.png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -17,11 +17,18 @@
       <span class="logo-text">Artisan<span>AISLE</span></span>
     </a>
     <div class="search">
-      <input type="text" placeholder="Search handmade products..." />
-      <button type="button" onclick="window.location.href='index.html'">Search</button>
+      <input type="text" id="globalArtisanSearch" placeholder="Search artisans, crafts, or regions..." />
+      <button type="button" id="globalSearchBtn">Search</button>
     </div>
     <div class="header-links">
-      <a href="cart.html">Cart</a>
+      <a href="cart.html" class="header-cart-btn" aria-label="Shopping Cart">
+        <svg class="header-cart-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <span class="cart-badge">0</span>
+      </a>
       <a href="login.html" id="loginButton">Login</a>
     </div>
   </header>
@@ -36,34 +43,176 @@
   </nav>
 
   <main>
-    <section class="hero">
-      <h1>Meet Our Artisans</h1>
-      <p>Every product tells the story of a skilled creator and a proud community.</p>
+    <!-- MODE 1: ALL ARTISANS DIRECTORY -->
+    <section id="artisanDirectorySection">
+      <div class="artisan-header-hero">
+        <h1>Meet Our Master Artisans & Weavers</h1>
+        <p>Every handcrafted piece preserves cultural heritage and empowers local families across Luzon, Visayas, and Mindanao.</p>
+      </div>
+
+      <div class="artisan-directory-container">
+        <!-- Search & Filter Controls -->
+        <div class="artisan-controls-row">
+          <div class="artisan-search-box">
+            <svg class="artisan-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="artisanFilterInput" placeholder="Filter by artisan name, craft, or province...">
+          </div>
+
+          <div class="artisan-filter-pills" id="regionFilterPills">
+            <button type="button" class="artisan-filter-pill active" data-region="all">All Regions</button>
+            <button type="button" class="artisan-filter-pill" data-region="Luzon">Luzon</button>
+            <button type="button" class="artisan-filter-pill" data-region="Visayas">Visayas</button>
+            <button type="button" class="artisan-filter-pill" data-region="Mindanao">Mindanao</button>
+          </div>
+        </div>
+
+        <!-- Artisans Grid -->
+        <div class="artisans-grid" id="artisansGrid">
+          <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
+            <p>Loading master artisans and community workshops...</p>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section class="grid">
-      <div class="card">
-        <h2>EUGENE MARCIENE M. JERUSALEM</h2>
-        <p>Specializes in woven bags, traditional baskets, and colorful home accents.</p>
-      </div>
-      <div class="card">
-        <h2>RENIEL M. SABUCO</h2>
-        <p>Creates polished wooden crafts and functional decor pieces rooted in Calbiga heritage.</p>
-      </div>
-      <div class="card">
-        <h2>ROBERT G. DACDAC</h2>
-        <p>Known for hand-embroidered textiles, custom accessories, and traditional weaving.</p>
-      </div>
-      <div class="card">
-        <h2>PIERCE P. ESTRADA</h2>
-        <p>Crafts meaningful souvenirs, handmade wallets, and keepsakes celebrating local traditions.</p>
-      </div>
-      <div class="card">
-        <h2>KIA VANETTE A. ACBO</h2>
-        <p>Specialized in artisan community coordination and business management.</p>
+    <!-- MODE 2: DEDICATED ARTISAN SHOP VIEW -->
+    <section id="artisanShopSection" style="display: none;">
+      <div class="artisan-directory-container" style="margin-top: 24px;">
+        <!-- Artisan Profile Hero Card -->
+        <div class="artisan-shop-hero">
+          <div class="artisan-shop-cover">
+            <a href="artisans.html" class="artisan-shop-back-btn" id="backToArtisansBtn">
+              ← Back to All Artisans
+            </a>
+          </div>
+
+          <div class="artisan-shop-profile-header">
+            <img id="shopArtisanPhoto" class="artisan-shop-photo" src="images/emblem.svg" alt="Artisan Photo">
+            <div class="artisan-shop-header-info">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+                <h1 id="shopArtisanName" class="artisan-shop-title">Artisan Name</h1>
+                <span class="artisan-verified-pill">🇵🇭 Verified Artisan</span>
+              </div>
+              <div id="shopArtisanShopName" class="artisan-shop-craft-tag">Artisan Collective</div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+                <span id="shopArtisanRegion" class="artisan-shop-region-badge">📍 Region</span>
+                <span id="shopArtisanCategory" class="artisan-shop-region-badge">🧵 Handcraft Specialization</span>
+                <span id="shopArtisanProductCount" class="artisan-shop-region-badge">📦 0 Creations</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="artisan-shop-bio-box">
+            <h4>Heritage & Artisan Story</h4>
+            <p id="shopArtisanBio">Crafting meaningful handmade goods with love, dedication, and generations of cultural artistry.</p>
+          </div>
+        </div>
+
+        <!-- Artisan's Listed Products -->
+        <div class="artisan-shop-section-heading">
+          <div>
+            <h2 id="shopCatalogTitle">Handcrafted Creations</h2>
+            <span id="shopCatalogSubtitle">Browse and support this artisan's workshop directly</span>
+          </div>
+        </div>
+
+        <div class="products-grid" id="artisanProductsGrid">
+          <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
+            <p>Loading handcrafted creations...</p>
+          </div>
+        </div>
       </div>
     </section>
   </main>
+
+  <!-- Quick View Modal -->
+  <div id="quickViewModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card detail-modal-card">
+      <button type="button" class="close-modal-btn" id="closeQuickViewBtn" aria-label="Close">✕</button>
+      <div class="detail-grid">
+        <div class="detail-gallery">
+          <div class="detail-main-image-wrap">
+            <img id="quickViewImage" src="" alt="Handcrafted product">
+          </div>
+        </div>
+
+        <div class="detail-content">
+          <span class="detail-category-tag" id="quickViewCategory">Category</span>
+          <h2 class="detail-product-title" id="quickViewTitle">Product Title</h2>
+
+          <div class="detail-seller-snippet">
+            <div class="detail-seller-badge" id="quickViewSellerInitial">A</div>
+            <div>
+              <small style="color:#666;">Crafted with pride by</small>
+              <h4 id="quickViewSellerName" style="margin:0; font-size:14px; color:#1d4831;">Artisan Partner</h4>
+            </div>
+          </div>
+
+          <div class="detail-price-cluster">
+            <span class="detail-price-current" id="quickViewPrice">₱0.00</span>
+          </div>
+
+          <div class="detail-desc-box" id="quickViewDesc">
+            Authentic Filipino handcrafted masterpiece created using traditional materials.
+          </div>
+
+          <div id="quickViewStockIndicator" class="detail-stock-indicator" style="color: green;">
+            In Stock
+          </div>
+
+          <div class="detail-quantity-cluster">
+            <label style="font-weight:600; font-size:14px; color:#444;">Quantity:</label>
+            <div class="quantity-picker">
+              <button type="button" id="quickViewQtyMinus">−</button>
+              <span id="quickViewQuantity">1</span>
+              <button type="button" id="quickViewQtyPlus">+</button>
+            </div>
+          </div>
+
+          <div class="detail-action-buttons">
+            <button type="button" class="btn-add-cart" id="quickViewAddCartBtn">Add to Cart</button>
+            <button type="button" class="btn-buy-now" id="quickViewBuyNowBtn">Buy Now</button>
+          </div>
+
+          <div class="detail-trust-badges">
+            <div class="detail-trust-item">🚚 Fast Regional Shipping</div>
+            <div class="detail-trust-item">🛡️ Direct GCash & COD</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Reviews List Modal -->
+  <div id="productReviewsListModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 620px; padding: 24px; max-height: 85vh; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #ebd9c8; padding-bottom: 12px; flex-shrink: 0;">
+        <div>
+          <h2 style="font-family: 'Cinzel', Georgia, serif; margin: 0; color: #1d4831; font-size: 20px;">Customer Reviews</h2>
+          <p id="reviewsModalProductSubtitle" style="margin: 3px 0 0; color: #6b5a4e; font-size: 13px; font-weight: 500;">Verified Artisan Community Reviews</p>
+        </div>
+        <button type="button" class="close-modal-btn" id="closeReviewsListModalBtn" aria-label="Close">✕</button>
+      </div>
+
+      <div class="review-modal-summary" style="display: flex; align-items: center; justify-content: space-between; background: #fbf9f5; border: 1.5px solid #ebd9c8; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 34px; font-weight: 800; color: #1d4831; font-family: 'Cinzel', serif;" id="reviewsModalAvgScore">5.0</div>
+          <div>
+            <div id="reviewsModalStars" style="color: #f59e0b; font-size: 17px; letter-spacing: 1px;">★★★★★</div>
+            <small id="reviewsModalTotalCount" style="color: #55625a; font-weight: 600;">Based on 0 verified reviews</small>
+          </div>
+        </div>
+        <a id="reviewsModalWriteReviewBtn" href="review.html" class="primary-btn" style="padding: 8px 16px; font-size: 13px; text-decoration: none;">Write a Review</a>
+      </div>
+
+      <div id="reviewsModalListContainer" style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; padding-right: 4px;">
+        <div style="text-align: center; color: #888; padding: 20px;">Loading customer reviews...</div>
+      </div>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <div class="footer-container">
@@ -74,7 +223,10 @@
       <p class="footer-copy">&copy; 2026 Artisan Aisle. All rights reserved. | Supporting Local Filipino Artisans &amp; Communities 🇵🇭</p>
     </div>
   </footer>
+
   <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="pwa-install.js"></script>
   <script type="module" src="header-auth.js"></script>
+  <script type="module" src="artisans-page.js"></script>
 </body>
 </html>

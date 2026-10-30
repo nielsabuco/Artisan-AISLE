@@ -1,8 +1,12 @@
 import { ArtisanDB } from './firebase-config.js';
+import { attachHeaderInstallBtn } from './pwa-install.js';
 
 export function updateHeaderAuth() {
   const headerLinks = document.querySelector('.header-links');
   if (!headerLinks) return;
+
+  // Ensure Install App button is present in header
+  attachHeaderInstallBtn();
 
   const user = ArtisanDB.getLocalUser();
   const cart = ArtisanDB.getCart();

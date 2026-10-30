@@ -110,6 +110,23 @@
                 </div>
               </div>
 
+              <!-- Courier Delivery & Distance Tier -->
+              <div class="form-group" style="margin-top: 4px; margin-bottom: 12px;">
+                <label for="shippingCourierRegion" style="font-weight: 700; color: #1d4831; display: block; margin-bottom: 4px;">Courier Destination & Distance Tier *</label>
+                <select id="shippingCourierRegion" required style="width: 100%; padding: 11px; border: 1.5px solid #d4c5b3; border-radius: 8px; font-size: 13.5px; background: white; font-weight: 500;">
+                  <option value="ncr" data-rate="60" data-label="Metro Manila (NCR)" selected>Metro Manila (NCR) — ₱60.00 (1-2 Days • Express J&T/LBC)</option>
+                  <option value="gma" data-rate="85" data-label="Greater Manila Area">Greater Manila Area (Cavite, Laguna, Batangas, Rizal, Bulacan) — ₱85.00 (2-3 Days)</option>
+                  <option value="luzon" data-rate="120" data-label="Rest of Luzon">Rest of Luzon (North / South Provinces) — ₱120.00 (3-5 Days)</option>
+                  <option value="visayas" data-rate="160" data-label="Visayas Region">Visayas (Cebu, Iloilo, Samar, Leyte, Bohol, Negros) — ₱160.00 (4-6 Days)</option>
+                  <option value="mindanao" data-rate="190" data-label="Mindanao Region">Mindanao (Davao, CDO, GenSan, Zamboanga) — ₱190.00 (5-7 Days)</option>
+                  <option value="island" data-rate="240" data-label="Island & Remote Provinces">Island & Remote Provinces (Palawan, Batanes, Catanduanes, Sulu) — ₱240.00 (6-9 Days)</option>
+                </select>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #555;">
+                  <span>🚚 <strong>Courier Partners:</strong> J&T Express • LBC Express • Flash Express</span>
+                  <span id="shippingCourierTag" style="font-weight: 700; color: #1d4831;">Tier: ₱60.00</span>
+                </div>
+              </div>
+
               <div class="form-group">
                 <label for="shippingNotes">Special Delivery Instructions (Optional)</label>
                 <input type="text" id="shippingNotes" placeholder="Leave at guardhouse, call upon arrival, etc.">
@@ -819,6 +836,8 @@
     </div>
   </footer>
 
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="pwa-install.js"></script>
   <script type="module" src="header-auth.js"></script>
   <script type="module" src="cart-page.js"></script>
 </body>

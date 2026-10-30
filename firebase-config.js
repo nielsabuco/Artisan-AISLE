@@ -533,6 +533,32 @@ export const ArtisanDB = {
     }, { merge: true });
   },
 
+  async getSellers() {
+    try {
+      const snap = await getDocs(collection(db, 'sellers'));
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (err) {
+      console.warn('Error fetching sellers:', err);
+      return [];
+    }
+  },
+
+  async createArtisan(artisanData) {
+    const col = collection(db, 'sellers');
+    const docRef = await addDoc(col, {
+      ...artisanData,
+      status: artisanData.status || 'Active',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return { id: docRef.id, ...artisanData };
+  },
+
+  async deleteArtisan(sellerId) {
+    if (!sellerId) return;
+    await deleteDoc(doc(db, 'sellers', sellerId));
+  },
+
   // --- Seller Applications ---
   async submitSellerApplication(appData) {
     const colRef = collection(db, 'seller_applications');

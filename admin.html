@@ -79,6 +79,10 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           User Management
         </button>
+        <button type="button" class="sidebar-btn" data-tab="artisans">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+          Artisans Directory (<span id="artisansCountBadge">0</span>)
+        </button>
         <button type="button" class="sidebar-btn" data-tab="products">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
           All Products
@@ -215,6 +219,52 @@
             </thead>
             <tbody id="usersTableBody">
               <tr><td colspan="5" class="loading-td">Loading users...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION: ARTISANS DIRECTORY -->
+      <section id="tab-artisans" class="admin-tab-section" style="display: none;">
+        <div class="section-header-row">
+          <div>
+            <h1>Artisans Directory & Creator Profiles</h1>
+            <p>Manage verified master artisans, upload photos, and curate regional heritage workshops.</p>
+          </div>
+          <div class="export-btn-cluster">
+            <button type="button" class="secondary-btn" id="seedArtisansBtn" style="padding: 8px 14px; font-size: 13px; font-weight: 600;">
+              🌱 Seed Master Artisans
+            </button>
+            <button type="button" class="primary-btn" id="openAddArtisanModalBtn" style="padding: 8px 16px; font-size: 13px; font-weight: 600;">
+              + Add New Artisan
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-toolbar">
+          <div class="search-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="adminArtisanSearchInput" placeholder="Filter by artisan name, shop, craft, or region...">
+          </div>
+        </div>
+
+        <div class="table-responsive-box">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Photo</th>
+                <th>Artisan Name</th>
+                <th>Shop / Collective</th>
+                <th>Region / Province</th>
+                <th>Craft Specialization</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminArtisansTableBody">
+              <tr>
+                <td colspan="7" class="loading-td">Loading artisans directory...</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -641,6 +691,87 @@
       <div class="modal-actions-row">
         <button type="button" class="secondary-btn" id="copyApprovedCredentialsBtn">📋 Copy Credentials</button>
         <button type="button" class="primary-btn" onclick="document.getElementById('sellerApprovalSuccessModal').style.display='none'">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Add / Edit Artisan Modal with Photo Upload -->
+  <div id="adminArtisanModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 600px; text-align: left; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #ebd9c8; padding-bottom: 10px;">
+        <h2 id="adminArtisanModalTitle" style="margin: 0; font-size: 20px; color: #285c3b;">Add Master Artisan</h2>
+        <button type="button" class="close-modal-btn" id="closeAdminArtisanModalBtn" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+      </div>
+      <p style="color: #666; font-size: 13px; margin-bottom: 16px;">
+        Upload photo, craft story, and contact details for this verified Philippine artisan.
+      </p>
+
+      <input type="hidden" id="adminArtisanId">
+
+      <!-- Photo Upload Box -->
+      <div class="form-group" style="margin-bottom: 16px; background: #faf8f5; border: 1.5px dashed #dcd1be; border-radius: 12px; padding: 14px; text-align: center;">
+        <label style="display: block; font-weight: 700; font-size: 13.5px; color: #1d4831; margin-bottom: 8px;">
+          Artisan Portrait / Workshop Photo *
+        </label>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
+          <img id="adminArtisanPhotoPreview" src="images/emblem.svg" alt="Preview" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.12); background: #eee;">
+          <div style="text-align: left;">
+            <input type="file" id="adminArtisanPhotoFile" accept="image/*" style="font-size: 13px; margin-bottom: 6px; display: block;">
+            <input type="text" id="adminArtisanPhotoUrl" placeholder="Or paste image URL directly..." style="width: 100%; max-width: 320px; padding: 7px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 12.5px;">
+            <small style="display: block; color: #777; font-size: 11px; margin-top: 3px;">Supports PNG, JPG, or WebP under 2MB</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div>
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Artisan Full Name *</label>
+          <input type="text" id="adminArtisanNameInput" required placeholder="e.g. Eugene Marciene Jerusalem" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px;">
+        </div>
+        <div>
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Shop / Collective Name *</label>
+          <input type="text" id="adminArtisanShopInput" required placeholder="e.g. Bicol Heritage Weavers" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px;">
+        </div>
+      </div>
+
+      <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div>
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Region / Province / Island *</label>
+          <input type="text" id="adminArtisanRegionInput" required placeholder="e.g. Calbiga, Samar (Visayas)" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px;">
+        </div>
+        <div>
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Craft Specialization *</label>
+          <input type="text" id="adminArtisanCategoryInput" required placeholder="e.g. Traditional Handloom Weaving" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px;">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Artisan Bio & Heritage Story *</label>
+        <textarea id="adminArtisanBioInput" rows="3" placeholder="Artisan's heritage, background, and craft tradition..." style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-family: inherit;"></textarea>
+      </div>
+
+      <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div>
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">GCash Account Name</label>
+          <input type="text" id="adminArtisanGCashNameInput" placeholder="Name on GCash" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px;">
+        </div>
+        <div>
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">GCash Mobile Number</label>
+          <input type="tel" id="adminArtisanGCashNumberInput" placeholder="09XX XXX XXXX" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px;">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 18px;">
+        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Account Status</label>
+        <select id="adminArtisanStatusInput" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; font-weight: 600;">
+          <option value="Active">Active (Visible in Marketplace)</option>
+          <option value="Inactive">Inactive / Suspended</option>
+        </select>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #eee; padding-top: 14px;">
+        <button type="button" class="secondary-btn" id="cancelAdminArtisanModalBtn">Cancel</button>
+        <button type="button" class="primary-btn" id="saveAdminArtisanBtn">Save Artisan Profile</button>
       </div>
     </div>
   </div>
