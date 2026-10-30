@@ -104,104 +104,438 @@
           </div>
 
           <!-- Payment Options -->
-          <div class="cart-card-box" id="paymentOptionsBox">
-            <h2>Select Payment Method</h2>
+          <div class="cart-card-box payment-section-card" id="paymentOptionsBox">
+            <div class="payment-box-header">
+              <div>
+                <div class="payment-step-indicator">
+                  <span class="step-badge">Step 2</span>
+                  <span class="step-text">Payment Method</span>
+                </div>
+                <h2 class="payment-box-heading">Select Payment Method</h2>
+                <p class="payment-box-sub">Choose your preferred payment method. Encrypted, instant, and covered by our buyer guarantee.</p>
+              </div>
+              <div class="payment-security-shield">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#285c3b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <path d="M9 12l2 2 4-4"/>
+                </svg>
+                <span>SSL Encrypted</span>
+              </div>
+            </div>
+
             <div class="payment-selector-group">
-              <label class="payment-radio-label">
+              <!-- OPTION 1: Cash on Delivery -->
+              <label class="payment-radio-label" data-method="cod">
                 <input type="radio" name="paymentOption" value="Cash on Delivery" checked>
                 <div class="payment-radio-card">
                   <div class="payment-card-header">
-                    <div class="payment-title">Cash on Delivery (COD)</div>
-                    <span class="payment-chip">Nationwide</span>
+                    <div class="payment-header-left">
+                      <span class="custom-radio-indicator" aria-hidden="true"></span>
+                      <div class="payment-brand-badge cod-badge">
+                        <svg class="payment-svg-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="36" height="36" rx="10" fill="url(#cod-grad)"/>
+                          <defs>
+                            <linearGradient id="cod-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                              <stop stop-color="#285c3b"/>
+                              <stop offset="1" stop-color="#183e25"/>
+                            </linearGradient>
+                          </defs>
+                          <path d="M9 13.5L18 8.5L27 13.5V23.5L18 28.5L9 23.5V13.5Z" fill="#32734a" stroke="#e8f5e9" stroke-width="1.5" stroke-linejoin="round"/>
+                          <path d="M18 8.5V28.5" stroke="#e8f5e9" stroke-width="1.5"/>
+                          <path d="M9 13.5L18 18.5L27 13.5" stroke="#e8f5e9" stroke-width="1.5"/>
+                          <circle cx="25" cy="23" r="5.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5"/>
+                          <text x="25" y="26.2" font-family="'Montserrat', sans-serif" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">₱</text>
+                        </svg>
+                      </div>
+                      <div class="payment-title-wrap">
+                        <div class="payment-title-row">
+                          <span class="payment-title">Cash on Delivery (COD)</span>
+                        </div>
+                        <span class="payment-subtitle">Pay with cash upon physical package delivery to your doorstep</span>
+                      </div>
+                    </div>
+                    <div class="payment-header-right">
+                      <span class="payment-chip cod-chip">Nationwide</span>
+                    </div>
                   </div>
-                  <div class="payment-sub">Pay in cash upon physical package delivery to your doorstep.</div>
+                  <div class="payment-sub">
+                    <div class="payment-steps-mini">
+                      <div class="mini-step">
+                        <span class="mini-step-num">1</span>
+                        <span>Confirm Order</span>
+                      </div>
+                      <span class="mini-step-arrow">➔</span>
+                      <div class="mini-step">
+                        <span class="mini-step-num">2</span>
+                        <span>Artisan Packs Items</span>
+                      </div>
+                      <span class="mini-step-arrow">➔</span>
+                      <div class="mini-step">
+                        <span class="mini-step-num">3</span>
+                        <span>Pay Cash to Courier</span>
+                      </div>
+                    </div>
+                    <div class="payment-perks">
+                      <span>✓ No bank account needed</span>
+                      <span>✓ Inspect package seal before paying</span>
+                      <span>✓ Official receipt included</span>
+                    </div>
+                  </div>
                 </div>
               </label>
 
-              <label class="payment-radio-label">
+              <!-- OPTION 2: GCash -->
+              <label class="payment-radio-label" data-method="gcash">
                 <input type="radio" name="paymentOption" value="GCash">
                 <div class="payment-radio-card">
                   <div class="payment-card-header">
-                    <div class="payment-title">GCash (E-Wallet & QRPh)</div>
-                    <span class="payment-chip gcash-chip">Instant</span>
+                    <div class="payment-header-left">
+                      <span class="custom-radio-indicator" aria-hidden="true"></span>
+                      <div class="payment-brand-badge gcash-badge">
+                        <svg class="payment-svg-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="36" height="36" rx="10" fill="url(#gcash-grad)"/>
+                          <defs>
+                            <linearGradient id="gcash-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                              <stop stop-color="#0082fb"/>
+                              <stop offset="1" stop-color="#005ecb"/>
+                            </linearGradient>
+                          </defs>
+                          <circle cx="18" cy="18" r="8.5" stroke="#ffffff" stroke-width="2.5"/>
+                          <path d="M18 18H23V21.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M22 11C24.5 12.5 26 15 26 18C26 21 24.5 23.5 22 25" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.9"/>
+                          <path d="M25 8.5C28 10.8 29.5 14 29.5 18C29.5 22 28 25.2 25 27.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.6"/>
+                        </svg>
+                      </div>
+                      <div class="payment-title-wrap">
+                        <div class="payment-title-row">
+                          <span class="payment-title">GCash</span>
+                          <span class="payment-badge-popular">RECOMMENDED</span>
+                        </div>
+                        <span class="payment-subtitle">Direct mobile app authorization or scan dynamic QRPh code</span>
+                      </div>
+                    </div>
+                    <div class="payment-header-right">
+                      <span class="payment-chip gcash-chip">Instant</span>
+                    </div>
                   </div>
-                  <div class="payment-sub">Send money directly via PayMongo or scan seller's dynamic QRPh code.</div>
+                  <div class="payment-sub">
+                    <div class="payment-steps-mini">
+                      <div class="mini-step">
+                        <span class="mini-step-num">1</span>
+                        <span>Click GCash Payment</span>
+                      </div>
+                      <span class="mini-step-arrow">➔</span>
+                      <div class="mini-step">
+                        <span class="mini-step-num">2</span>
+                        <span>Authorize in App / QRPh</span>
+                      </div>
+                      <span class="mini-step-arrow">➔</span>
+                      <div class="mini-step">
+                        <span class="mini-step-num">3</span>
+                        <span>Auto-Verified & Marked Paid</span>
+                      </div>
+                    </div>
+                    <div class="payment-perks">
+                      <span>✓ Instant automated verification via PayMongo</span>
+                      <span>✓ Supports QRPh (scan with any bank app)</span>
+                      <span>✓ 0% additional processing surcharge</span>
+                    </div>
+                  </div>
                 </div>
               </label>
 
-              <label class="payment-radio-label">
+              <!-- OPTION 3: Maya -->
+              <label class="payment-radio-label" data-method="maya">
                 <input type="radio" name="paymentOption" value="Maya">
                 <div class="payment-radio-card">
                   <div class="payment-card-header">
-                    <div class="payment-title">Maya (PayMaya Wallet & QR)</div>
-                    <span class="payment-chip maya-chip">Instant</span>
+                    <div class="payment-header-left">
+                      <span class="custom-radio-indicator" aria-hidden="true"></span>
+                      <div class="payment-brand-badge maya-badge">
+                        <svg class="payment-svg-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="36" height="36" rx="10" fill="url(#maya-grad)"/>
+                          <defs>
+                            <linearGradient id="maya-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                              <stop stop-color="#00d66f"/>
+                              <stop offset="1" stop-color="#009949"/>
+                            </linearGradient>
+                          </defs>
+                          <path d="M10 23V14.5C10 13.1 11.1 12 12.5 12C13.9 12 15 13.1 15 14.5V23" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                          <path d="M15 14.5C15 13.1 16.1 12 17.5 12C18.9 12 20 13.1 20 14.5V23" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                          <path d="M20 14.5C20 13.1 21.1 12 22.5 12C23.9 12 25 13.1 25 14.5V23" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                          <circle cx="26" cy="11.5" r="1.5" fill="#ffffff"/>
+                        </svg>
+                      </div>
+                      <div class="payment-title-wrap">
+                        <div class="payment-title-row">
+                          <span class="payment-title">Maya</span>
+                          <span class="payment-badge-pill">PayMaya</span>
+                        </div>
+                        <span class="payment-subtitle">Pay using your Maya wallet balance, Maya QR, or Maya Credit</span>
+                      </div>
+                    </div>
+                    <div class="payment-header-right">
+                      <span class="payment-chip maya-chip">0% Fee</span>
+                    </div>
                   </div>
-                  <div class="payment-sub">Pay with your registered Maya mobile account or scan Maya QR with instant verification.</div>
+                  <div class="payment-sub">
+                    <div class="payment-steps-mini">
+                      <div class="mini-step">
+                        <span class="mini-step-num">1</span>
+                        <span>Click Maya Payment</span>
+                      </div>
+                      <span class="mini-step-arrow">➔</span>
+                      <div class="mini-step">
+                        <span class="mini-step-num">2</span>
+                        <span>Log in or Scan Maya QR</span>
+                      </div>
+                      <span class="mini-step-arrow">➔</span>
+                      <div class="mini-step">
+                        <span class="mini-step-num">3</span>
+                        <span>Instant Confirmation</span>
+                      </div>
+                    </div>
+                    <div class="payment-perks">
+                      <span>✓ Official PayMaya wallet integration</span>
+                      <span>✓ Zero processing or transfer fees</span>
+                      <span>✓ Real-time SMS and in-app receipt</span>
+                    </div>
+                  </div>
                 </div>
               </label>
 
-              <label class="payment-radio-label">
+              <!-- OPTION 4: Credit / Debit Card -->
+              <label class="payment-radio-label" data-method="card">
                 <input type="radio" name="paymentOption" value="Credit / Debit Card">
                 <div class="payment-radio-card">
                   <div class="payment-card-header">
-                    <div class="payment-title">Credit / Debit Card</div>
-                    <span class="payment-chip card-chip">3D-Secure</span>
+                    <div class="payment-header-left">
+                      <span class="custom-radio-indicator" aria-hidden="true"></span>
+                      <div class="payment-brand-badge card-badge">
+                        <svg class="payment-svg-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="36" height="36" rx="10" fill="url(#card-grad)"/>
+                          <defs>
+                            <linearGradient id="card-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                              <stop stop-color="#1e293b"/>
+                              <stop offset="1" stop-color="#0f172a"/>
+                            </linearGradient>
+                          </defs>
+                          <rect x="7" y="11" width="22" height="15" rx="2.5" fill="#334155" stroke="#64748b" stroke-width="1"/>
+                          <rect x="10" y="14" width="4.5" height="3.5" rx="0.8" fill="#eab308"/>
+                          <path d="M10 15.5H14.5M12.2 14V17.5" stroke="#a16207" stroke-width="0.5"/>
+                          <rect x="7" y="19" width="22" height="2" fill="#1e293b"/>
+                          <circle cx="21" cy="22.5" r="1.5" fill="#ef4444"/>
+                          <circle cx="23.5" cy="22.5" r="1.5" fill="#f59e0b" fill-opacity="0.85"/>
+                        </svg>
+                      </div>
+                      <div class="payment-title-wrap">
+                        <div class="payment-title-row">
+                          <span class="payment-title">Credit / Debit Card</span>
+                        </div>
+                        <span class="payment-subtitle">Visa, Mastercard, and JCB accepted with 3D-Secure OTP</span>
+                      </div>
+                    </div>
+                    <div class="payment-header-right">
+                      <div class="card-brand-pills">
+                        <span class="card-brand-pill visa">VISA</span>
+                        <span class="card-brand-pill mc">
+                          <span class="mc-dot red"></span>
+                          <span class="mc-dot yellow"></span>
+                        </span>
+                        <span class="card-brand-pill jcb">JCB</span>
+                      </div>
+                      <span class="payment-chip card-chip">3D-Secure</span>
+                    </div>
                   </div>
-                  <div class="payment-sub">Visa, Mastercard, and JCB accepted with bank-grade 256-bit encryption.</div>
+                  <div class="payment-sub">
+                    <div class="payment-steps-mini">
+                      <div class="mini-step">
+                        <span class="mini-step-num">1</span>
+                        <span>Click Card Payment</span>
+                      </div>
+                      <span class="mini-step-arrow">➔</span>
+                      <div class="mini-step">
+                        <span class="mini-step-num">2</span>
+                        <span>Enter 16-Digit Card Details</span>
+                      </div>
+                      <span class="mini-step-arrow">➔</span>
+                      <div class="mini-step">
+                        <span class="mini-step-num">3</span>
+                        <span>Authorize via Bank SMS OTP</span>
+                      </div>
+                    </div>
+                    <div class="payment-perks">
+                      <span>✓ 256-bit bank-grade SSL encryption</span>
+                      <span>✓ Card CVV is never stored on our servers</span>
+                      <span>✓ Protected by Visa Secure & Mastercard Identity Check</span>
+                    </div>
+                  </div>
                 </div>
               </label>
             </div>
 
-            <!-- GCash Direct Seller Panel (shown when GCash selected) -->
-            <div id="gcashDirectDetailsPanel" class="gcash-seller-box" style="display: none; background: #f0f7ff; border: 1.5px solid #b8daff; border-radius: 12px; padding: 20px;">
-              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                <span style="background: #007DFE; color: white; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 6px;">GCash</span>
-                <h3 style="margin: 0; color: #0056b3; font-size: 17px;">Seamless GCash Mobile Checkout</h3>
+            <!-- Dynamic Guide & Next Steps Panel (swapped via JS) -->
+            <!-- 1. COD Guide -->
+            <div id="codDirectDetailsPanel" class="payment-guide-card cod-guide">
+              <div class="guide-header">
+                <div class="guide-brand-left">
+                  <span class="guide-badge cod">COD</span>
+                  <div>
+                    <h3 class="guide-title">Cash on Delivery Confirmation</h3>
+                    <span class="guide-caption">No upfront online payment required today</span>
+                  </div>
+                </div>
+                <span class="guide-status-chip">Doorstep Handover</span>
               </div>
-              <p style="color: #495057; font-size: 14px; margin-bottom: 12px; line-height: 1.5;">
-                When you click <strong>Proceed to GCash Payment</strong>, you will be securely redirected to GCash or our dynamic QRPh gateway to authorize payment. Your order will automatically be verified and marked as <strong>PAID</strong>.
-              </p>
-              <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #0056b3; font-weight: 600;">
-                <span>✓ Instant automated verification</span>
-                <span>✓ PayMongo & QRPh compatible</span>
-                <span>✓ Encrypted transaction</span>
+              <div class="guide-body">
+                <p>Your order will be instantly recorded and routed to our local artisans in Vigan, Paete, and Benguet to begin handcrafting and packaging. Please prepare the exact cash amount for the courier rider upon delivery.</p>
+                <div class="guide-highlights">
+                  <div class="highlight-item">
+                    <span class="highlight-icon">📦</span>
+                    <div>
+                      <strong>Free Parcel Inspection</strong>
+                      <span>You may check external packaging seals before handing over cash</span>
+                    </div>
+                  </div>
+                  <div class="highlight-item">
+                    <span class="highlight-icon">🧾</span>
+                    <div>
+                      <strong>Official Sales Receipt</strong>
+                      <span>Included inside every parcel for warranty and returns</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Maya Direct Panel (shown when Maya selected) -->
-            <div id="mayaDirectDetailsPanel" class="maya-seller-box" style="display: none;">
-              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                <span style="background: #00A859; color: white; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 6px;">Maya</span>
-                <h3 style="margin: 0; color: #166534; font-size: 17px;">Official Maya E-Wallet Checkout</h3>
+            <!-- 2. GCash Guide -->
+            <div id="gcashDirectDetailsPanel" class="payment-guide-card gcash-guide" style="display: none;">
+              <div class="guide-header">
+                <div class="guide-brand-left">
+                  <span class="guide-badge gcash">GCash</span>
+                  <div>
+                    <h3 class="guide-title">GCash Express Checkout</h3>
+                    <span class="guide-caption">Automated verification via PayMongo & QRPh</span>
+                  </div>
+                </div>
+                <span class="guide-status-chip gcash">Instant Verified</span>
               </div>
-              <p style="color: #374151; font-size: 14px; margin-bottom: 12px; line-height: 1.5;">
-                When you click <strong>Proceed to Maya Payment</strong>, you will authorize payment via your Maya mobile wallet or Maya QR code. Once confirmed, your order status is instantly marked as <strong>PAID</strong>.
-              </p>
-              <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #15803d; font-weight: 600;">
-                <span>✓ Instant automated verification</span>
-                <span>✓ Zero transaction fees</span>
-                <span>✓ Maya Wallet & Maya QR compatible</span>
+              <div class="guide-body">
+                <p>When you click <strong>Proceed to GCash Payment →</strong> below, you will be redirected to the secure GCash mobile gateway or dynamic QRPh screen. Once approved, your order status is automatically updated to <strong>PAID</strong> in real time.</p>
+                <div class="guide-highlights">
+                  <div class="highlight-item">
+                    <span class="highlight-icon">⚡</span>
+                    <div>
+                      <strong>Instant Payment Sync</strong>
+                      <span>Zero waiting time — automated webhook updates your order instantly</span>
+                    </div>
+                  </div>
+                  <div class="highlight-item">
+                    <span class="highlight-icon">📲</span>
+                    <div>
+                      <strong>Scan to Pay (QRPh)</strong>
+                      <span>Scan using GCash, Maya, ShopeePay, or any QRPh compliant Philippine bank</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Credit / Debit Card Panel (shown when Card selected) -->
-            <div id="cardDirectDetailsPanel" class="card-seller-box" style="display: none;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <span style="background: #1e293b; color: white; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 6px;">Cards</span>
-                  <h3 style="margin: 0; color: #0f172a; font-size: 17px;">Encrypted 3D-Secure Card Checkout</h3>
+            <!-- 3. Maya Guide -->
+            <div id="mayaDirectDetailsPanel" class="payment-guide-card maya-guide" style="display: none;">
+              <div class="guide-header">
+                <div class="guide-brand-left">
+                  <span class="guide-badge maya">Maya</span>
+                  <div>
+                    <h3 class="guide-title">Maya E-Wallet & QR Checkout</h3>
+                    <span class="guide-caption">Zero transaction fees • Instant order processing</span>
+                  </div>
                 </div>
-                <div style="font-size: 12px; color: #64748b; font-weight: 600;">
-                  Visa • Mastercard • JCB
+                <span class="guide-status-chip maya">0% Convenience Fee</span>
+              </div>
+              <div class="guide-body">
+                <p>When you click <strong>Proceed to Maya Payment →</strong> below, you can authorize payment via your Maya mobile wallet or scan the interactive Maya QR code. Confirmation is instantaneous and triggers expedited artisan dispatch.</p>
+                <div class="guide-highlights">
+                  <div class="highlight-item">
+                    <span class="highlight-icon">💳</span>
+                    <div>
+                      <strong>Maya Wallet & Maya Credit</strong>
+                      <span>Use your existing wallet funds, linked cards, or Maya Credit</span>
+                    </div>
+                  </div>
+                  <div class="highlight-item">
+                    <span class="highlight-icon">🔒</span>
+                    <div>
+                      <strong>BSP Regulated</strong>
+                      <span>Processed through secure, licensed financial channels with SMS receipts</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <p style="color: #374151; font-size: 14px; margin-bottom: 12px; line-height: 1.5;">
-                When you click <strong>Pay with Credit / Debit Card</strong>, your transaction is processed with end-to-end 256-bit SSL encryption and bank 3D-Secure OTP verification. ArtisanAisle never stores your private card CVV.
-              </p>
-              <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #334155; font-weight: 600;">
-                <span>✓ Bank-grade 256-bit encryption</span>
-                <span>✓ Visa, Mastercard & JCB supported</span>
-                <span>✓ Protected by 3D-Secure OTP</span>
+            </div>
+
+            <!-- 4. Card Guide -->
+            <div id="cardDirectDetailsPanel" class="payment-guide-card card-guide" style="display: none;">
+              <div class="guide-header">
+                <div class="guide-brand-left">
+                  <span class="guide-badge card">CARDS</span>
+                  <div>
+                    <h3 class="guide-title">Encrypted 3D-Secure Card Processing</h3>
+                    <span class="guide-caption">Visa • Mastercard • JCB</span>
+                  </div>
+                </div>
+                <span class="guide-status-chip card">256-Bit SSL</span>
+              </div>
+              <div class="guide-body">
+                <p>When you click <strong>Pay with Credit / Debit Card →</strong> below, you will enter your card details through bank-grade 256-bit encryption. Authorization is finalized with your bank's 3D-Secure One-Time Password (OTP). ArtisanAisle never retains your CVV.</p>
+                <div class="guide-highlights">
+                  <div class="highlight-item">
+                    <span class="highlight-icon">🛡️</span>
+                    <div>
+                      <strong>3D-Secure OTP Protection</strong>
+                      <span>Verified directly with your issuing bank via SMS authentication</span>
+                    </div>
+                  </div>
+                  <div class="highlight-item">
+                    <span class="highlight-icon">🔐</span>
+                    <div>
+                      <strong>Strict PCI-DSS Compliance</strong>
+                      <span>Your private card credentials are encrypted with TLS 1.3 / AES-256</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trust & Security Pillars Footer -->
+            <div class="payment-trust-footer">
+              <div class="trust-pillar-item">
+                <span class="trust-pillar-icon">🔒</span>
+                <div>
+                  <strong>256-Bit SSL</strong>
+                  <span>Bank-level encryption</span>
+                </div>
+              </div>
+              <div class="trust-pillar-item">
+                <span class="trust-pillar-icon">🛡️</span>
+                <div>
+                  <strong>PayMongo Secured</strong>
+                  <span>BSP-licensed gateway</span>
+                </div>
+              </div>
+              <div class="trust-pillar-item">
+                <span class="trust-pillar-icon">🇵🇭</span>
+                <div>
+                  <strong>QRPh Compliant</strong>
+                  <span>National QR standard</span>
+                </div>
+              </div>
+              <div class="trust-pillar-item">
+                <span class="trust-pillar-icon">✨</span>
+                <div>
+                  <strong>Buyer Guarantee</strong>
+                  <span>Authentic crafts protected</span>
+                </div>
               </div>
             </div>
           </div>

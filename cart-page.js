@@ -203,12 +203,14 @@ async function renderCart() {
 
 function setupPaymentListener() {
   const radios = document.querySelectorAll('input[name="paymentOption"]');
+  const codPanel = document.getElementById('codDirectDetailsPanel');
   const gcashPanel = document.getElementById('gcashDirectDetailsPanel');
   const mayaPanel = document.getElementById('mayaDirectDetailsPanel');
   const cardPanel = document.getElementById('cardDirectDetailsPanel');
   const submitBtn = document.getElementById('placeOrderSubmitBtn');
 
   const updatePanels = (val) => {
+    if (codPanel) codPanel.style.display = val === 'Cash on Delivery' ? 'block' : 'none';
     if (gcashPanel) gcashPanel.style.display = val === 'GCash' ? 'block' : 'none';
     if (mayaPanel) mayaPanel.style.display = val === 'Maya' ? 'block' : 'none';
     if (cardPanel) cardPanel.style.display = val === 'Credit / Debit Card' ? 'block' : 'none';
@@ -236,6 +238,11 @@ function setupPaymentListener() {
       updatePanels(radio.value);
     });
   });
+
+  const checked = document.querySelector('input[name="paymentOption"]:checked');
+  if (checked) {
+    updatePanels(checked.value);
+  }
 }
 
 function loadSavedShipping(user) {
