@@ -89,11 +89,11 @@ function renderProducts() {
         <div class="product-card-pricing">
           <span class="price-val">${priceFormatted}</span>
         </div>
-        <div class="product-card-actions" style="display:flex; gap:8px;">
-          <button type="button" class="action-btn view-details-btn" style="flex:1; background:#f1ebd8; color:#285c3b; border:1px solid #dcd1be; padding:10px 14px; border-radius:8px; font-weight:600; cursor:pointer;">
+        <div class="product-card-actions">
+          <button type="button" class="action-btn view-details-btn">
             View Details
           </button>
-          <button type="button" class="primary-btn add-to-cart-btn" style="flex:1;" ${isOutOfStock ? 'disabled' : ''}>
+          <button type="button" class="primary-btn add-to-cart-btn" ${isOutOfStock ? 'disabled' : ''}>
             ${isOutOfStock ? 'Sold Out' : 'Add to Cart'}
           </button>
         </div>
@@ -229,11 +229,35 @@ function openQuickView(product) {
 
 function setupCategoryFilters() {
   const buttons = document.querySelectorAll('.cat-filter-btn');
+  const mobileToggleBtn = document.getElementById('mobileFilterToggleBtn');
+  const mobileLabel = document.getElementById('mobileFilterCurrentLabel');
+  const sidebar = document.getElementById('categoriesSidebar');
+
+  if (mobileToggleBtn && sidebar) {
+    mobileToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('mobile-open');
+      const isOpen = sidebar.classList.contains('mobile-open');
+      mobileToggleBtn.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    // Close when tapping outside on mobile
+    document.addEventListener('click', (e) => {
+      if (sidebar.classList.contains('mobile-open') && !sidebar.contains(e.target) && !mobileToggleBtn.contains(e.target)) {
+        sidebar.classList.remove('mobile-open');
+        mobileToggleBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       buttons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeCategory = btn.dataset.category;
+      if (mobileLabel) mobileLabel.textContent = activeCategory;
+      if (sidebar) sidebar.classList.remove('mobile-open');
+      if (mobileToggleBtn) mobileToggleBtn.setAttribute('aria-expanded', 'false');
       renderProducts();
     });
   });

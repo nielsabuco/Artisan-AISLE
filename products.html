@@ -40,7 +40,7 @@
         </div>
 
         <div class="product-layout">
-            <aside class="categories-sidebar" aria-label="Product categories">
+            <aside class="categories-sidebar" id="categoriesSidebar" aria-label="Product categories">
                 <h3>Filter by Category</h3>
                 <div class="category-buttons-list">
                     <button type="button" class="cat-filter-btn active" data-category="All Products">All Products</button>
@@ -55,8 +55,17 @@
             </aside>
 
             <div class="catalog-grid-area">
-                <div class="catalog-status-bar">
-                    <span id="productsCountLabel">Loading catalog...</span>
+                <div class="catalog-toolbar-row">
+                    <div class="catalog-status-bar">
+                        <span id="productsCountLabel">Loading catalog...</span>
+                    </div>
+                    <div class="mobile-filter-bar">
+                        <button type="button" class="mobile-filter-btn" id="mobileFilterToggleBtn" aria-expanded="false" aria-controls="categoriesSidebar">
+                            <span class="filter-icon">🏷️</span>
+                            <span>Filter: <strong id="mobileFilterCurrentLabel">All Products</strong></span>
+                            <span class="filter-caret">▾</span>
+                        </button>
+                    </div>
                 </div>
                 <div id="productGrid" class="product-grid" aria-live="polite">
                     <!-- Products populated dynamically from Firestore -->
