@@ -173,67 +173,76 @@ export const ArtisanDB = {
     // When approved, a seller MUST use their temporary password (old registration password is disabled).
     // On subsequent logins after changing password, they MUST use their new permanent password.
     try {
-      const q = query(collection(db, 'users'), where('email', '==', cleanEmail));
-      const snap = await getDocs(q);
-      if (!snap.empty) {
-        const userDoc = snap.docs[0];
-        const userData = userDoc.data();
-        let isApprovedSeller = userData.role === 'seller' || userData.sellerStatus === 'approved';
+      let userDoc = null;
+      let userData = null;
 
-        // Robust fallback: Check if approved in seller_applications
-        if (!userData.temporaryPassword) {
-          try {
-            const appQ = query(collection(db, 'seller_applications'), where('email', '==', cleanEmail));
-            const appSnap = await getDocs(appQ);
-            if (!appSnap.empty) {
-              const appData = appSnap.docs[0].data();
-              if (appData.status === 'approved' && appData.temporaryPassword) {
-                userData.temporaryPassword = appData.temporaryPassword;
-                userData.mustChangePassword = true;
-                isApprovedSeller = true;
-              }
-            }
-          } catch (e) {}
+      // Find user document (case-insensitive email matching)
+      const userSnap = await getDocs(collection(db, 'users'));
+      for (const d of userSnap.docs) {
+        const udata = d.data();
+        if ((udata.email || '').trim().toLowerCase() === cleanEmail) {
+          userDoc = d;
+          userData = udata;
+          break;
         }
+      }
 
-        // Case A: First-time login with temporary password required
-        if (isApprovedSeller && userData.mustChangePassword && !userData.hasChangedInitialPassword) {
-          if (userData.temporaryPassword && userData.temporaryPassword === password) {
-            const sessionData = {
-              uid: userDoc.id,
-              id: userDoc.id,
-              ...userData,
-              email: cleanEmail,
-              mustChangePassword: true,
-              hasChangedInitialPassword: false,
-              role: 'seller',
-              sellerStatus: 'approved'
-            };
-            this._saveLocalSession(sessionData);
-            return sessionData;
-          } else {
-            throw new Error('Your seller account has been approved! For security, please log in using the temporary password sent to your email.');
+      // Check seller applications for approved temporary password as well
+      let appData = null;
+      try {
+        const appSnap = await getDocs(collection(db, 'seller_applications'));
+        for (const ad of appSnap.docs) {
+          const adata = ad.data();
+          if ((adata.email || '').trim().toLowerCase() === cleanEmail && adata.status === 'approved') {
+            appData = adata;
+            break;
           }
         }
+      } catch (e) {}
 
-        // Case B: Subsequent logins: permanent password already set, never prompt to change password again
-        if (isApprovedSeller && userData.hasChangedInitialPassword && userData.permanentPassword) {
-          if (userData.permanentPassword === password) {
-            const sessionData = {
-              uid: userDoc.id,
-              id: userDoc.id,
-              ...userData,
-              email: cleanEmail,
-              mustChangePassword: false,
-              hasChangedInitialPassword: true,
-              role: 'seller',
-              sellerStatus: 'approved'
-            };
-            this._saveLocalSession(sessionData);
-            return sessionData;
-          } else {
-            throw new Error('Incorrect password. Please enter the new password you set for your seller account.');
-          }
+      const tempPass = userData?.temporaryPassword || appData?.temporaryPassword;
+      const isApprovedSeller = userData?.role === 'seller' || userData?.sellerStatus === 'approved' || appData != null;
+      const hasChangedInitPass = userData?.hasChangedInitialPassword === true;
+
+      // Case A: First-time login with temporary password required
+      if (isApprovedSeller && tempPass && !hasChangedInitPass) {
+        if (password === tempPass) {
+          const resolvedUid = userDoc?.id || appData?.userId || appData?.uid || ('seller_' + Date.now());
+          const sessionData = {
+            uid: resolvedUid,
+            id: resolvedUid,
+            ...(userData || {}),
+            email: cleanEmail,
+            mustChangePassword: true,
+            hasChangedInitialPassword: false,
+            temporaryPassword: tempPass,
+            role: 'seller',
+            sellerStatus: 'approved'
+          };
+          this._saveLocalSession(sessionData);
+          return sessionData;
+        } else {
+          throw new Error('Your seller account has been approved! For security, please log in using the temporary password sent to your email.');
+        }
+      }
+
+      // Case B: Subsequent logins: permanent password already set, never prompt to change password again
+      if (isApprovedSeller && hasChangedInitPass && userData?.permanentPassword) {
+        if (userData.permanentPassword === password) {
+          const sessionData = {
+            uid: userDoc ? userDoc.id : cleanEmail,
+            id: userDoc ? userDoc.id : cleanEmail,
+            ...userData,
+            email: cleanEmail,
+            mustChangePassword: false,
+            hasChangedInitialPassword: true,
+            role: 'seller',
+            sellerStatus: 'approved'
+          };
+          this._saveLocalSession(sessionData);
+          return sessionData;
+        } else {
+          throw new Error('Incorrect password. Please enter the new password you set for your seller account.');
         }
       }
     } catch (checkErr) {
@@ -792,17 +801,24 @@ export const ArtisanDB = {
     const cleanEmail = (application.email || '').trim().toLowerCase();
     let userId = application.userId || application.uid;
 
-    // Fallback: If userId was not stored on application doc, locate user document by email
+    // Fallback: If userId was not stored on application doc, scan users collection (case-insensitive)
     if (!userId && cleanEmail) {
       try {
-        const q = query(collection(db, 'users'), where('email', '==', cleanEmail));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          userId = snap.docs[0].id;
+        const snap = await getDocs(collection(db, 'users'));
+        for (const d of snap.docs) {
+          const udata = d.data();
+          if ((udata.email || '').trim().toLowerCase() === cleanEmail) {
+            userId = d.id;
+            break;
+          }
         }
       } catch (e) {
         console.warn('Could not find user by email:', e);
       }
+    }
+
+    if (!userId) {
+      userId = appId;
     }
 
     // 1. Generate secure temporary password for seller onboarding
@@ -814,13 +830,15 @@ export const ArtisanDB = {
     await updateDoc(doc(db, 'seller_applications', appId), {
       status: 'approved',
       temporaryPassword: temporaryPassword,
+      mustChangePassword: true,
+      hasChangedInitialPassword: false,
       reviewedAt: serverTimestamp()
     });
 
-    // 3. Register/activate in sellers collection
+    // 3. Register/activate in sellers collection with temporaryPassword stored
     const sellerPayload = {
-      id: userId || appId,
-      uid: userId || appId,
+      id: userId,
+      uid: userId,
       name: application.applicantName || application.name || 'Artisan Seller',
       shopName: application.shopName || 'Artisan Shop',
       category: application.category || 'General',
@@ -829,27 +847,24 @@ export const ArtisanDB = {
       gcashName: application.gcashName || application.applicantName || '',
       gcashNumber: application.gcashNumber || application.phone || '',
       status: 'Active',
+      temporaryPassword: temporaryPassword,
       approvedAt: serverTimestamp()
     };
-    if (userId) {
-      await setDoc(doc(db, 'sellers', userId), sellerPayload, { merge: true });
-    }
+    await setDoc(doc(db, 'sellers', userId), sellerPayload, { merge: true });
 
     // 4. Update user document with seller role, status, and temporary password
-    const isTargetAdmin = this.isEmailAdmin(cleanEmail);
-    if (userId) {
-      await setDoc(doc(db, 'users', userId), {
-        role: isTargetAdmin ? 'admin' : 'seller',
-        sellerStatus: 'approved',
-        shopName: application.shopName || 'Artisan Shop',
-        sellerId: userId,
-        mustChangePassword: !isTargetAdmin, // Admins never forced to change password
-        hasChangedInitialPassword: isTargetAdmin,
-        temporaryPassword: isTargetAdmin ? null : temporaryPassword,
-        approvalEmailSentTo: cleanEmail,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-    }
+    // Always set temporaryPassword and require initial password change for the seller account!
+    await setDoc(doc(db, 'users', userId), {
+      role: 'seller',
+      sellerStatus: 'approved',
+      shopName: application.shopName || 'Artisan Shop',
+      sellerId: userId,
+      mustChangePassword: true,
+      hasChangedInitialPassword: false,
+      temporaryPassword: temporaryPassword,
+      approvalEmailSentTo: cleanEmail,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
 
     // 5. Send auto-generated email via serverless route /api/send-seller-email
     let autoEmailDispatched = false;
