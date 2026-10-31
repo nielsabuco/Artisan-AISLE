@@ -6903,7 +6903,7 @@ button.toggle-password-btn svg,
 /* ================= ARTISAN DIRECTORY & DEDICATED SHOP STYLES ================= */
 .artisan-header-hero {
   background: linear-gradient(135deg, #1d4831 0%, #2b6140 100%);
-  color: #ffffff;
+  color: #ffffff !important;
   padding: 42px 20px;
   text-align: center;
   border-radius: 0 0 24px 24px;
@@ -6914,13 +6914,16 @@ button.toggle-password-btn svg,
   font-size: 2.2rem;
   margin: 0 0 10px;
   font-family: inherit;
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .artisan-header-hero p {
-  font-size: 1rem;
-  opacity: 0.9;
+  font-size: 1.05rem;
+  opacity: 0.95;
   max-width: 650px;
   margin: 0 auto;
+  color: #e2f0e6 !important;
 }
 
 .artisan-directory-container {
