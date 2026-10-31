@@ -88,9 +88,6 @@ function renderSellerStatusCard(user) {
         <div class="banner-text">
           <h3>Your Seller Account is Active</h3>
           <p>Congratulations! Your seller application has been approved. You can now manage your catalog, list new handcrafted items, and fulfill incoming orders.</p>
-          <div style="background: #e7eee8; padding: 10px 14px; border-radius: 8px; margin-top: 10px; font-size: 13px; color: #285c3b;">
-            <strong>Immediate Access:</strong> You can enter the Seller Portal right now using your current password or Google login! (You do not need to change your password to start selling).
-          </div>
         </div>
       </div>
       <div class="seller-actions-row" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
@@ -107,7 +104,7 @@ function renderSellerStatusCard(user) {
         <div class="banner-icon">⏳</div>
         <div class="banner-text">
           <h3>Application Pending Administrator Review</h3>
-          <p>Your application for <strong>"${user.pendingShopName || 'your artisan shop'}"</strong> has been received. Our administrative team will review your submitted credentials. Once approved, you can immediately access the Seller Portal using your current login credentials!</p>
+          <p>Your application for <strong>"${user.pendingShopName || 'your artisan shop'}"</strong> has been received. Our administrative team will review your submitted credentials. Once approved, you will receive your temporary login credentials via email to set your new permanent password and access the Seller Portal.</p>
         </div>
       </div>
       <p class="helper-text">Privileges are restricted until administrator approval is granted.</p>
