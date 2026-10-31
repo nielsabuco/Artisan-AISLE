@@ -218,6 +218,30 @@ function renderApplicationsTable(apps) {
                 };
               }
 
+              const gmailBtn = document.getElementById('openGmailDirectBtn');
+              if (gmailBtn) {
+                const subject = encodeURIComponent(`🎉 Congratulations! Your Artisan Aisle Seller Account for "${res.shopName}" is Approved`);
+                const body = encodeURIComponent(
+`Mabuhay ${res.applicantName || 'Artisan Partner'},
+
+Congratulations! Your artisan seller application for "${res.shopName}" has been approved on Artisan Aisle!
+
+For your account security, your previous session has been automatically logged out. Please log in again using your new seller credentials below:
+
+• Registered Email: ${res.cleanEmail}
+• Temporary Password: ${res.temporaryPassword}
+• Seller Login Link: ${res.loginUrl}
+
+Once logged in, you will automatically be directed to choose your own permanent password before entering the Seller Portal.
+
+Welcome to the Artisan Aisle community!
+
+Warm regards,
+Artisan Aisle Team`
+                );
+                gmailBtn.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(res.cleanEmail)}&su=${subject}&body=${body}`;
+              }
+
               modal.style.display = 'flex';
             } else {
               alert(`Application for "${app.shopName}" has been APPROVED!\n\nEmail: ${res.cleanEmail}\nTemporary Password: ${res.temporaryPassword}\n\nAuto-generated email was dispatched with their login link.`);

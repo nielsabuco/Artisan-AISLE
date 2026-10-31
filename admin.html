@@ -806,12 +806,16 @@
         </div>
       </div>
 
-      <div class="modal-actions-row">
+      <div class="modal-actions-row" style="display: flex; gap: 8px; flex-wrap: wrap;">
         <button type="button" class="secondary-btn" id="copyApprovedCredentialsBtn" style="display: inline-flex; align-items: center; gap: 6px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           Copy Credentials
         </button>
-        <button type="button" class="primary-btn" onclick="document.getElementById('sellerApprovalSuccessModal').style.display='none'">Done</button>
+        <a id="openGmailDirectBtn" href="#" target="_blank" class="primary-btn" style="display: inline-flex; align-items: center; gap: 6px; background: #ea4335; border-color: #d93025; color: white !important; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.271H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.49l8.073-5.997c1.618-1.214 3.927-.059 3.927 1.964z"/></svg>
+          Send via Gmail
+        </a>
+        <button type="button" class="primary-btn" style="background: #285c3b;" onclick="document.getElementById('sellerApprovalSuccessModal').style.display='none'">Done</button>
       </div>
     </div>
   </div>
