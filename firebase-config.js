@@ -1755,14 +1755,32 @@ export const ArtisanDB = {
 
     // 2. Permanently clear mustChangePassword and mark hasChangedInitialPassword in Firestore
     if (uid) {
-      await updateDoc(doc(db, 'users', uid), {
+      await setDoc(doc(db, 'users', uid), {
         mustChangePassword: false,
         hasChangedInitialPassword: true,
         temporaryPassword: null,
         permanentPassword: newPassword,
         passwordChangedAt: serverTimestamp(),
         updatedAt: serverTimestamp()
-      }).catch(e => console.warn('User doc password flag update warning:', e));
+      }, { merge: true }).catch(e => console.warn('User doc password flag update warning:', e));
+    }
+
+    // Also update matching seller application if any
+    const userEmail = (localUser?.email || auth.currentUser?.email || '').trim().toLowerCase();
+    if (userEmail) {
+      try {
+        const appSnap = await getDocs(collection(db, 'seller_applications'));
+        for (const ad of appSnap.docs) {
+          if ((ad.data().email || '').trim().toLowerCase() === userEmail) {
+            await setDoc(doc(db, 'seller_applications', ad.id), {
+              mustChangePassword: false,
+              hasChangedInitialPassword: true,
+              temporaryPassword: null,
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+          }
+        }
+      } catch (e) {}
     }
 
     // 3. Update local cache
