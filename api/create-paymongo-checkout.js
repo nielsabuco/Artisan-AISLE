@@ -74,7 +74,7 @@ export default async function handler(req, res) {
 
     const requestedTypes = Array.isArray(paymentMethodTypes) && paymentMethodTypes.length > 0
       ? paymentMethodTypes
-      : ['gcash', 'paymaya', 'card', 'qrph'];
+      : ['gcash', 'paymaya', 'qrph'];
 
     const payload = {
       data: {

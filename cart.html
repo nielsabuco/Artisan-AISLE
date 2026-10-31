@@ -334,75 +334,6 @@
                   </div>
                 </div>
               </label>
-
-              <!-- OPTION 4: Credit / Debit Card -->
-              <label class="payment-radio-label" data-method="card">
-                <input type="radio" name="paymentOption" value="Credit / Debit Card">
-                <div class="payment-radio-card">
-                  <div class="payment-card-header">
-                    <div class="payment-header-left">
-                      <span class="custom-radio-indicator" aria-hidden="true"></span>
-                      <div class="payment-brand-badge card-badge">
-                        <svg class="payment-svg-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect width="36" height="36" rx="10" fill="url(#card-grad)"/>
-                          <defs>
-                            <linearGradient id="card-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-                              <stop stop-color="#1e293b"/>
-                              <stop offset="1" stop-color="#0f172a"/>
-                            </linearGradient>
-                          </defs>
-                          <rect x="7" y="11" width="22" height="15" rx="2.5" fill="#334155" stroke="#64748b" stroke-width="1"/>
-                          <rect x="10" y="14" width="4.5" height="3.5" rx="0.8" fill="#eab308"/>
-                          <path d="M10 15.5H14.5M12.2 14V17.5" stroke="#a16207" stroke-width="0.5"/>
-                          <rect x="7" y="19" width="22" height="2" fill="#1e293b"/>
-                          <circle cx="21" cy="22.5" r="1.5" fill="#ef4444"/>
-                          <circle cx="23.5" cy="22.5" r="1.5" fill="#f59e0b" fill-opacity="0.85"/>
-                        </svg>
-                      </div>
-                      <div class="payment-title-wrap">
-                        <div class="payment-title-row">
-                          <span class="payment-title">Credit / Debit Card</span>
-                        </div>
-                        <span class="payment-subtitle">Visa, Mastercard, and JCB accepted with 3D-Secure OTP</span>
-                      </div>
-                    </div>
-                    <div class="payment-header-right">
-                      <div class="card-brand-pills">
-                        <span class="card-brand-pill visa">VISA</span>
-                        <span class="card-brand-pill mc">
-                          <span class="mc-dot red"></span>
-                          <span class="mc-dot yellow"></span>
-                        </span>
-                        <span class="card-brand-pill jcb">JCB</span>
-                      </div>
-                      <span class="payment-chip card-chip">3D-Secure</span>
-                    </div>
-                  </div>
-                  <div class="payment-sub">
-                    <div class="payment-steps-mini">
-                      <div class="mini-step">
-                        <span class="mini-step-num">1</span>
-                        <span>Click Card Payment</span>
-                      </div>
-                      <span class="mini-step-arrow">➔</span>
-                      <div class="mini-step">
-                        <span class="mini-step-num">2</span>
-                        <span>Enter 16-Digit Card Details</span>
-                      </div>
-                      <span class="mini-step-arrow">➔</span>
-                      <div class="mini-step">
-                        <span class="mini-step-num">3</span>
-                        <span>Authorize via Bank SMS OTP</span>
-                      </div>
-                    </div>
-                    <div class="payment-perks">
-                      <span>✓ 256-bit bank-grade SSL encryption</span>
-                      <span>✓ Card CVV is never stored on our servers</span>
-                      <span>✓ Protected by Visa Secure & Mastercard Identity Check</span>
-                    </div>
-                  </div>
-                </div>
-              </label>
             </div>
 
             <!-- Dynamic Guide & Next Steps Panel (swapped via JS) -->
@@ -499,39 +430,6 @@
                     <div>
                       <strong>BSP Regulated</strong>
                       <span>Processed through secure, licensed financial channels with SMS receipts</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 4. Card Guide -->
-            <div id="cardDirectDetailsPanel" class="payment-guide-card card-guide" style="display: none;">
-              <div class="guide-header">
-                <div class="guide-brand-left">
-                  <span class="guide-badge card">CARDS</span>
-                  <div>
-                    <h3 class="guide-title">Encrypted 3D-Secure Card Processing</h3>
-                    <span class="guide-caption">Visa • Mastercard • JCB</span>
-                  </div>
-                </div>
-                <span class="guide-status-chip card">256-Bit SSL</span>
-              </div>
-              <div class="guide-body">
-                <p>When you click <strong>Pay with Credit / Debit Card →</strong> below, you will enter your card details through bank-grade 256-bit encryption. Authorization is finalized with your bank's 3D-Secure One-Time Password (OTP). ArtisanAisle never retains your CVV.</p>
-                <div class="guide-highlights">
-                  <div class="highlight-item">
-                    <span class="highlight-icon">🛡️</span>
-                    <div>
-                      <strong>3D-Secure OTP Protection</strong>
-                      <span>Verified directly with your issuing bank via SMS authentication</span>
-                    </div>
-                  </div>
-                  <div class="highlight-item">
-                    <span class="highlight-icon">🔐</span>
-                    <div>
-                      <strong>Strict PCI-DSS Compliance</strong>
-                      <span>Your private card credentials are encrypted with TLS 1.3 / AES-256</span>
                     </div>
                   </div>
                 </div>
@@ -665,86 +563,6 @@
           Cancel and return to cart
         </button>
       </div>
-    </div>
-  </div>
-
-  <!-- Credit / Debit Card Checkout Modal (3D-Secure & Demo Sandbox) -->
-  <div id="cardCheckoutModal" class="modal-backdrop" style="display: none;">
-    <div class="modal-card" style="max-width: 480px; text-align: left;">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="background: #1e293b; color: white; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 6px;">Cards</span>
-          <h2 style="margin: 0; font-size: 19px; color: #0f172a;">Encrypted Card Checkout</h2>
-        </div>
-        <button type="button" id="closeCardModalBtn" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">✕</button>
-      </div>
-
-      <!-- Live Interactive Card Preview -->
-      <div class="interactive-card-preview">
-        <div class="card-preview-top">
-          <div class="card-chip-svg">
-            <svg width="24" height="18" viewBox="0 0 24 18" fill="none">
-              <rect width="24" height="18" rx="3" fill="#ca8a04"/>
-              <path d="M0 6h24M0 12h24M8 0v18M16 0v18" stroke="#a16207" stroke-width="1"/>
-            </svg>
-          </div>
-          <span class="card-network-logo" id="previewCardNetwork">VISA / MC</span>
-        </div>
-        <div class="card-preview-number" id="previewCardNumber">•••• •••• •••• ••••</div>
-        <div class="card-preview-bottom">
-          <div>
-            <div style="color: #94a3b8; font-size: 9px; margin-bottom: 2px;">CARDHOLDER</div>
-            <div class="card-holder-name" id="previewCardName">YOUR NAME</div>
-          </div>
-          <div style="text-align: right;">
-            <div style="color: #94a3b8; font-size: 9px; margin-bottom: 2px;">EXPIRES</div>
-            <div class="card-expiry-val" id="previewCardExpiry">MM/YY</div>
-          </div>
-        </div>
-      </div>
-
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <span style="font-size: 13px; font-weight: 700; color: #374151;">Amount: <strong id="cardModalAmount" style="color: #285c3b; font-size: 16px;">₱0.00</strong></span>
-        <button type="button" class="btn-autofill-demo" id="cardAutoFillDemoBtn">⚡ Fill Demo Card</button>
-      </div>
-
-      <form id="cardPaymentForm" onsubmit="return false;">
-        <div style="margin-bottom: 12px;">
-          <label for="cardNumberInput" style="display:block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Card Number</label>
-          <input type="text" id="cardNumberInput" placeholder="4242 •••• •••• ••••" maxlength="19" autocomplete="cc-number" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px; font-family: monospace; font-weight:600;">
-        </div>
-
-        <div style="margin-bottom: 12px;">
-          <label for="cardHolderNameInput" style="display:block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Cardholder Name</label>
-          <input type="text" id="cardHolderNameInput" placeholder="Full name as printed on card" autocomplete="cc-name" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px;">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
-          <div>
-            <label for="cardExpiryInput" style="display:block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Expiry Date</label>
-            <input type="text" id="cardExpiryInput" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px; text-align:center;">
-          </div>
-          <div>
-            <label for="cardCvvInput" style="display:block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Security CVV</label>
-            <input type="password" id="cardCvvInput" placeholder="•••" maxlength="4" autocomplete="cc-csc" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px; text-align:center;">
-          </div>
-        </div>
-
-        <div id="cardModalErrorNotice" style="display:none; color:#dc2626; font-size:12px; margin-bottom:12px; background:#fef2f2; padding:8px 12px; border-radius:6px; border:1px solid #fecaca;"></div>
-
-        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; color: #64748b; margin-bottom: 16px;">
-          <span>🔒 256-Bit SSL Encrypted</span> • <span>3D-Secure Protected</span>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <button type="button" class="primary-btn" id="confirmCardPayBtn" style="background: #1e293b; color: white; width: 100%; padding: 14px; font-size: 15px; border-radius: 8px; font-weight: 700; cursor: pointer;">
-            Pay Securely Now
-          </button>
-          <button type="button" class="secondary-btn" id="cancelCardPayBtn" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 8px; cursor: pointer;">
-            Cancel and return to cart
-          </button>
-        </div>
-      </form>
     </div>
   </div>
 

@@ -64,14 +64,11 @@ class PayMongoService {
 
     const normalizedChannel = (channel || '').toLowerCase();
     let methodTag = 'paymongo_gcash';
-    let paymentMethodTypes = ['gcash', 'paymaya', 'card', 'qrph'];
+    let paymentMethodTypes = ['gcash', 'paymaya', 'qrph'];
 
     if (normalizedChannel.includes('maya')) {
       methodTag = 'paymongo_maya';
       paymentMethodTypes = ['paymaya', 'qrph'];
-    } else if (normalizedChannel.includes('card')) {
-      methodTag = 'paymongo_card';
-      paymentMethodTypes = ['card'];
     } else if (normalizedChannel.includes('gcash')) {
       methodTag = 'paymongo_gcash';
       paymentMethodTypes = ['gcash', 'qrph'];

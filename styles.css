@@ -7604,3 +7604,322 @@ button.toggle-password-btn svg,
     gap: 8px !important;
   }
 }
+
+/* ==========================================================================
+   UNIVERSAL BUTTON TEXT VISIBILITY & CONTRAST ENHANCEMENT
+   Ensures 100% crystal-clear readability across all devices, modals & themes.
+   ========================================================================== */
+
+/* 1. Base Default Fallback: All buttons must have legible text */
+button,
+.btn {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-shadow: none !important;
+  box-sizing: border-box;
+}
+
+/* 2. Solid Dark Buttons: High-contrast pure white text */
+.btn,
+.primary-btn,
+button.primary-btn,
+.btn-add-cart,
+.add-to-cart-btn,
+.btn-buy-now,
+.btn-disburse-one-go,
+.btn-admin-logout,
+.btn-export-excel,
+.btn-export-word,
+.artisan-view-shop-btn,
+.btn-view-seller-profile,
+.gcash-pay-btn,
+.action-btn.approve-btn,
+.action-btn.reject-btn,
+.action-btn.suspend,
+.action-btn.suspend-seller-btn,
+.action-btn.restore,
+.action-btn.unsuspend-seller-btn,
+.action-btn.disburse-btn {
+  color: #ffffff !important;
+}
+
+.btn:hover,
+.primary-btn:hover,
+button.primary-btn:hover,
+.btn-add-cart:hover,
+.add-to-cart-btn:hover,
+.btn-buy-now:hover,
+.btn-disburse-one-go:hover,
+.btn-admin-logout:hover,
+.btn-export-excel:hover,
+.btn-export-word:hover,
+.artisan-view-shop-btn:hover,
+.btn-view-seller-profile:hover,
+.gcash-pay-btn:hover {
+  color: #ffffff !important;
+}
+
+/* 3. Light / Secondary / Outline Buttons: High-contrast dark text (never white!) */
+.secondary-btn,
+button.secondary-btn,
+.btn-secondary,
+.gcash-secondary-btn {
+  background: #fbf9f5 !important;
+  color: #1d4831 !important;
+  border: 1.5px solid #d9ccbe !important;
+  font-weight: 700 !important;
+}
+
+.secondary-btn:hover,
+button.secondary-btn:hover,
+.btn-secondary:hover,
+.gcash-secondary-btn:hover {
+  background: #f3ece1 !important;
+  color: #113120 !important;
+  border-color: #bfa892 !important;
+}
+
+/* 4. Product Card & Catalog Buttons */
+.product-card-actions .view-details-btn,
+.view-details-btn,
+.action-btn.view-details-btn {
+  background: #f1ebd8 !important;
+  color: #1d4831 !important;
+  border: 1.5px solid #dcd1be !important;
+  font-weight: 700 !important;
+}
+
+.product-card-actions .view-details-btn:hover,
+.view-details-btn:hover,
+.action-btn.view-details-btn:hover {
+  background: #e6dec8 !important;
+  color: #113120 !important;
+}
+
+/* Override .card-btn when light/outline style is applied */
+.card-btn[style*="background:#f1ebd8"],
+.card-btn[style*="background: #f1ebd8"] {
+  background: #f1ebd8 !important;
+  color: #1d4831 !important;
+  border: 1.5px solid #dcd1be !important;
+  font-weight: 800 !important;
+}
+
+.card-btn:not([style*="background:#f1ebd8"]):not([style*="background: #f1ebd8"]) {
+  background: #1d4831 !important;
+  color: #ffffff !important;
+}
+
+/* Inline Artisan link button */
+.artisan-link-inline {
+  background: transparent !important;
+  border: none !important;
+  color: #1d4831 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  display: inline !important;
+}
+
+.artisan-link-inline:hover {
+  color: #c88937 !important;
+}
+
+/* 5. Filter Pills, Chips, and Tabs */
+.artisan-filter-pill:not(.active),
+.seller-chip-btn:not(.active),
+.cat-filter-btn:not(.active),
+.cart-tab-btn:not(.active),
+.gcash-tab-btn:not(.active),
+.nav-btn:not(.active) {
+  background: #f8fafc !important;
+  color: #334155 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  font-weight: 600 !important;
+}
+
+.artisan-filter-pill:not(.active):hover,
+.seller-chip-btn:not(.active):hover,
+.cat-filter-btn:not(.active):hover,
+.cart-tab-btn:not(.active):hover,
+.gcash-tab-btn:not(.active):hover,
+.nav-btn:not(.active):hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.artisan-filter-pill.active,
+.seller-chip-btn.active,
+.cat-filter-btn.active,
+.cart-tab-btn.active,
+.gcash-tab-btn.active,
+.nav-btn.active {
+  background: #1d4831 !important;
+  color: #ffffff !important;
+  border-color: #1d4831 !important;
+  font-weight: 700 !important;
+}
+
+/* 6. Admin Table Action Buttons */
+.action-btn.edit-btn,
+.action-btn.edit,
+.action-btn.edit-artisan-btn,
+.action-btn.edit-prod-btn,
+.action-btn.edit-tracking-btn,
+.action-btn.manage-promo-btn {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 600 !important;
+}
+
+.action-btn.toggle-status-btn {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 600 !important;
+}
+
+.action-btn.delete-btn,
+.action-btn.delete,
+.action-btn.delete-seller-btn,
+.action-btn.delete-artisan-btn,
+.action-btn.revoke-seller-btn {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+  font-weight: 700 !important;
+}
+
+.action-btn.delete-btn:hover,
+.action-btn.delete:hover {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+}
+
+/* 7. Utility & Specialized Buttons */
+.btn-export-small,
+.btn-autofill-demo,
+.btn-reviews-trigger,
+.btn-visit-artisan-shop,
+.btn-subtle {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border: 1.5px solid #cbd5e1 !important;
+  font-weight: 600 !important;
+}
+
+.btn-export-small:hover,
+.btn-autofill-demo:hover,
+.btn-reviews-trigger:hover,
+.btn-visit-artisan-shop:hover,
+.btn-subtle:hover {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+.btn-copy-gcash,
+.copy-chip-btn {
+  background: #ffffff !important;
+  color: #005ce6 !important;
+  border: 1.5px solid #005ce6 !important;
+  font-weight: 700 !important;
+}
+
+.btn-copy-gcash:hover,
+.copy-chip-btn:hover {
+  background: #f0f7ff !important;
+}
+
+/* Cart Quantity & Item Removal Buttons */
+.qty-btn,
+.dec-btn,
+.inc-btn,
+.cart-quantity-control button {
+  background: #f1ebd8 !important;
+  color: #1d4831 !important;
+  border: 1px solid #dcd1be !important;
+  font-weight: 800 !important;
+}
+
+.qty-btn:hover,
+.dec-btn:hover,
+.inc-btn:hover,
+.cart-quantity-control button:hover {
+  background: #e6dec8 !important;
+  color: #113120 !important;
+}
+
+.cart-item-remove-btn,
+.remove-cart-item {
+  background: transparent !important;
+  color: #dc2626 !important;
+  font-weight: 700 !important;
+  border: none !important;
+}
+
+.cart-item-remove-btn:hover,
+.remove-cart-item:hover {
+  color: #991b1b !important;
+}
+
+/* Modal Close Cross Button */
+.close-modal-btn,
+button.close-modal-btn {
+  background: transparent !important;
+  color: #475569 !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  border: none !important;
+}
+
+.close-modal-btn:hover,
+button.close-modal-btn:hover {
+  color: #0f172a !important;
+}
+
+/* Google Auth Button */
+.btn-google {
+  background: #ffffff !important;
+  color: #3c4043 !important;
+  border: 1px solid #dadce0 !important;
+  font-weight: 600 !important;
+}
+
+.btn-google:hover {
+  background: #f8f9fa !important;
+  color: #202124 !important;
+  border-color: #c6c9ce !important;
+}
+
+/* Header PWA Install Button */
+.btn-header-install {
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+  border: 1px solid #86efac !important;
+  font-weight: 700 !important;
+}
+
+.btn-header-install:hover {
+  background: #dcfce7 !important;
+  color: #14532d !important;
+}
+
+/* 8. Disabled Buttons: Clear distinct disabled state with readable text */
+button:disabled,
+.btn:disabled,
+.primary-btn:disabled,
+.secondary-btn:disabled,
+.action-btn:disabled,
+.btn-disburse-one-go:disabled {
+  background: #e2e8f0 !important;
+  color: #64748b !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.85 !important;
+}
