@@ -113,7 +113,8 @@ export default defineConfig({
         categories: resolve(import.meta.dirname, 'categories.html'),
         contact: resolve(import.meta.dirname, 'contact.html'),
         review: resolve(import.meta.dirname, 'review.html'),
-        gcashCheckout: resolve(import.meta.dirname, 'gcash-checkout.html')
+        gcashCheckout: resolve(import.meta.dirname, 'gcash-checkout.html'),
+        adminDisbursements: resolve(import.meta.dirname, 'admin-disbursements.html')
       }
     }
   }

@@ -1412,6 +1412,112 @@ export const ArtisanDB = {
     }, { merge: true });
   },
 
+  async disburseSellerTotalNetSalary(sellerId, {
+    netSalary,
+    grossSales = 0,
+    platformFees = 0,
+    gatewayFee = 0,
+    maintenanceFee = 0,
+    orderIds = [],
+    orderNumbers = [],
+    referenceNumber,
+    notes = '',
+    adminEmail = 'Administrator',
+    gcashName = '',
+    gcashNumber = '',
+    shopName = '',
+    artisanName = ''
+  }) {
+    if (!sellerId) throw new Error('Seller ID is required for disbursement.');
+    if (!referenceNumber) throw new Error('GCash Reference / Transaction Number is required.');
+
+    const payoutId = `payout_${sellerId}_${Date.now()}`;
+    const payoutDocRef = doc(db, 'seller_payouts', payoutId);
+
+    const payoutRecord = {
+      id: payoutId,
+      sellerId,
+      type: 'lump_sum_salary_disbursement',
+      netSalary: Number(netSalary) || 0,
+      grossSales: Number(grossSales) || 0,
+      platformFees: Number(platformFees) || 0,
+      gatewayFee: Number(gatewayFee) || 0,
+      maintenanceFee: Number(maintenanceFee) || 0,
+      orderIds: orderIds || [],
+      orderNumbers: orderNumbers || [],
+      referenceNumber: referenceNumber.trim(),
+      notes: notes.trim(),
+      disbursedBy: adminEmail,
+      gcashName,
+      gcashNumber,
+      shopName,
+      artisanName,
+      status: 'Disbursed',
+      paymentMethod: 'GCash Express Send',
+      disbursedAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+
+    // 1. Save to seller_payouts collection
+    await setDoc(payoutDocRef, payoutRecord);
+
+    // 2. Mark each included order as having this seller's salary disbursed
+    if (Array.isArray(orderIds) && orderIds.length > 0) {
+      for (const orderId of orderIds) {
+        try {
+          const orderRef = doc(db, 'orders', orderId);
+          await updateDoc(orderRef, {
+            [`disbursements.${sellerId}`]: {
+              status: 'Disbursed',
+              payoutId,
+              referenceNumber: referenceNumber.trim(),
+              disbursedAt: serverTimestamp(),
+              disbursedBy: adminEmail,
+              amount: Number(netSalary) || 0
+            },
+            updatedAt: serverTimestamp()
+          });
+        } catch (orderErr) {
+          console.warn(`Could not tag order ${orderId} as disbursed:`, orderErr);
+        }
+      }
+    }
+
+    // 3. Update seller document in sellers collection with last payout summary
+    try {
+      const sellerRef = doc(db, 'sellers', sellerId);
+      await setDoc(sellerRef, {
+        lastDisbursement: {
+          payoutId,
+          amount: Number(netSalary) || 0,
+          referenceNumber: referenceNumber.trim(),
+          disbursedAt: serverTimestamp(),
+          disbursedBy: adminEmail
+        },
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (sellerErr) {
+      console.warn('Could not update seller lastDisbursement:', sellerErr);
+    }
+
+    // 4. Send instant notification to the seller's user account
+    try {
+      const formattedAmount = `₱${Number(netSalary).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      await this.addNotification(sellerId, {
+        title: '💸 Salary Disbursed via GCash!',
+        message: `Your total net salary of ${formattedAmount} (85% net earnings) has been successfully transferred to your GCash account (${gcashNumber || gcashName}). GCash Reference No: ${referenceNumber.trim()}.`,
+        type: 'salary_payout',
+        payoutId,
+        referenceNumber: referenceNumber.trim()
+      });
+    } catch (notifErr) {
+      console.warn('Could not send disbursement notification:', notifErr);
+    }
+
+    return payoutRecord;
+  },
+
   async updateOrderStatus(orderId, orderStatus, paymentStatus) {
     const updates = { updatedAt: serverTimestamp() };
     if (orderStatus) updates.orderStatus = orderStatus;

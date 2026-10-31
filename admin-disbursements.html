@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seller GCash Salary Disbursements | Admin Console | ArtisanAisle</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Dedicated GCash Payout Console Styles */
+    .payout-console-header {
+      background: linear-gradient(135deg, #0d2818 0%, #174229 100%);
+      color: #ffffff;
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #d4af37;
+    }
+    .payout-console-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .payout-console-brand img {
+      height: 38px;
+      filter: brightness(0) invert(1);
+    }
+    .payout-console-brand h1 {
+      font-size: 1.25rem;
+      margin: 0;
+      color: #ffffff !important;
+      font-weight: 700;
+    }
+    .payout-console-brand p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+    .payout-console-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .payout-console-actions a,
+    .payout-console-actions button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-return-admin {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .btn-return-admin:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+    }
+    .btn-return-store {
+      background: transparent;
+      color: #cbd5e1;
+      border: 1px solid transparent;
+    }
+    .btn-return-store:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .btn-admin-logout {
+      background: #dc2626;
+      color: #ffffff;
+      border: none;
+    }
+    .btn-admin-logout:hover {
+      background: #b91c1c;
+    }
+
+    .payout-page-body {
+      max-width: 1360px;
+      margin: 24px auto 60px;
+      padding: 0 20px;
+    }
+
+    /* Seller Selector Card */
+    .seller-selection-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 22px 24px;
+      border: 1.5px solid #e2e8f0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+    }
+    .selector-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .selector-title-group h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: #1e3a29;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .selector-title-group p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .seller-select-controls {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      .seller-select-controls {
+        grid-template-columns: 1fr;
+      }
+    }
+    .seller-dropdown-custom {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      border: 2px solid #285c3b;
+      border-radius: 10px;
+      background: #fdfdfd;
+      color: #1e293b;
+      cursor: pointer;
+      outline: none;
+      box-shadow: 0 2px 6px rgba(40,92,59,0.08);
+    }
+    .seller-dropdown-custom:focus {
+      border-color: #166534;
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
+    }
+    .seller-filter-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .seller-chip-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .seller-chip-btn.active,
+    .seller-chip-btn:hover {
+      background: #285c3b;
+      color: #ffffff;
+      border-color: #285c3b;
+    }
+
+    /* Selected Seller Hero & GCash Payout Details Card */
+    .seller-detail-banner {
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1.5px solid #cbd5e1;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+      padding: 24px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    @media (max-width: 900px) {
+      .seller-detail-banner {
+        grid-template-columns: 1fr;
+      }
+    }
+    .seller-identity-info {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+    .seller-avatar-badge {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #e2f0e6;
+      border: 2px solid #285c3b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .seller-avatar-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .seller-meta-titles h3 {
+      margin: 0 0 4px;
+      font-size: 1.4rem;
+      color: #1e3a29;
+    }
+    .seller-meta-titles p {
+      margin: 0 0 8px;
+      color: #64748b;
+      font-size: 13.5px;
+    }
+    .seller-contact-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .seller-tag-item {
+      font-size: 12px;
+      background: #f1f5f9;
+      color: #334155;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* GCash Destination Highlight Box */
+    .gcash-payout-box {
+      background: linear-gradient(135deg, #005ce6 0%, #0041a8 100%);
+      color: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0, 92, 230, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    .gcash-payout-box::after {
+      content: 'GCash';
+      position: absolute;
+      right: -10px;
+      bottom: -15px;
+      font-size: 64px;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+    .gcash-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .gcash-label-badge {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .gcash-account-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .gcash-number-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .gcash-phone-display {
+      font-family: monospace;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .btn-copy-gcash {
+      background: #ffffff;
+      color: #005ce6;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .btn-copy-gcash:hover {
+      background: #f0f7ff;
+      transform: translateY(-1px);
+    }
+
+    /* Financial Metrics Grid */
+    .metrics-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px 18px;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .metric-card .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 6px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .metric-card .card-amount {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .metric-card .card-tag {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      display: inline-block;
+      font-weight: 600;
+    }
+    .metric-card.highlight-pending {
+      border: 2px solid #16a34a;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.15);
+    }
+    .metric-card.highlight-pending .card-amount {
+      color: #15803d;
+      font-size: 26px;
+    }
+
+    /* One-Go Disbursement Action Banner */
+    .one-go-action-banner {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border: 2px dashed #005ce6;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 18px;
+    }
+    .one-go-desc h3 {
+      margin: 0 0 6px;
+      font-size: 1.25rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .one-go-desc p {
+      margin: 0;
+      font-size: 13.5px;
+      color: #475569;
+      max-width: 650px;
+    }
+    .btn-disburse-one-go {
+      background: #005ce6;
+      color: #ffffff;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 18px rgba(0, 92, 230, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-disburse-one-go:hover:not(:disabled) {
+      background: #004ac0;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 92, 230, 0.4);
+    }
+    .btn-disburse-one-go:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* Table Sections */
+    .table-container-card {
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      padding: 20px;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .table-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .table-top-bar h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: #1e293b;
+    }
+    .export-btns-group {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-export-small {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-export-small:hover {
+      background: #f1f5f9;
+    }
+
+    /* GCash Modal Custom Styling */
+    .modal-gcash-card {
+      max-width: 520px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+    .modal-gcash-header {
+      background: #005ce6;
+      color: #ffffff;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-gcash-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-gcash-body {
+      padding: 22px 24px;
+    }
+    .disburse-summary-recap {
+      background: #f0f7ff;
+      border: 1.5px solid #bae6fd;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      font-size: 13.5px;
+      color: #0369a1;
+    }
+    .disburse-summary-recap strong {
+      color: #0c4a6e;
+    }
+    .disburse-amount-highlight {
+      font-size: 26px;
+      font-weight: 900;
+      color: #15803d;
+      margin-top: 4px;
+      display: block;
+    }
+  </style>
+</head>
+<body style="background: #f8fafc; min-height: 100vh;">
+
+  <!-- Console Header -->
+  <header class="payout-console-header">
+    <div class="payout-console-brand">
+      <a href="index.html" title="Artisan Aisle Storefront">
+        <img src="images/logo.svg" alt="Artisan Aisle Logo">
+      </a>
+      <div>
+        <h1>Seller GCash Salary Disbursements</h1>
+        <p>15% Platform Deduction Structure • 85% Total Net Artisan Earnings Settlement</p>
+      </div>
+    </div>
+    <div class="payout-console-actions">
+      <a href="admin.html#payouts" class="btn-return-admin">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Admin Dashboard
+      </a>
+      <a href="index.html" class="btn-return-store">Storefront</a>
+      <button type="button" class="btn-admin-logout" id="adminLogoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <!-- Access Denied Card (If unauthenticated or not Admin) -->
+  <div id="adminAccessDeniedCard" style="display: none; max-width: 520px; margin: 60px auto; padding: 36px 30px; text-align: center; background: #ffffff; border-radius: 16px; border: 1.5px solid #fee2e2; box-shadow: 0 10px 25px rgba(220,38,38,0.1);">
+    <div style="font-size: 48px; margin-bottom: 12px;">🔒</div>
+    <h2 style="color: #991b1b; margin-bottom: 8px;">Restricted Administrative Portal</h2>
+    <p style="color: #64748b; font-size: 14px; margin-bottom: 22px; line-height: 1.5;">
+      You must be authenticated with verified Administrator privileges to view seller financial ledgers and authorize GCash salary payouts.
+    </p>
+    <a href="login.html?redirect=admin-disbursements.html" class="primary-btn" style="display: inline-block; padding: 12px 24px; text-decoration: none; font-weight: 700; background: #285c3b;">
+      Sign in as Administrator →
+    </a>
+  </div>
+
+  <!-- Main Disbursement Console Content -->
+  <main id="adminPayoutConsoleContent" class="payout-page-body" style="display: none;">
+
+    <!-- 15% Platform Fee & Salary Structure Banner -->
+    <div class="payout-policy-banner" style="margin-bottom: 22px;">
+      <div class="notice-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+      </div>
+      <div class="notice-content">
+        <h4>Artisan Salary & 15% Platform Deduction Structure</h4>
+        <p>
+          Every customer purchase undergoes a transparent 15% platform deduction on item gross revenue: <strong>2% direct payment processing fund</strong> (covers payment gateway infrastructure) and <strong>13% website maintenance &amp; servers</strong>. The full net salary of <strong>85%</strong> is disbursed in one go to the artisan's verified GCash mobile account.
+        </p>
+        <div class="payout-fee-chips">
+          <span class="fee-chip chip-gateway">2% Direct Payment Processing</span>
+          <span class="fee-chip chip-maint">13% Platform &amp; Maintenance</span>
+          <span class="fee-chip chip-payout">85% Total Net Artisan Salary</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 1: Select the Seller -->
+    <section class="seller-selection-card">
+      <div class="selector-top-row">
+        <div class="selector-title-group">
+          <h2>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#285c3b" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            Select Artisan / Seller to View Sales &amp; Disburse Salary
+          </h2>
+          <p>Choose an approved artisan workshop to view their itemized customer sales, fee deductions, and transfer their net salary in one go via GCash.</p>
+        </div>
+        <div style="font-size: 13px; font-weight: 600; color: #475569;" id="sellerCountSummary">
+          Loading artisans...
+        </div>
+      </div>
+
+      <div class="seller-select-controls">
+        <select id="sellerSelectDropdown" class="seller-dropdown-custom">
+          <option value="">-- Choose an Artisan / Shop --</option>
+        </select>
+        <div style="position: relative; min-width: 280px;">
+          <input type="text" id="sellerSearchInput" placeholder="Quick search by name, shop, or phone..." style="width: 100%; padding: 12px 14px 12px 36px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13.5px; box-sizing: border-box;">
+          <svg style="position: absolute; left: 12px; top: 14px; color: #94a3b8;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </div>
+      </div>
+
+      <div class="seller-filter-chips">
+        <button type="button" class="seller-chip-btn active" data-filter="all">All Artisans (<span id="countFilterAll">0</span>)</button>
+        <button type="button" class="seller-chip-btn" data-filter="pending">With Pending Payouts (<span id="countFilterPending">0</span>)</button>
+        <button type="button" class="seller-chip-btn" data-filter="settled">Fully Settled (<span id="countFilterSettled">0</span>)</button>
+      </div>
+    </section>
+
+    <!-- Empty State (When no seller is selected yet) -->
+    <div id="noSellerSelectedState" style="text-align: center; padding: 60px 20px; background: #ffffff; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 30px;">
+      <div style="font-size: 54px; margin-bottom: 12px;">🎨</div>
+      <h3 style="color: #1e3a29; margin-bottom: 6px;">Select an Artisan Above</h3>
+      <p style="color: #64748b; font-size: 14px; max-width: 500px; margin: 0 auto;">
+        Pick any artisan from the dropdown to audit their gross sales, 15% platform deductions, and disburse their total net earnings in one go to GCash.
+      </p>
+    </div>
+
+    <!-- Active Selected Seller Section -->
+    <div id="activeSellerDetailContainer" style="display: none;">
+
+      <!-- Step 2: Selected Seller Information & GCash Destination Card -->
+      <section class="seller-detail-banner">
+        <div class="seller-identity-info">
+          <div class="seller-avatar-badge" id="artisanAvatarWrap">
+            <span>🇵🇭</span>
+          </div>
+          <div class="seller-meta-titles">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <h3 id="sellerDisplayShopName">Shop Name</h3>
+              <span class="status-badge delivered" style="font-size: 11px;">Verified Artisan</span>
+            </div>
+            <p id="sellerDisplayArtisanName">Crafted by Artisan Name</p>
+            <div class="seller-contact-tags">
+              <span class="seller-tag-item" id="sellerCategoryTag">🧵 Handcraft Specialization</span>
+              <span class="seller-tag-item" id="sellerRegionTag">📍 Region</span>
+              <span class="seller-tag-item" id="sellerEmailTag">✉️ email@domain.com</span>
+              <span class="seller-tag-item" id="sellerPhoneTag">📞 09XXXXXXXXX</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verified GCash Account Card -->
+        <div class="gcash-payout-box">
+          <div class="gcash-box-header">
+            <span class="gcash-label-badge">Official GCash Payout Destination</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          </div>
+          <div class="gcash-account-name" id="sellerGcashName">GCash Account Name</div>
+          <div class="gcash-number-row">
+            <span class="gcash-phone-display" id="sellerGcashNumber">09XXXXXXXXX</span>
+            <button type="button" class="btn-copy-gcash" id="copyGcashBtn" title="Copy GCash Number">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy
+            </button>
+          </div>
+          <div style="margin-top: 8px; font-size: 11px; opacity: 0.9;">
+            ✅ Auto-verified for GCash Express Send salary settlements.
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: Sales & Salary Financial Breakdown Cards -->
+      <section class="metrics-summary-grid">
+        <div class="metric-card">
+          <span class="card-title">Item Gross Sales</span>
+          <span class="card-amount" id="metricGrossSales">₱0.00</span>
+          <span class="card-tag" style="background: #fef3c7; color: #92400e;">100% Customer Paid</span>
+        </div>
+        <div class="metric-card">
+          <span class="card-title">Payment Handling (2%)</span>
+          <span class="card-amount" id="metricGatewayFee" style="color: #b45309;">-₱0.00</span>
+          <span class="card-tag" style="background: #fee2e2; color: #991b1b;">Gateway Reserve</span>
+        </div>
+        <div class="metric-card">
+          <span class="card-title">Website Maint. (13%)</span>
+          <span class="card-amount" id="metricMaintFee" style="color: #4338ca;">-₱0.00</span>
+          <span class="card-tag" style="background: #e0e7ff; color: #3730a3;">Platform Fund</span>
+        </div>
+        <div class="metric-card">
+          <span class="card-title">Total 15% Platform Fees</span>
+          <span class="card-amount" id="metricTotalFees" style="color: #dc2626;">-₱0.00</span>
+          <span class="card-tag" style="background: #fee2e2; color: #b91c1c;">Direct Deductions</span>
+        </div>
+        <div class="metric-card">
+          <span class="card-title">Lifetime Net Salary (85%)</span>
+          <span class="card-amount" id="metricLifetimeNet" style="color: #1e3a29;">₱0.00</span>
+          <span class="card-tag" style="background: #e2f0e6; color: #1e4620;">Total Earned</span>
+        </div>
+        <div class="metric-card">
+          <span class="card-title">Already Disbursed</span>
+          <span class="card-amount" id="metricAlreadyDisbursed" style="color: #0284c7;">₱0.00</span>
+          <span class="card-tag" style="background: #e0f2fe; color: #0369a1;">Settled via GCash</span>
+        </div>
+        <div class="metric-card highlight-pending">
+          <span class="card-title" style="color: #15803d; font-weight: 800;">Pending Net Salary to Disburse</span>
+          <span class="card-amount" id="metricPendingSalary">₱0.00</span>
+          <span class="card-tag" style="background: #dcfce7; color: #15803d; font-weight: 700;">85% Ready for Payout</span>
+        </div>
+      </section>
+
+      <!-- Step 4: Disburse Total Net Salary in One Go Banner -->
+      <section class="one-go-action-banner">
+        <div class="one-go-desc">
+          <h3>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#005ce6" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            Disburse Total Net Salary via GCash in One Go
+          </h3>
+          <p>
+            Transfer the artisan's entire outstanding net earnings in a single GCash payment. This automatically marks all pending order items as <strong>Disbursed</strong>, tags the GCash Reference Number, and sends an immediate payout receipt notification to the seller.
+          </p>
+        </div>
+        <div>
+          <button type="button" id="disburseInOneGoBtn" class="btn-disburse-one-go">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="6" x2="12" y2="8"></line><line x1="12" y1="16" x2="12" y2="18"></line></svg>
+            <span id="disburseBtnText">Disburse Total Net Salary via GCash</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Step 5: Itemized Orders & Sales Table -->
+      <section class="table-container-card">
+        <div class="table-top-bar">
+          <div>
+            <h3>Customer Orders &amp; Sales Breakdown</h3>
+            <span style="font-size: 13px; color: #64748b;">All sales generated by this artisan's workshop products</span>
+          </div>
+          <div class="export-btns-group">
+            <button type="button" class="btn-export-small" id="exportSellerSalesExcelBtn">
+              📊 Export Sales (Excel)
+            </button>
+            <button type="button" class="btn-export-small" id="exportSellerSalesWordBtn">
+              📄 Export Statement (Word)
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive-box">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Date</th>
+                <th>Product Items</th>
+                <th>Gross Total</th>
+                <th>2% Gateway</th>
+                <th>13% Maint.</th>
+                <th>Total Fee (15%)</th>
+                <th>Net Salary (85%)</th>
+                <th>Payment Mode</th>
+                <th>Fulfillment</th>
+                <th>Disbursement Status</th>
+              </tr>
+            </thead>
+            <tbody id="sellerOrdersTableBody">
+              <tr><td colspan="11" class="loading-td">Select an artisan to load sales...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Step 6: GCash Disbursement History Table -->
+      <section class="table-container-card">
+        <div class="table-top-bar">
+          <div>
+            <h3>GCash Disbursement &amp; Payout Audit History</h3>
+            <span style="font-size: 13px; color: #64748b;">Permanent ledger of past salary transfers made to this artisan's GCash</span>
+          </div>
+          <div class="export-btns-group">
+            <button type="button" class="btn-export-small" id="exportDisbursementHistoryExcelBtn">
+              📊 Export Ledger (Excel)
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive-box">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Disbursement ID</th>
+                <th>Date &amp; Time</th>
+                <th>Net Salary Sent</th>
+                <th>Gross Volume</th>
+                <th>Orders Settled</th>
+                <th>GCash Reference #</th>
+                <th>Disbursed By</th>
+                <th>Notes</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="sellerDisbursementsTableBody">
+              <tr><td colspan="9" class="loading-td">No previous GCash disbursements on record.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- GCash One-Go Disbursement Confirmation Modal -->
+  <div id="oneGoDisburseModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card modal-gcash-card" style="text-align: left;">
+      <div class="modal-gcash-header">
+        <h3>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          GCash Salary Disbursement (One Go)
+        </h3>
+        <button type="button" class="close-modal-btn" id="closeOneGoModalBtn" style="color: #ffffff; background: transparent; border: none; font-size: 22px; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="modal-gcash-body">
+        <p style="font-size: 13.5px; color: #475569; margin: 0 0 14px; line-height: 1.5;">
+          Please send the net salary through your GCash app (Express Send), then paste the confirmation transaction reference number below to mark this settlement.
+        </p>
+
+        <!-- Summary Card -->
+        <div class="disburse-summary-recap">
+          <div><strong>Recipient:</strong> <span id="modalShopName">-</span> (<span id="modalArtisanName">-</span>)</div>
+          <div style="margin-top: 4px;">
+            <strong>GCash Account:</strong> <span id="modalGcashAccount">-</span>
+            <button type="button" id="modalCopyGcashBtn" style="background:#ffffff; border:1px solid #005ce6; color:#005ce6; border-radius:4px; padding:2px 6px; font-size:11px; font-weight:700; cursor:pointer; margin-left:6px;">Copy</button>
+          </div>
+          <div style="margin-top: 8px;">
+            <strong>Settling Orders:</strong> <span id="modalOrdersCount">0 orders</span> (<span id="modalGrossTotal">₱0.00</span> Gross minus 15% platform fees)
+          </div>
+          <div style="margin-top: 8px;">
+            <strong>Total Net Salary to Transfer (85%):</strong>
+            <span class="disburse-amount-highlight" id="modalNetSalaryDisplay">₱0.00</span>
+          </div>
+        </div>
+
+        <form id="oneGoDisburseForm" onsubmit="handleConfirmOneGoDisbursement(event)">
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">
+              GCash Reference / Transaction No. *
+            </label>
+            <input type="text" id="modalGcashRefInput" required placeholder="e.g. 100982736451" style="width: 100%; padding: 10px 12px; font-size: 15px; font-family: monospace; border: 1.5px solid #005ce6; border-radius: 8px; box-sizing: border-box;">
+            <small style="font-size: 11.5px; color: #64748b;">Find this on your GCash transaction confirmation receipt SMS or in-app history.</small>
+          </div>
+
+          <div style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">
+              Disbursement Notes / Remarks
+            </label>
+            <input type="text" id="modalDisburseNotesInput" value="Total net salary settlement via GCash Express Send (85% net earnings)" style="width: 100%; padding: 9px 12px; font-size: 13.5px; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="secondary-btn" id="cancelOneGoModalBtn" style="padding: 10px 18px;">Cancel</button>
+            <button type="submit" id="submitOneGoDisburseBtn" class="primary-btn" style="background: #005ce6; padding: 10px 22px; font-weight: 700;">
+              Confirm &amp; Disburse via GCash →
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="export-utils.js"></script>
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="admin-disbursements.js"></script>
+</body>
+</html>
