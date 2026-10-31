@@ -236,12 +236,18 @@
 
             <div class="detail-seller-card">
                 <div class="detail-seller-avatar" id="detailSellerInitial">A</div>
-                <div class="detail-seller-meta">
+                <div class="detail-seller-meta" style="flex: 1;">
                     <h4 id="detailSellerName">Artisan Partner</h4>
                     <p>Verified Community Weaver / Craftsman</p>
-                    <a href="artisans.html" id="detailArtisanShopLink" class="btn-visit-artisan-shop" title="Visit Artisan Shop">
-                        🏬 Visit Artisan Shop & Profile →
-                    </a>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+                      <button type="button" class="btn-view-seller-profile" id="detailViewSellerProfileBtn" onclick="openSellerProfileModalForCurrentProduct('detail')" title="View this seller's profile and workshop creations only">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        View Seller Profile
+                      </button>
+                      <a href="artisans.html" id="detailArtisanShopLink" class="btn-visit-artisan-shop" title="Visit Dedicated Workshop Page">
+                        Visit Workshop Page →
+                      </a>
+                    </div>
                 </div>
             </div>
 
@@ -312,12 +318,18 @@
 
         <div class="detail-seller-card">
           <div class="detail-seller-avatar" id="quickViewSellerInitial">A</div>
-          <div class="detail-seller-meta">
+          <div class="detail-seller-meta" style="flex: 1;">
             <h4 id="quickViewSellerName">Artisan Partner</h4>
             <p>Verified Community Artisan</p>
-            <a href="artisans.html" id="indexQuickViewArtisanShopLink" class="btn-visit-artisan-shop" title="Visit Artisan Shop">
-              🏬 Visit Artisan Shop & Profile →
-            </a>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+              <button type="button" class="btn-view-seller-profile" id="quickViewSellerProfileBtn" onclick="openSellerProfileModalForCurrentProduct('quick')" title="View this seller's profile and workshop creations only">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                View Seller Profile
+              </button>
+              <a href="artisans.html" id="indexQuickViewArtisanShopLink" class="btn-visit-artisan-shop" title="Visit Dedicated Workshop Page">
+                Visit Workshop Page →
+              </a>
+            </div>
           </div>
         </div>
 
@@ -878,9 +890,17 @@
 <script type="module" src="firebase-config.js"></script>
 <script type="module" src="pwa-install.js"></script>
 <script type="module" src="header-auth.js"></script>
+<script type="module" src="seller-profile-modal.js"></script>
 
 <!-- Main Storefront Application Script -->
 <script>
+function openSellerProfileModalForCurrentProduct(source) {
+  const prod = source === 'detail' ? selectedProduct : quickViewProduct;
+  if (prod && window.openSellerProfileModal) {
+    window.openSellerProfileModal(prod.sellerId, prod.sellerName);
+  }
+}
+window.openSellerProfileModalForCurrentProduct = openSellerProfileModalForCurrentProduct;
 /* ================= APPLICATION STATE ================= */
 
 let liveProducts = [];
@@ -1283,6 +1303,9 @@ function createProductCardHtml(product, options = {}) {
             </div>
             <div class="product-info">
                 <h3>${product.name}</h3>
+                <p class="product-card-artisan" style="font-size:12px; color:#555; margin:2px 0 4px;">
+                    By <button type="button" class="artisan-link-inline" onclick="event.stopPropagation(); openSellerProfileModal('${product.sellerId || ''}', '${(product.sellerName || 'Artisan Partner').replace(/'/g, "\\'")}')" title="View ${product.sellerName || 'Artisan'}'s profile and creations">${product.sellerName || 'Artisan Partner'}</button>
+                </p>
                 <p class="price">₱${price}.00</p>
                 <div class="rating">★★★★★ <small style="color:#666;">(${stock > 0 ? stock + ' left' : 'Sold out'})</small></div>
                 <div style="display:flex; gap:8px; margin-top:8px;">

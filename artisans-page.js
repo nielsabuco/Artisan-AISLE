@@ -250,6 +250,7 @@ function checkRoute() {
 }
 
 function findArtisan(id, name) {
+  // 1. Check allArtisans
   if (id) {
     const byId = allArtisans.find(a => a.id === id);
     if (byId) return byId;
@@ -262,6 +263,84 @@ function findArtisan(id, name) {
     );
     if (byName) return byName;
   }
+
+  // 2. Check live Firestore sellers
+  if (Array.isArray(liveFirestoreSellers) && liveFirestoreSellers.length > 0) {
+    if (id) {
+      const s = liveFirestoreSellers.find(x => x.id === id || x.uid === id);
+      if (s) {
+        return {
+          id: s.id || s.uid,
+          name: s.name || s.applicantName || 'Artisan Seller',
+          shopName: s.shopName || `${s.name || 'Artisan'}'s Workshop`,
+          region: s.region || s.location || 'Philippines',
+          category: s.category || 'Handmade Crafts',
+          bio: s.bio || s.story || 'Handcrafting authentic cultural treasures with passion and heritage.',
+          photo: s.photo || s.avatar || 'images/emblem.svg',
+          status: s.status || 'Active',
+          verified: true
+        };
+      }
+    }
+    if (name) {
+      const clean = name.toLowerCase().trim();
+      const s = liveFirestoreSellers.find(x =>
+        (x.name && x.name.toLowerCase().includes(clean)) ||
+        (x.shopName && x.shopName.toLowerCase().includes(clean))
+      );
+      if (s) {
+        return {
+          id: s.id || s.uid,
+          name: s.name || s.applicantName || 'Artisan Seller',
+          shopName: s.shopName || `${s.name || 'Artisan'}'s Workshop`,
+          region: s.region || s.location || 'Philippines',
+          category: s.category || 'Handmade Crafts',
+          bio: s.bio || s.story || 'Handcrafting authentic cultural treasures with passion and heritage.',
+          photo: s.photo || s.avatar || 'images/emblem.svg',
+          status: s.status || 'Active',
+          verified: true
+        };
+      }
+    }
+  }
+
+  // 3. Fallback: Synthesize from products catalog for this seller
+  if (allProducts && allProducts.length > 0) {
+    const cleanName = (name || '').toLowerCase().trim();
+    const prod = allProducts.find(p =>
+      (id && p.sellerId === id) ||
+      (cleanName && p.sellerName && p.sellerName.toLowerCase().includes(cleanName)) ||
+      (cleanName && p.sellerShop && p.sellerShop.toLowerCase().includes(cleanName))
+    );
+    if (prod) {
+      return {
+        id: prod.sellerId || id || 'artisan',
+        name: prod.sellerName || name || 'Artisan Partner',
+        shopName: prod.sellerShop || prod.shopName || `${prod.sellerName || 'Artisan'}'s Workshop`,
+        region: prod.sellerRegion || prod.region || 'Philippines',
+        category: prod.category || 'Handcrafted Creations',
+        bio: prod.sellerBio || 'Dedicated local Filipino artisan handcrafting authentic cultural treasures with traditional heritage techniques.',
+        photo: prod.sellerPhoto || 'images/emblem.svg',
+        status: 'Active',
+        verified: true
+      };
+    }
+  }
+
+  // 4. Default static artisans
+  if (id) {
+    const d = DEFAULT_ARTISANS.find(a => a.id === id);
+    if (d) return { ...d };
+  }
+  if (name) {
+    const clean = name.toLowerCase().trim();
+    const d = DEFAULT_ARTISANS.find(a =>
+      (a.name && a.name.toLowerCase().includes(clean)) ||
+      (a.shopName && a.shopName.toLowerCase().includes(clean))
+    );
+    if (d) return { ...d };
+  }
+
   return null;
 }
 
@@ -379,6 +458,37 @@ function showArtisanShopView(artisan) {
   document.getElementById('shopArtisanCategory').textContent = `🧵 ${artisan.category}`;
   document.getElementById('shopArtisanBio').textContent = artisan.bio;
 
+  const catalogTitle = document.getElementById('shopCatalogTitle');
+  if (catalogTitle) catalogTitle.textContent = `${artisan.shopName}'s Creations Only`;
+
+  const catalogSubtitle = document.getElementById('shopCatalogSubtitle');
+  if (catalogSubtitle) catalogSubtitle.textContent = `Showing all handcrafted items listed exclusively by ${artisan.name}`;
+
+  // Smart back navigation
+  const backBtn = document.getElementById('backToArtisansBtn');
+  if (backBtn) {
+    const params = new URLSearchParams(window.location.search);
+    const hasSellerParam = params.get('sellerId') || params.get('sellerName');
+    if (hasSellerParam) {
+      backBtn.textContent = '← Back to Products';
+      backBtn.onclick = (e) => {
+        e.preventDefault();
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.location.href = 'products.html';
+        }
+      };
+    } else {
+      backBtn.textContent = '← Back to All Artisans';
+      backBtn.onclick = (e) => {
+        e.preventDefault();
+        history.pushState(null, '', 'artisans.html');
+        switchToDirectoryView();
+      };
+    }
+  }
+
   renderArtisanProducts(artisan);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -387,19 +497,23 @@ function renderArtisanProducts(artisan) {
   const container = document.getElementById('artisanProductsGrid');
   if (!container) return;
 
-  // Filter products for this artisan
+  // Filter products for this artisan ONLY
+  const targetId = artisan.id;
+  const targetName = (artisan.name || '').toLowerCase().trim();
+  const targetShop = (artisan.shopName || '').toLowerCase().trim();
+
   const artisanProducts = allProducts.filter(p => {
-    if (p.sellerId && p.sellerId === artisan.id) return true;
+    if (targetId && p.sellerId && p.sellerId === targetId) return true;
     if (p.sellerName) {
       const sn = p.sellerName.toLowerCase();
-      if (artisan.name && sn.includes(artisan.name.toLowerCase())) return true;
-      if (artisan.shopName && sn.includes(artisan.shopName.toLowerCase())) return true;
+      if (targetName && sn.includes(targetName)) return true;
+      if (targetShop && sn.includes(targetShop)) return true;
     }
     return false;
   });
 
   const countEl = document.getElementById('shopArtisanProductCount');
-  if (countEl) countEl.textContent = `📦 ${artisanProducts.length} Creations Listed`;
+  if (countEl) countEl.textContent = `📦 ${artisanProducts.length} Creation${artisanProducts.length === 1 ? '' : 's'} Listed by this Seller Only`;
 
   const catalogTitle = document.getElementById('shopCatalogTitle');
   if (catalogTitle) catalogTitle.textContent = `${artisan.shopName}'s Handcrafted Creations`;

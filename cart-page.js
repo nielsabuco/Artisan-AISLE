@@ -141,7 +141,7 @@ async function renderCart() {
           <div class="cart-item-header">
             <div>
               <h3 class="cart-item-title">${item.name}</h3>
-              <span class="cart-item-seller">Artisan: ${item.sellerName || 'Verified Guild Member'}</span>
+              <span class="cart-item-seller">Artisan: <a href="artisans.html?sellerId=${encodeURIComponent(item.sellerId || '')}&sellerName=${encodeURIComponent(item.sellerName || '')}" class="artisan-link-inline" style="font-size:12px; font-weight:600; text-decoration:underline;" title="View this artisan's workshop and profile">${item.sellerName || 'Verified Guild Member'}</a></span>
             </div>
             <button type="button" class="cart-item-remove-btn" title="Remove item">&times;</button>
           </div>

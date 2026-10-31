@@ -1,5 +1,6 @@
 import { ArtisanDB } from './firebase-config.js';
 import { handleAddToCart, updateHeaderAuth } from './header-auth.js';
+import './seller-profile-modal.js';
 
 let liveProducts = [];
 let activeCategory = 'All Products';
@@ -112,7 +113,7 @@ function renderProducts() {
       <div class="product-info">
         <span class="product-card-category">${product.category || 'Handicrafts'}</span>
         <h3 class="product-card-title">${product.name}</h3>
-        <p class="product-card-artisan">By <a href="${artisanShopUrl}" class="artisan-link" title="Visit ${product.sellerName || 'Artisan'}'s Shop" onclick="event.stopPropagation()"><strong>${product.sellerName || 'Artisan Partner'}</strong> 🏬</a></p>
+        <p class="product-card-artisan">By <button type="button" class="artisan-link-inline" title="View ${product.sellerName || 'Artisan'}'s profile and workshop creations" onclick="event.stopPropagation(); if (window.openSellerProfileModal) window.openSellerProfileModal('${product.sellerId || ''}', '${(product.sellerName || 'Artisan Partner').replace(/'/g, "\\'")}')"><strong>${product.sellerName || 'Artisan Partner'}</strong></button></p>
         <div class="product-card-pricing">
           <span class="price-val">${priceFormatted}</span>
         </div>
@@ -211,6 +212,7 @@ function openQuickView(product) {
   if (!modal || !product) return;
 
   activeModalProduct = product;
+  window.activeModalProduct = product;
   activeModalQty = 1;
 
   document.getElementById('quickViewName').textContent = product.name;
