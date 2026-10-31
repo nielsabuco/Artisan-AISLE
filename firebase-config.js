@@ -178,7 +178,23 @@ export const ArtisanDB = {
       if (!snap.empty) {
         const userDoc = snap.docs[0];
         const userData = userDoc.data();
-        const isApprovedSeller = userData.role === 'seller' || userData.sellerStatus === 'approved';
+        let isApprovedSeller = userData.role === 'seller' || userData.sellerStatus === 'approved';
+
+        // Robust fallback: Check if approved in seller_applications
+        if (!userData.temporaryPassword) {
+          try {
+            const appQ = query(collection(db, 'seller_applications'), where('email', '==', cleanEmail));
+            const appSnap = await getDocs(appQ);
+            if (!appSnap.empty) {
+              const appData = appSnap.docs[0].data();
+              if (appData.status === 'approved' && appData.temporaryPassword) {
+                userData.temporaryPassword = appData.temporaryPassword;
+                userData.mustChangePassword = true;
+                isApprovedSeller = true;
+              }
+            }
+          } catch (e) {}
+        }
 
         // Case A: First-time login with temporary password required
         if (isApprovedSeller && userData.mustChangePassword && !userData.hasChangedInitialPassword) {
@@ -396,34 +412,40 @@ export const ArtisanDB = {
         } catch (e) {}
 
         const profile = await this.getUserProfile(user.uid);
+        const email = profile?.email || user.email || '';
+        const rawRole = String(profile?.role || '').trim().toLowerCase();
+        const isAdminUser = isTokenAdmin || rawRole === 'admin' || this.isEmailAdmin(email);
 
-        // Security check: Only if newly approved seller has NOT yet changed their initial password
-        if (profile?.mustChangePassword && !profile?.hasChangedInitialPassword && !window.location.pathname.includes('login.html')) {
-          await signOut(auth).catch(() => {});
-          localStorage.removeItem('handicraft_logged_in_user');
-          localStorage.removeItem('handicraft_profile');
-          window.location.href = `login.html?sellerApproved=true&email=${encodeURIComponent(user.email || '')}`;
-          return;
-        }
+        // Security check: Only regular non-admin sellers must change password
+        // NEVER auto-logout admins, and NEVER auto-logout from admin.html or login.html
+        if (!isAdminUser && !window.location.pathname.includes('admin.html') && !window.location.pathname.includes('login.html')) {
+          if (profile?.mustChangePassword && !profile?.hasChangedInitialPassword) {
+            await signOut(auth).catch(() => {});
+            localStorage.removeItem('handicraft_logged_in_user');
+            localStorage.removeItem('handicraft_profile');
+            window.location.href = `login.html?sellerApproved=true&email=${encodeURIComponent(user.email || '')}`;
+            return;
+          }
 
-        // Real-time listener: instantly auto-logout seller the second an admin approves their application
-        if (!window.__userLiveUnsubscribe && !window.location.pathname.includes('login.html')) {
-          window.__userLiveUnsubscribe = onSnapshot(doc(db, 'users', user.uid), async (liveSnap) => {
-            if (liveSnap.exists()) {
-              const liveData = liveSnap.data();
-              if (liveData?.mustChangePassword && !liveData?.hasChangedInitialPassword) {
-                if (window.__userLiveUnsubscribe) {
-                  window.__userLiveUnsubscribe();
-                  window.__userLiveUnsubscribe = null;
+          // Real-time listener: instantly auto-logout seller the second an admin approves their application
+          if (!window.__userLiveUnsubscribe) {
+            window.__userLiveUnsubscribe = onSnapshot(doc(db, 'users', user.uid), async (liveSnap) => {
+              if (liveSnap.exists()) {
+                const liveData = liveSnap.data();
+                if (liveData?.mustChangePassword && !liveData?.hasChangedInitialPassword) {
+                  if (window.__userLiveUnsubscribe) {
+                    window.__userLiveUnsubscribe();
+                    window.__userLiveUnsubscribe = null;
+                  }
+                  alert("🎉 Congratulations! Your artisan seller account has been approved!\n\nFor your security, you have been automatically logged out. Please check your email for your new credentials and login link to access your Seller Portal.");
+                  await signOut(auth).catch(() => {});
+                  localStorage.removeItem('handicraft_logged_in_user');
+                  localStorage.removeItem('handicraft_profile');
+                  window.location.href = `login.html?sellerApproved=true&email=${encodeURIComponent(user.email || '')}`;
                 }
-                alert("🎉 Congratulations! Your artisan seller account has been approved!\n\nFor your security, you have been automatically logged out. Please check your email for your new credentials and login link to access your Seller Portal.");
-                await signOut(auth).catch(() => {});
-                localStorage.removeItem('handicraft_logged_in_user');
-                localStorage.removeItem('handicraft_profile');
-                window.location.href = `login.html?sellerApproved=true&email=${encodeURIComponent(user.email || '')}`;
               }
-            }
-          }, (err) => console.warn('User live approval listener warning:', err));
+            }, (err) => console.warn('User live approval listener warning:', err));
+          }
         }
 
         let activeUser = profile || {
@@ -434,18 +456,18 @@ export const ArtisanDB = {
           sellerStatus: 'none'
         };
 
-        const email = activeUser.email || (user.email || '');
-        const rawRole = String(activeUser.role || activeUser.Role || '').trim().toLowerCase();
+        const activeEmail = activeUser.email || (user.email || '');
+        const activeRole = String(activeUser.role || activeUser.Role || '').trim().toLowerCase();
 
-        if (isTokenAdmin || rawRole === 'admin' || activeUser.isAdmin === true || this.isEmailAdmin(email)) {
+        if (isTokenAdmin || activeRole === 'admin' || activeUser.isAdmin === true || this.isEmailAdmin(activeEmail)) {
           activeUser.role = 'admin';
           if (profile && profile.role !== 'admin') {
             updateDoc(doc(db, 'users', user.uid), { role: 'admin' }).catch(() => {});
           }
-        } else if (rawRole === 'seller' || String(activeUser.sellerStatus || '').toLowerCase() === 'approved') {
+        } else if (activeRole === 'seller' || String(activeUser.sellerStatus || '').toLowerCase() === 'approved') {
           activeUser.role = 'seller';
         } else {
-          activeUser.role = rawRole || 'user';
+          activeUser.role = activeRole || 'user';
         }
 
         this._saveLocalSession(activeUser);
@@ -765,24 +787,40 @@ export const ArtisanDB = {
   },
 
   async approveSellerApplication(appId, application) {
-    // 1. Update application doc
-    await updateDoc(doc(db, 'seller_applications', appId), {
-      status: 'approved',
-      reviewedAt: serverTimestamp()
-    });
+    if (!appId) throw new Error('Application ID is required for approval.');
 
-    const userId = application.userId;
     const cleanEmail = (application.email || '').trim().toLowerCase();
+    let userId = application.userId || application.uid;
 
-    // 2. Generate secure temporary password for seller onboarding
+    // Fallback: If userId was not stored on application doc, locate user document by email
+    if (!userId && cleanEmail) {
+      try {
+        const q = query(collection(db, 'users'), where('email', '==', cleanEmail));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          userId = snap.docs[0].id;
+        }
+      } catch (e) {
+        console.warn('Could not find user by email:', e);
+      }
+    }
+
+    // 1. Generate secure temporary password for seller onboarding
     const randomDigits = Math.floor(1000 + Math.random() * 9000);
     const temporaryPassword = `Artisan#${randomDigits}`;
     const loginUrl = `${window.location.origin}/login.html?sellerApproved=true&email=${encodeURIComponent(cleanEmail)}`;
 
+    // 2. Update application document status to approved and record generated temporaryPassword
+    await updateDoc(doc(db, 'seller_applications', appId), {
+      status: 'approved',
+      temporaryPassword: temporaryPassword,
+      reviewedAt: serverTimestamp()
+    });
+
     // 3. Register/activate in sellers collection
     const sellerPayload = {
-      id: userId,
-      uid: userId,
+      id: userId || appId,
+      uid: userId || appId,
       name: application.applicantName || application.name || 'Artisan Seller',
       shopName: application.shopName || 'Artisan Shop',
       category: application.category || 'General',
@@ -793,27 +831,25 @@ export const ArtisanDB = {
       status: 'Active',
       approvedAt: serverTimestamp()
     };
-    await setDoc(doc(db, 'sellers', userId), sellerPayload);
+    if (userId) {
+      await setDoc(doc(db, 'sellers', userId), sellerPayload, { merge: true });
+    }
 
-    // 4. Update user role, sellerStatus, and require password change
-    let targetRole = 'seller';
-    try {
-      const existingProfile = await this.getUserProfile(userId);
-      if (existingProfile && (existingProfile.role === 'admin' || this.isEmailAdmin(cleanEmail))) {
-        targetRole = 'admin';
-      }
-    } catch (e) {}
-
-    await updateDoc(doc(db, 'users', userId), {
-      role: targetRole,
-      sellerStatus: 'approved',
-      shopName: application.shopName || 'Artisan Shop',
-      sellerId: userId,
-      mustChangePassword: true,
-      temporaryPassword: temporaryPassword,
-      approvalEmailSentTo: cleanEmail,
-      updatedAt: serverTimestamp()
-    }).catch(e => console.warn('User role update warning:', e.message));
+    // 4. Update user document with seller role, status, and temporary password
+    const isTargetAdmin = this.isEmailAdmin(cleanEmail);
+    if (userId) {
+      await setDoc(doc(db, 'users', userId), {
+        role: isTargetAdmin ? 'admin' : 'seller',
+        sellerStatus: 'approved',
+        shopName: application.shopName || 'Artisan Shop',
+        sellerId: userId,
+        mustChangePassword: !isTargetAdmin, // Admins never forced to change password
+        hasChangedInitialPassword: isTargetAdmin,
+        temporaryPassword: isTargetAdmin ? null : temporaryPassword,
+        approvalEmailSentTo: cleanEmail,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
 
     // 5. Send auto-generated email via serverless route /api/send-seller-email
     let autoEmailDispatched = false;
