@@ -292,6 +292,10 @@ export const ArtisanDB = {
   },
 
   async logoutUser() {
+    if (window.__userLiveUnsubscribe) {
+      window.__userLiveUnsubscribe();
+      window.__userLiveUnsubscribe = null;
+    }
     try {
       await signOut(auth);
     } catch (err) {
@@ -383,6 +387,26 @@ export const ArtisanDB = {
           localStorage.removeItem('handicraft_profile');
           window.location.href = `login.html?sellerApproved=true&email=${encodeURIComponent(user.email || '')}`;
           return;
+        }
+
+        // Real-time listener: instantly auto-logout seller the second an admin approves their application
+        if (!window.__userLiveUnsubscribe && !window.location.pathname.includes('login.html')) {
+          window.__userLiveUnsubscribe = onSnapshot(doc(db, 'users', user.uid), async (liveSnap) => {
+            if (liveSnap.exists()) {
+              const liveData = liveSnap.data();
+              if (liveData?.mustChangePassword && !liveData?.hasChangedInitialPassword) {
+                if (window.__userLiveUnsubscribe) {
+                  window.__userLiveUnsubscribe();
+                  window.__userLiveUnsubscribe = null;
+                }
+                alert("🎉 Congratulations! Your artisan seller account has been approved!\n\nFor your security, you have been automatically logged out. Please check your email for your new credentials and login link to access your Seller Portal.");
+                await signOut(auth).catch(() => {});
+                localStorage.removeItem('handicraft_logged_in_user');
+                localStorage.removeItem('handicraft_profile');
+                window.location.href = `login.html?sellerApproved=true&email=${encodeURIComponent(user.email || '')}`;
+              }
+            }
+          }, (err) => console.warn('User live approval listener warning:', err));
         }
 
         let activeUser = profile || {
