@@ -339,3 +339,4 @@ window.closeSellerProfileModal = closeSellerProfileModal;
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeSellerProfileModal();
 });
+

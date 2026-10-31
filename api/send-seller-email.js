@@ -118,17 +118,19 @@ export default async function handler(req, res) {
     </html>
     `;
 
-    // Attempt email delivery if mail transport credentials configured
-    let emailDispatched = true;
+    // Attempt email delivery via Resend API
+    let emailDispatched = false;
     let dispatchMethod = 'simulated';
+    let resendError = null;
 
-    // Check if SendGrid, Resend, or SMTP environment variables are present
-    if (process.env.RESEND_API_KEY) {
+    const resendApiKey = process.env.RESEND_API_KEY;
+
+    if (resendApiKey) {
       try {
         const resendRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            'Authorization': `Bearer ${resendApiKey}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
@@ -138,11 +140,17 @@ export default async function handler(req, res) {
             html: htmlContent
           })
         });
+        const resendData = await resendRes.json().catch(() => ({}));
         if (resendRes.ok) {
           dispatchMethod = 'resend';
+          emailDispatched = true;
+        } else {
+          resendError = resendData.message || 'Resend error ' + resendRes.status;
+          console.warn('Resend notice:', resendError);
         }
       } catch (err) {
-        console.warn('Resend dispatch error, falling back to recorded log:', err.message);
+        resendError = err.message;
+        console.warn('Resend network error:', err.message);
       }
     }
 
@@ -151,8 +159,9 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      emailDispatched: true,
+      emailDispatched,
       dispatchMethod,
+      resendError,
       recipient: to,
       subject: emailSubject,
       temporaryPassword,
