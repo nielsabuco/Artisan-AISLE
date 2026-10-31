@@ -28,25 +28,25 @@ service cloud.firestore {
 
     // Users Collection
     match /users/{userId} {
-      allow read: if isSignedIn();
-      allow create: if isOwner(userId) || isAdmin();
-      allow update: if isOwner(userId) || isAdmin();
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
       allow delete: if isAdmin();
     }
 
     // Sellers Collection - publicly readable so buyers see seller info & GCash payment details
     match /sellers/{sellerId} {
       allow read: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
-      allow delete: if isSignedIn();
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
     }
 
     // Seller Applications Collection
     match /seller_applications/{appId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
       allow delete: if isSignedIn();
     }
 

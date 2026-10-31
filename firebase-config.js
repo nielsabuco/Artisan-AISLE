@@ -175,20 +175,41 @@ export const ArtisanDB = {
     try {
       let userDoc = null;
       let userData = null;
+      let sellerData = null;
+      let sellerDocId = null;
+      let appData = null;
 
-      // Find user document (case-insensitive email matching)
-      const userSnap = await getDocs(collection(db, 'users'));
-      for (const d of userSnap.docs) {
-        const udata = d.data();
-        if ((udata.email || '').trim().toLowerCase() === cleanEmail) {
-          userDoc = d;
-          userData = udata;
-          break;
+      // 1. Query sellers collection (publicly readable in Firestore!)
+      try {
+        const sellerSnap = await getDocs(collection(db, 'sellers'));
+        for (const sd of sellerSnap.docs) {
+          const sdata = sd.data();
+          if ((sdata.email || '').trim().toLowerCase() === cleanEmail) {
+            sellerData = sdata;
+            sellerDocId = sd.id;
+            break;
+          }
         }
+      } catch (e) {
+        console.warn('Sellers lookup warning:', e);
       }
 
-      // Check seller applications for approved temporary password as well
-      let appData = null;
+      // 2. Query users collection
+      try {
+        const userSnap = await getDocs(collection(db, 'users'));
+        for (const d of userSnap.docs) {
+          const udata = d.data();
+          if ((udata.email || '').trim().toLowerCase() === cleanEmail) {
+            userDoc = d;
+            userData = udata;
+            break;
+          }
+        }
+      } catch (e) {
+        console.warn('Users lookup warning:', e);
+      }
+
+      // 3. Query seller_applications collection
       try {
         const appSnap = await getDocs(collection(db, 'seller_applications'));
         for (const ad of appSnap.docs) {
@@ -198,20 +219,25 @@ export const ArtisanDB = {
             break;
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Applications lookup warning:', e);
+      }
 
-      const tempPass = userData?.temporaryPassword || appData?.temporaryPassword;
-      const isApprovedSeller = userData?.role === 'seller' || userData?.sellerStatus === 'approved' || appData != null;
-      const hasChangedInitPass = userData?.hasChangedInitialPassword === true;
+      const tempPass = sellerData?.temporaryPassword || userData?.temporaryPassword || appData?.temporaryPassword;
+      const permPass = sellerData?.permanentPassword || userData?.permanentPassword;
+      const prevTempPass = sellerData?.previousTemporaryPassword || userData?.previousTemporaryPassword;
+      const isApprovedSeller = sellerData != null || userData?.role === 'seller' || userData?.sellerStatus === 'approved' || appData != null;
+      const hasChangedInitPass = (sellerData?.hasChangedInitialPassword === true || userData?.hasChangedInitialPassword === true) && Boolean(permPass);
 
       // Case A: First-time login with temporary password required
       if (isApprovedSeller && tempPass && !hasChangedInitPass) {
         if (password === tempPass) {
-          const resolvedUid = userDoc?.id || appData?.userId || appData?.uid || ('seller_' + Date.now());
+          const resolvedUid = userDoc?.id || sellerDocId || appData?.userId || appData?.uid || ('seller_' + Date.now());
           const sessionData = {
             uid: resolvedUid,
             id: resolvedUid,
             ...(userData || {}),
+            ...(sellerData || {}),
             email: cleanEmail,
             mustChangePassword: true,
             hasChangedInitialPassword: false,
@@ -227,12 +253,14 @@ export const ArtisanDB = {
       }
 
       // Case B: Subsequent logins: permanent password already set, never prompt to change password again
-      if (isApprovedSeller && hasChangedInitPass && userData?.permanentPassword) {
-        if (userData.permanentPassword === password) {
+      if (isApprovedSeller && hasChangedInitPass && permPass) {
+        if (password === permPass) {
+          const resolvedUid = userDoc ? userDoc.id : (sellerDocId || cleanEmail);
           const sessionData = {
-            uid: userDoc ? userDoc.id : cleanEmail,
-            id: userDoc ? userDoc.id : cleanEmail,
-            ...userData,
+            uid: resolvedUid,
+            id: resolvedUid,
+            ...(userData || {}),
+            ...(sellerData || {}),
             email: cleanEmail,
             mustChangePassword: false,
             hasChangedInitialPassword: true,
@@ -241,12 +269,14 @@ export const ArtisanDB = {
           };
           this._saveLocalSession(sessionData);
           return sessionData;
+        } else if ((tempPass && password === tempPass) || (prevTempPass && password === prevTempPass)) {
+          throw new Error('Notice: Your temporary password has already been replaced by your new permanent password. Please log in using the permanent password you created.');
         } else {
           throw new Error('Incorrect password. Please enter the new password you set for your seller account.');
         }
       }
     } catch (checkErr) {
-      if (checkErr.message && checkErr.message.includes('seller account')) {
+      if (checkErr.message && checkErr.message.includes('seller account') || checkErr.message.includes('permanent password')) {
         throw checkErr;
       }
       console.warn('Seller pre-auth check warning:', checkErr.message);
@@ -1763,6 +1793,17 @@ export const ArtisanDB = {
         passwordChangedAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }, { merge: true }).catch(e => console.warn('User doc password flag update warning:', e));
+
+      // Also update in sellers collection (publicly readable collection)
+      await setDoc(doc(db, 'sellers', uid), {
+        mustChangePassword: false,
+        hasChangedInitialPassword: true,
+        temporaryPassword: null,
+        previousTemporaryPassword: localUser?.temporaryPassword || null,
+        permanentPassword: newPassword,
+        passwordChangedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true }).catch(() => {});
     }
 
     // Also update matching seller application if any
