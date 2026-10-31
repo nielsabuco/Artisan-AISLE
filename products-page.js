@@ -113,7 +113,7 @@ function renderProducts() {
       <div class="product-info">
         <span class="product-card-category">${product.category || 'Handicrafts'}</span>
         <h3 class="product-card-title">${product.name}</h3>
-        <p class="product-card-artisan">By <button type="button" class="artisan-link-inline" title="View ${product.sellerName || 'Artisan'}'s profile and workshop creations" onclick="event.stopPropagation(); if (window.openSellerProfileModal) window.openSellerProfileModal('${product.sellerId || ''}', '${(product.sellerName || 'Artisan Partner').replace(/'/g, "\\'")}')"><strong>${product.sellerName || 'Artisan Partner'}</strong></button></p>
+        <p class="product-card-artisan">By <button type="button" class="artisan-link-inline" title="View ${product.sellerName || 'Artisan'}'s profile and workshop creations" onclick="event.stopPropagation(); if (window.openSellerProfileModal) window.openSellerProfileModal('${product.sellerId || ''}', '${(product.sellerName || 'Artisan Partner').replace(/'/g, "\\'")}')">${product.sellerName || 'Artisan Partner'}</button></p>
         <div class="product-card-pricing">
           <span class="price-val">${priceFormatted}</span>
         </div>
