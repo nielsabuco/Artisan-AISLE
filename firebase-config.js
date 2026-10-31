@@ -168,6 +168,66 @@ export const ArtisanDB = {
 
   async loginUser(email, password) {
     const cleanEmail = email.trim().toLowerCase();
+
+    // 1. Strict Seller Credential Enforcement:
+    // When approved, a seller MUST use their temporary password (old registration password is disabled).
+    // On subsequent logins after changing password, they MUST use their new permanent password.
+    try {
+      const q = query(collection(db, 'users'), where('email', '==', cleanEmail));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const userDoc = snap.docs[0];
+        const userData = userDoc.data();
+        const isApprovedSeller = userData.role === 'seller' || userData.sellerStatus === 'approved';
+
+        // Case A: First-time login with temporary password required
+        if (isApprovedSeller && userData.mustChangePassword && !userData.hasChangedInitialPassword) {
+          if (userData.temporaryPassword && userData.temporaryPassword === password) {
+            const sessionData = {
+              uid: userDoc.id,
+              id: userDoc.id,
+              ...userData,
+              email: cleanEmail,
+              mustChangePassword: true,
+              hasChangedInitialPassword: false,
+              role: 'seller',
+              sellerStatus: 'approved'
+            };
+            this._saveLocalSession(sessionData);
+            return sessionData;
+          } else {
+            throw new Error('Your seller account has been approved! For security, please log in using the temporary password sent to your email.');
+          }
+        }
+
+        // Case B: Subsequent logins: permanent password already set, never prompt to change password again
+        if (isApprovedSeller && userData.hasChangedInitialPassword && userData.permanentPassword) {
+          if (userData.permanentPassword === password) {
+            const sessionData = {
+              uid: userDoc.id,
+              id: userDoc.id,
+              ...userData,
+              email: cleanEmail,
+              mustChangePassword: false,
+              hasChangedInitialPassword: true,
+              role: 'seller',
+              sellerStatus: 'approved'
+            };
+            this._saveLocalSession(sessionData);
+            return sessionData;
+          } else {
+            throw new Error('Incorrect password. Please enter the new password you set for your seller account.');
+          }
+        }
+      }
+    } catch (checkErr) {
+      if (checkErr.message && checkErr.message.includes('seller account')) {
+        throw checkErr;
+      }
+      console.warn('Seller pre-auth check warning:', checkErr.message);
+    }
+
+    // 2. Standard Firebase Auth login for regular customers and platform administrators
     try {
       const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
       const user = cred.user;
@@ -189,49 +249,6 @@ export const ArtisanDB = {
       this._saveLocalSession(sessionData);
       return sessionData;
     } catch (authErr) {
-      // Check if user was approved as seller with a generated temporary password
-      try {
-        const q = query(collection(db, 'users'), where('email', '==', cleanEmail));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          const userDoc = snap.docs[0];
-          const userData = userDoc.data();
-
-          // 1. First-time login with temporary password: must change password once
-          if (userData.mustChangePassword && !userData.hasChangedInitialPassword && userData.temporaryPassword && userData.temporaryPassword === password) {
-            const sessionData = {
-              uid: userDoc.id,
-              id: userDoc.id,
-              ...userData,
-              email: cleanEmail,
-              mustChangePassword: true,
-              hasChangedInitialPassword: false,
-              role: userData.role || 'seller',
-              sellerStatus: userData.sellerStatus || 'approved'
-            };
-            this._saveLocalSession(sessionData);
-            return sessionData;
-          }
-
-          // 2. Subsequent logins: permanent password already set, never prompt to change password again
-          if (userData.hasChangedInitialPassword && userData.permanentPassword && userData.permanentPassword === password) {
-            const sessionData = {
-              uid: userDoc.id,
-              id: userDoc.id,
-              ...userData,
-              email: cleanEmail,
-              mustChangePassword: false,
-              hasChangedInitialPassword: true,
-              role: userData.role || 'seller',
-              sellerStatus: userData.sellerStatus || 'approved'
-            };
-            this._saveLocalSession(sessionData);
-            return sessionData;
-          }
-        }
-      } catch (checkErr) {
-        console.warn('Credentials verification check warning:', checkErr);
-      }
       throw authErr;
     }
   },
@@ -434,7 +451,18 @@ export const ArtisanDB = {
         this._saveLocalSession(activeUser);
         callback(activeUser);
       } else {
-        callback(null);
+        const local = this.getLocalUser();
+        if (local && (local.uid || local.id)) {
+          if (local.mustChangePassword && !local.hasChangedInitialPassword && !window.location.pathname.includes('login.html')) {
+            localStorage.removeItem('handicraft_logged_in_user');
+            localStorage.removeItem('handicraft_profile');
+            window.location.href = `login.html?sellerApproved=true&email=${encodeURIComponent(local.email || '')}`;
+            return;
+          }
+          callback(local);
+        } else {
+          callback(null);
+        }
       }
     });
   },
@@ -825,22 +853,7 @@ export const ArtisanDB = {
       status: autoEmailDispatched ? 'Delivered' : 'Recorded'
     }).catch(() => {});
 
-    // 6. Also dispatch official Firebase Auth password setup email as an alternate security link
-    let firebaseEmailSent = false;
-    if (cleanEmail) {
-      try {
-        const actionCodeSettings = {
-          url: `${window.location.origin}/login.html?sellerApproved=true&email=${encodeURIComponent(cleanEmail)}`,
-          handleCodeInApp: false
-        };
-        await sendPasswordResetEmail(auth, cleanEmail, actionCodeSettings);
-        firebaseEmailSent = true;
-      } catch (emailErr) {
-        console.warn('Password setup email dispatch info:', emailErr);
-      }
-    }
-
-    // 7. Send notification to the user in Firestore
+    // 6. Send notification to the user in Firestore
     await addDoc(collection(db, 'notifications'), {
       userId,
       recipientEmail: cleanEmail,
@@ -853,9 +866,8 @@ export const ArtisanDB = {
 
     return {
       success: true,
-      emailSent: autoEmailDispatched || firebaseEmailSent,
+      emailSent: autoEmailDispatched,
       autoEmailDispatched,
-      firebaseEmailSent,
       temporaryPassword,
       cleanEmail,
       loginUrl,

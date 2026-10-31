@@ -226,13 +226,13 @@ function renderApplicationsTable(apps) {
 
 Congratulations! Your artisan seller application for "${res.shopName}" has been approved on Artisan Aisle!
 
-For your account security, your previous session has been automatically logged out. Please log in again using your new seller credentials below:
+For your account security, your previous session has been automatically logged out. Please log in using your new temporary seller credentials:
 
 • Registered Email: ${res.cleanEmail}
 • Temporary Password: ${res.temporaryPassword}
 • Seller Login Link: ${res.loginUrl}
 
-Once logged in, you will automatically be directed to choose your own permanent password before entering the Seller Portal.
+IMPORTANT: Please log in using this temporary password (your old registration password is now disabled for security). On your first login, you will be prompted once to set your own new permanent password before entering your Seller Portal.
 
 Welcome to the Artisan Aisle community!
 

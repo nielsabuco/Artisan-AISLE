@@ -250,8 +250,8 @@
         const profile = await window.ArtisanDB.getUserProfile(user.uid);
         currentSellerProfile = profile || user;
 
-        // If user must change their temporary password, redirect to login change password modal
-        if (profile?.mustChangePassword) {
+        // If user must change their temporary password, redirect to login change password modal (first login only)
+        if (profile?.mustChangePassword === true && !profile?.hasChangedInitialPassword) {
           alert('Security Notice: You must change your temporary password before accessing the Seller Portal.');
           window.location.href = `login.html?email=${encodeURIComponent(user.email || '')}`;
           return;
