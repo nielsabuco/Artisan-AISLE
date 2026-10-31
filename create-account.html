@@ -18,7 +18,12 @@
       </a>
     </div>
     <h1>Create Account</h1>
-    <p style="color:#666; font-size:14px; margin-bottom:15px;">Register for an ArtisanAisle customer account.</p>
+    <p style="color:#666; font-size:14px; margin-bottom:12px;">Register for an ArtisanAisle customer account.</p>
+
+    <!-- Verified Email Requirement Notice -->
+    <div style="background: #eef7ee; border: 1px solid #c8e6c9; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 12.5px; color: #1e4620; text-align: left; line-height: 1.45;">
+      <strong>ℹ️ Verified Email Notice:</strong> Please use a valid, active email address that you have access to. All order confirmations, receipts, security updates, and seller approval credentials will be sent to this email.
+    </div>
 
     <!-- Google Sign Up -->
     <button id="googleSignUpBtn" type="button" class="btn-google" onclick="signUpWithGoogle()">
@@ -49,6 +54,63 @@
     </div>
     <div class="link" style="margin-top:10px;">
       <a href="index.html">Back to Storefront</a>
+    </div>
+  </div>
+
+  <!-- Mandatory Complete Profile & Set Initial Password Modal (For Google & New Users) -->
+  <div id="completeProfileModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 460px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="margin: 0; font-size: 1.15rem; color: #1e4620;">Complete Your Profile</h3>
+      </div>
+      <p style="font-size: 13px; color: #555; margin-bottom: 16px; line-height: 1.45;">
+        Welcome to Artisan Aisle! Please finish setting up your account by providing your contact details and setting your permanent account password.
+      </p>
+
+      <form id="completeProfileForm" onsubmit="handleSaveCompleteProfile(event)">
+        <input type="hidden" id="completeProfileUid" />
+        
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 12.5px; color: #333; margin-bottom: 4px;">Email Address</label>
+          <input type="email" id="completeProfileEmail" disabled style="width: 100%; padding: 9px 12px; background: #f0f0f0; border: 1.5px solid #ccc; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; color: #666;" />
+          <small style="font-size: 11px; color: #666;">This verified email will receive your order updates and seller credentials.</small>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 12.5px; color: #333; margin-bottom: 4px;">Full Name</label>
+          <input type="text" id="completeProfileName" placeholder="Your Full Name" required style="width: 100%; padding: 9px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 13.5px; box-sizing: border-box;" />
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 12.5px; color: #333; margin-bottom: 4px;">Phone Number (09XXXXXXXXX)</label>
+          <input type="tel" id="completeProfilePhone" placeholder="09XXXXXXXXX" required style="width: 100%; padding: 9px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 13.5px; box-sizing: border-box;" />
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 12.5px; color: #333; margin-bottom: 4px;">Set First Account Password (min 6 characters)</label>
+          <div class="password-input-wrap">
+            <input type="password" id="completeProfilePass" placeholder="Set your password" required minlength="6" style="width: 100%; padding: 9px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 13.5px; box-sizing: border-box;" />
+            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('completeProfilePass', this)" aria-label="Show password" title="Show password">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+          <small style="font-size: 11.5px; color: #666;">If you apply as a seller later, this password will be replaced by a temporary approval password sent to your Gmail.</small>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 12.5px; color: #333; margin-bottom: 4px;">Confirm Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="completeProfileConfirmPass" placeholder="Confirm password" required minlength="6" style="width: 100%; padding: 9px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 13.5px; box-sizing: border-box;" />
+            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('completeProfileConfirmPass', this)" aria-label="Show password" title="Show password">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="saveCompleteProfileBtn" class="primary-btn" style="width: 100%; padding: 12px; font-size: 15px; font-weight: 700; background: #285c3b;">
+          Save Profile &amp; Continue →
+        </button>
+      </form>
     </div>
   </div>
 
@@ -119,7 +181,13 @@
           throw new Error('Authentication service is still initializing. Please try again.');
         }
 
-        await db.loginWithGoogle();
+        const userProfile = await db.loginWithGoogle();
+        const isPlatformAdmin = userProfile && (String(userProfile.role || '').toLowerCase() === 'admin' || (db && db.isEmailAdmin && db.isEmailAdmin(userProfile.email)));
+        if (!isPlatformAdmin && (userProfile?.requiresInitialSetup === true || !userProfile?.hasCompletedProfile || !userProfile?.permanentPassword)) {
+          showCompleteProfileModal(userProfile);
+          return;
+        }
+
         alert('Signed in with Google! Welcome to ArtisanAisle.');
         window.location.href = 'profile.html';
       } catch (err) {
@@ -142,6 +210,61 @@
       }
     }
 
+    function showCompleteProfileModal(profile) {
+      const modal = document.getElementById('completeProfileModal');
+      if (!modal) return;
+      document.getElementById('completeProfileUid').value = profile.uid || profile.id || '';
+      document.getElementById('completeProfileEmail').value = profile.email || '';
+      document.getElementById('completeProfileName').value = profile.name || '';
+      document.getElementById('completeProfilePhone').value = profile.phone || '';
+      modal.style.display = 'flex';
+    }
+
+    async function handleSaveCompleteProfile(e) {
+      e.preventDefault();
+      const uid = document.getElementById('completeProfileUid').value;
+      const name = document.getElementById('completeProfileName').value.trim();
+      const phone = document.getElementById('completeProfilePhone').value.trim();
+      const pass = document.getElementById('completeProfilePass').value;
+      const confirmPass = document.getElementById('completeProfileConfirmPass').value;
+      const btn = document.getElementById('saveCompleteProfileBtn');
+
+      if (!name || !phone || !pass) {
+        alert('Please fill in all fields.');
+        return;
+      }
+      if (pass.length < 6) {
+        alert('Password must be at least 6 characters.');
+        return;
+      }
+      if (pass !== confirmPass) {
+        alert('Passwords do not match. Please re-enter.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Saving Profile...';
+
+      try {
+        const db = window.ArtisanDB || window.firebaseApi;
+        if (db && db.completeUserProfile) {
+          await db.completeUserProfile(uid, { name, phone, password: pass });
+        }
+        alert('Profile completed and password set successfully! Welcome to Artisan Aisle.');
+        const modal = document.getElementById('completeProfileModal');
+        if (modal) modal.style.display = 'none';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectTarget = urlParams.get('redirect');
+        window.location.href = redirectTarget || 'profile.html';
+      } catch (err) {
+        console.error('Error completing profile:', err);
+        alert('Could not complete profile: ' + err.message);
+        btn.disabled = false;
+        btn.innerText = 'Save Profile & Continue →';
+      }
+    }
+
     function togglePasswordVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -158,6 +281,8 @@
 
     window.createAccount = createAccount;
     window.signUpWithGoogle = signUpWithGoogle;
+    window.showCompleteProfileModal = showCompleteProfileModal;
+    window.handleSaveCompleteProfile = handleSaveCompleteProfile;
     window.togglePasswordVisibility = togglePasswordVisibility;
   </script>
 </body>

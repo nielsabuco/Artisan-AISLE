@@ -79,6 +79,9 @@ export const ArtisanDB = {
       phone: phone.trim(),
       role: isEmailAdmin ? 'admin' : 'user', // Default account role is user unless admin email
       sellerStatus: 'none', // none | pending | approved | rejected
+      hasCompletedProfile: true,
+      requiresInitialSetup: false,
+      permanentPassword: password,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
@@ -319,8 +322,10 @@ export const ArtisanDB = {
 
     // Check if user profile already exists in Firestore
     let profile = await this.getUserProfile(user.uid);
+    let isNewGoogleUser = false;
+
     if (!profile) {
-      // First-time Google login: create profile document
+      isNewGoogleUser = true;
       const displayName = user.displayName || (email ? email.split('@')[0] : 'Artisan Customer');
       profile = {
         uid: user.uid,
@@ -330,6 +335,8 @@ export const ArtisanDB = {
         avatar: user.photoURL || '',
         role: isAdmin ? 'admin' : 'user', // Automatically Admin if email rule matches
         sellerStatus: 'none', // none | pending | approved | rejected
+        hasCompletedProfile: false,
+        requiresInitialSetup: true,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
@@ -342,6 +349,10 @@ export const ArtisanDB = {
       if (isAdmin && profile.role !== 'admin') {
         profile.role = 'admin';
         this.updateUserRole(user.uid, 'admin').catch(() => {});
+      }
+      // If an existing Google user does not have a password or profile completed, mark as requiring setup
+      if (!profile.hasCompletedProfile && !profile.permanentPassword && profile.role !== 'admin' && !isAdmin) {
+        profile.requiresInitialSetup = true;
       }
       // Existing profile: update avatar if available and not set
       if (!profile.avatar && user.photoURL) {
@@ -356,7 +367,39 @@ export const ArtisanDB = {
     }
 
     this._saveLocalSession(profile);
-    return profile;
+    return { ...profile, isNewGoogleUser };
+  },
+
+  async completeUserProfile(uid, { name, phone, password, address, city }) {
+    if (!uid) throw new Error('User ID is required');
+    if (!password || password.length < 6) throw new Error('Password must be at least 6 characters');
+
+    const updateData = {
+      hasCompletedProfile: true,
+      requiresInitialSetup: false,
+      permanentPassword: password,
+      updatedAt: serverTimestamp()
+    };
+    if (name) updateData.name = name.trim();
+    if (phone) updateData.phone = phone.trim();
+    if (address) updateData.address = address.trim();
+    if (city) updateData.city = city.trim();
+
+    // If Firebase Auth session is active, also set the password on Firebase Auth
+    if (auth.currentUser && auth.currentUser.uid === uid) {
+      try {
+        await updatePassword(auth.currentUser, password);
+      } catch (authErr) {
+        console.warn('Firebase Auth updatePassword warning on profile completion:', authErr.message);
+      }
+    }
+
+    await setDoc(doc(db, 'users', uid), updateData, { merge: true });
+
+    const local = this.getLocalUser() || {};
+    const updated = { ...local, ...updateData };
+    this._saveLocalSession(updated);
+    return updated;
   },
 
   async signInWithGoogle() {
