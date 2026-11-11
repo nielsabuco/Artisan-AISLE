@@ -80,6 +80,24 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Promotions Collection - publicly readable for storefront validation; admins manage
+    match /promotions/{promoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Promotion Redemptions Collection - record applied promotions
+    match /promotionRedemptions/{redemptionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Promotion Audit Logs Collection - admin-only
+    match /promotionLogs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
     // Fallback for any other collections
     match /{document=**} {
       allow read, write: if isSignedIn();

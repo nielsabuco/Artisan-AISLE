@@ -3,8 +3,9 @@ import { PayMongo } from './paymongo-service.js';
 
 let currentOrder = null;
 let orderId = '';
-let qrphPayload = '';
+let currentSession = null;
 let timerInterval = null;
+let pollInterval = null;
 let timeLeftSeconds = 15 * 60; // 15 minutes
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -21,10 +22,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   await checkGatewayStatus();
   setupEventListeners();
   startCountdownTimer();
+  await initializePayMongoGcashSession();
 });
 
 /**
- * Loads order information and builds dynamic QRPh payload
+ * Loads order details and displays the complete shipping fee breakdown
  */
 async function loadOrderDetails() {
   try {
@@ -37,88 +39,57 @@ async function loadOrderDetails() {
     // Check if already marked as Paid
     if (currentOrder.paymentStatus === 'Paid') {
       alert('This order has already been paid and confirmed!');
-      window.location.href = `cart.html?payment=success&orderId=${orderId}&ref=${currentOrder.paymentReference || 'VERIFIED'}`;
+      window.location.href = `cart.html?payment=success&orderId=${orderId}&method=paymongo_gcash&ref=${currentOrder.paymentReference || 'VERIFIED'}`;
       return;
     }
 
-    const totalAmount = Number(currentOrder.total || 0);
-    const totalFormatted = `₱${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    const subtotal = Number(currentOrder.subtotal || 0) || (Array.isArray(currentOrder.items) ? currentOrder.items.reduce((acc, i) => acc + (Number(i.price || 0) * Number(i.quantity || 1)), 0) : 0);
+    const shipping = Number(currentOrder.shipping || 0);
+    const discount = Number(currentOrder.discount || 0);
+    const total = Number(currentOrder.total || 0) || Math.max(0, subtotal - discount) + shipping;
+
+    const totalFormatted = `₱${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    const subtotalFormatted = `₱${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    const shippingFormatted = shipping > 0 ? `+₱${shipping.toLocaleString('en-US', { minimumFractionDigits: 2 })}` : 'FREE';
     const orderRef = currentOrder.orderNumber || orderId;
 
     // Display banner figures
     document.getElementById('gcashTotalAmountDisplay').textContent = totalFormatted;
-    document.getElementById('gcashBtnAmount').textContent = totalFormatted;
     document.getElementById('gcashOrderNumberTag').textContent = `Order Reference: ${orderRef}`;
-    
-    // QRPh figures
-    document.getElementById('qrOrderRefText').textContent = orderRef;
-    document.getElementById('qrPayableAmount').textContent = totalFormatted;
-    document.getElementById('qrStepAmount').textContent = totalFormatted;
 
-    // PayMongo figures
+    // Itemized summary figures (including shipping fee)
+    const subtotalEl = document.getElementById('pmItemsSubtotalText');
+    if (subtotalEl) subtotalEl.textContent = subtotalFormatted;
+
+    const shippingEl = document.getElementById('pmShippingFeeText');
+    if (shippingEl) shippingEl.textContent = shippingFormatted;
+
+    const discountRow = document.getElementById('pmDiscountRow');
+    const discountEl = document.getElementById('pmDiscountText');
+    if (discountRow && discountEl) {
+      if (discount > 0) {
+        discountRow.style.display = 'flex';
+        discountEl.textContent = `-₱${discount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      } else {
+        discountRow.style.display = 'none';
+      }
+    }
+
+    // Total payable figures
     const pmPayable = document.getElementById('pmPayableAmount');
     if (pmPayable) pmPayable.textContent = totalFormatted;
+
     const pmOrderRef = document.getElementById('pmOrderRefText');
     if (pmOrderRef) pmOrderRef.textContent = orderRef;
+
     const pmBtnAmt = document.getElementById('pmBtnAmount');
     if (pmBtnAmt) pmBtnAmt.textContent = totalFormatted;
 
-    // Resolve artisan / seller GCash details
-    let sellerName = 'Eugene Marciene Jerusalem';
-    let sellerPhone = '09764948458';
+    const qrStepAmt = document.getElementById('qrStepAmount');
+    if (qrStepAmt) qrStepAmt.textContent = totalFormatted;
 
-    if (currentOrder.items && currentOrder.items.length > 0) {
-      const firstItem = currentOrder.items[0];
-      if (firstItem.sellerName) {
-        sellerName = firstItem.sellerName;
-      }
-      if (firstItem.sellerGCash) {
-        sellerPhone = firstItem.sellerGCash;
-      } else if (firstItem.sellerId) {
-        try {
-          const sellerDoc = await ArtisanDB.getSeller(firstItem.sellerId);
-          if (sellerDoc && sellerDoc.gcashNumber) {
-            sellerPhone = sellerDoc.gcashNumber;
-            sellerName = sellerDoc.shopName || sellerDoc.fullName || sellerName;
-          }
-        } catch (e) {
-          console.warn('Could not fetch seller profile:', e);
-        }
-      }
-    }
-
-    let cleanPhone = sellerPhone.replace(/\D/g, '');
-    if (cleanPhone.startsWith('63') && cleanPhone.length === 12) cleanPhone = '0' + cleanPhone.slice(2);
-    const prettyPhone = cleanPhone.length === 11 
-      ? `${cleanPhone.slice(0, 4)} ${cleanPhone.slice(4, 7)} ${cleanPhone.slice(7)}`
-      : sellerPhone;
-
-    document.getElementById('gcashMerchantName').textContent = `Merchant: ${sellerName} (via ArtisanAisle)`;
-    document.getElementById('qrSellerName').textContent = sellerName;
-    document.getElementById('qrSellerGcash').textContent = prettyPhone;
-
-    // Generate Standards-Compliant QRPh EMVCo Dynamic Payload
-    qrphPayload = generateQRPhPayload({
-      merchantName: sellerName.slice(0, 25),
-      gcashNumber: cleanPhone,
-      amount: totalAmount.toFixed(2),
-      orderRef: orderRef
-    });
-
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=${encodeURIComponent(qrphPayload)}`;
-    const qrImg = document.getElementById('qrphImageTag');
-    if (qrImg) {
-      qrImg.src = qrUrl;
-    }
-
-    // Pre-fill direct phone input if customer provided it
-    const phoneInput = document.getElementById('gcashPhoneInput');
-    if (currentOrder.customerPhone && phoneInput) {
-      let custClean = currentOrder.customerPhone.replace(/\D/g, '');
-      if (custClean.startsWith('63') && custClean.length === 12) custClean = custClean.slice(2);
-      if (custClean.startsWith('0') && custClean.length === 11) custClean = custClean.slice(1);
-      if (custClean.length === 10) phoneInput.value = custClean;
-    }
+    // Merchant identity
+    document.getElementById('gcashMerchantName').textContent = 'ArtisanAisle Official Store (PayMongo Live)';
 
   } catch (err) {
     console.error('Failed to load order:', err);
@@ -127,30 +98,130 @@ async function loadOrderDetails() {
 }
 
 /**
- * Checks and updates PayMongo gateway status in the UI
+ * Initializes the PayMongo GCash QR Checkout Session
+ */
+async function initializePayMongoGcashSession() {
+  if (!currentOrder) return;
+
+  const qrImg = document.getElementById('qrphImageTag');
+  const proceedBtn = document.getElementById('paymongoProceedBtn');
+  const checkPill = document.getElementById('pmAutoCheckPill');
+
+  try {
+    const session = await PayMongo.createCheckoutSession(currentOrder, 'gcash');
+
+    if (session && session.success && session.checkoutUrl) {
+      currentSession = session;
+
+      // Render the live QR code pointing directly to PayMongo's secure GCash checkout session
+      if (qrImg) {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=6&data=${encodeURIComponent(session.checkoutUrl)}`;
+        qrImg.src = qrUrl;
+        qrImg.alt = 'Scan to Pay with GCash App';
+      }
+
+      // Configure proceed button
+      if (proceedBtn) {
+        proceedBtn.onclick = () => {
+          window.location.href = session.checkoutUrl;
+        };
+      }
+
+      // Start automatic payment polling every 3.5 seconds
+      startPaymentPolling(session.sessionId);
+
+    } else if (session && session.needsSetup) {
+      if (checkPill) {
+        checkPill.innerHTML = '⚠️ PayMongo API key required in Admin Console';
+        checkPill.style.background = '#fef3c7';
+        checkPill.style.color = '#92400e';
+      }
+      showError('PayMongo gateway is awaiting API credentials. Please set your PayMongo keys in Admin Console > Payment Gateway.');
+    } else {
+      throw new Error(session?.error || 'Could not create PayMongo GCash checkout session.');
+    }
+  } catch (err) {
+    console.error('PayMongo GCash session initiation error:', err);
+    showError(err.message || 'Error connecting to PayMongo Live GCash gateway.');
+  }
+}
+
+/**
+ * Periodically polls the payment status and auto-redirects on confirmation
+ */
+function startPaymentPolling(sessionId) {
+  if (pollInterval) clearInterval(pollInterval);
+
+  pollInterval = setInterval(async () => {
+    try {
+      // 1. Check order directly in Firestore in case webhook or background worker updated it
+      const order = await ArtisanDB.getOrder(orderId);
+      if (order && order.paymentStatus === 'Paid') {
+        clearInterval(pollInterval);
+        handlePaymentSuccess(order.paymentReference || 'VERIFIED');
+        return;
+      }
+
+      // 2. Query PayMongo verify endpoint
+      if (sessionId) {
+        const check = await PayMongo.verifyPayment(sessionId);
+        if (check && check.paid) {
+          clearInterval(pollInterval);
+
+          // Update order in Firestore
+          const paymentRef = check.paymentId || ('PM-GC-' + Date.now().toString(36).toUpperCase());
+          await ArtisanDB.updateOrder(orderId, {
+            paymentStatus: 'Paid',
+            orderStatus: 'Confirmed',
+            paymentMethod: 'GCash (PayMongo Live QR)',
+            paymentReference: paymentRef,
+            paidAt: new Date().toISOString()
+          });
+
+          handlePaymentSuccess(paymentRef);
+        }
+      }
+    } catch (e) {
+      console.warn('Payment check attempt:', e);
+    }
+  }, 3500);
+}
+
+/**
+ * Handles payment success and transitions to receipt
+ */
+function handlePaymentSuccess(refId) {
+  const overlay = document.getElementById('gcashProcessingOverlay');
+  const title = document.getElementById('gcashProcessingTitle');
+  const msg = document.getElementById('gcashProcessingMsg');
+
+  if (overlay) overlay.style.display = 'flex';
+  if (title) title.textContent = '🎉 Payment Confirmed!';
+  if (msg) msg.textContent = 'Your GCash payment via PayMongo has been verified. Redirecting to your confirmed order receipt...';
+
+  setTimeout(() => {
+    window.location.href = `cart.html?payment=success&orderId=${orderId}&method=paymongo_gcash&ref=${refId}`;
+  }, 1400);
+}
+
+/**
+ * Checks and updates PayMongo gateway status banner in the UI
  */
 async function checkGatewayStatus() {
   try {
     const status = await PayMongo.getStatus();
-    const badge = document.getElementById('pmBadgeStatus');
     const title = document.getElementById('pmStatusTitle');
     const modeText = document.getElementById('pmModeIndicatorText');
 
-    if (badge) {
-      badge.textContent = status.isLiveMode ? 'Live Mode' : 'Sandbox';
-      badge.style.background = status.isLiveMode ? '#dcfce7' : '#fef3c7';
-      badge.style.color = status.isLiveMode ? '#15803d' : '#92400e';
-    }
-
     if (title && modeText) {
       if (status.isConfigured) {
-        title.textContent = status.isLiveMode ? 'PayMongo Live GCash Gateway' : 'PayMongo Sandbox Gateway';
+        title.textContent = status.isLiveMode ? 'PayMongo Live GCash QR Gateway' : 'PayMongo Sandbox Gateway';
         modeText.textContent = status.isLiveMode 
-          ? 'Connected & ready to accept real money transfers' 
-          : 'Connected with test keys (safe sandbox testing)';
+          ? 'Live mode active — Real money GCash QR payments accepted' 
+          : 'Sandbox testing mode active — Scan or launch test checkout';
       } else {
-        title.textContent = 'PayMongo Gateway (Ready for Keys)';
-        modeText.textContent = 'Add your sk_test_ or sk_live_ key in Admin Console to enable live portal';
+        title.textContent = 'PayMongo Gateway (Awaiting Keys)';
+        modeText.textContent = 'Configure sk_live_... key in Admin Console to accept real customer payments';
       }
     }
   } catch (e) {
@@ -159,411 +230,87 @@ async function checkGatewayStatus() {
 }
 
 /**
- * Builds an authentic Philippine QRPh EMVCo Tag-Length-Value (TLV) payload string
- */
-function generateQRPhPayload({ merchantName, gcashNumber, amount, orderRef }) {
-  const tlv = (tag, val) => {
-    const s = String(val);
-    const len = String(s.length).padStart(2, '0');
-    return `${tag}${len}${s}`;
-  };
-
-  const sub00 = tlv('00', 'ph.gov.qrph.p2m');
-  const sub01 = tlv('01', gcashNumber || '09764948458');
-  const tag26 = tlv('26', `${sub00}${sub01}`);
-
-  const subRef = tlv('01', orderRef || 'ORD-000');
-  const tag62 = tlv('62', subRef);
-
-  let raw = 
-    tlv('00', '01') +             // Payload Format Indicator (01)
-    tlv('01', '12') +             // Point of Initiation (12 = Dynamic QR)
-    tag26 +                       // QRPh / GCash Merchant Info
-    tlv('52', '5999') +           // Merchant Category Code (General Craft)
-    tlv('53', '608') +            // Currency (608 = Philippine Peso PHP)
-    tlv('54', amount) +           // Exact Order Transaction Amount
-    tlv('58', 'PH') +             // Country Code (Philippines)
-    tlv('59', merchantName) +     // Merchant / Artisan Name
-    tlv('60', 'Manila') +         // Merchant City
-    tag62 +                       // Additional Data (Bill/Ref No)
-    '6304';                       // CRC Checksum Tag (length 04)
-
-  const crc = computeCRC16(raw);
-  return `${raw}${crc}`;
-}
-
-function computeCRC16(str) {
-  let crc = 0xFFFF;
-  for (let i = 0; i < str.length; i++) {
-    crc ^= str.charCodeAt(i) << 8;
-    for (let j = 0; j < 8; j++) {
-      if ((crc & 0x8000) !== 0) {
-        crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
-      } else {
-        crc = (crc << 1) & 0xFFFF;
-      }
-    }
-  }
-  return crc.toString(16).toUpperCase().padStart(4, '0');
-}
-
-/**
  * Sets up user interaction listeners
  */
 function setupEventListeners() {
-  const tabPayMongoBtn = document.getElementById('tabPayMongoBtn');
-  const tabQrphBtn = document.getElementById('tabQrphBtn');
-  const tabDirectBtn = document.getElementById('tabDirectBtn');
+  // Manual check status button
+  const checkStatusBtn = document.getElementById('gcashCheckStatusBtn');
+  checkStatusBtn?.addEventListener('click', async () => {
+    checkStatusBtn.disabled = true;
+    checkStatusBtn.textContent = 'Checking PayMongo settlement...';
 
-  const paymongoView = document.getElementById('paymongoViewContainer');
-  const qrphView = document.getElementById('qrphViewContainer');
-  const directView = document.getElementById('directViewContainer');
+    try {
+      const order = await ArtisanDB.getOrder(orderId);
+      if (order && order.paymentStatus === 'Paid') {
+        handlePaymentSuccess(order.paymentReference || 'VERIFIED');
+        return;
+      }
 
-  const switchTab = (activeTab, activeView) => {
-    [tabPayMongoBtn, tabQrphBtn, tabDirectBtn].forEach(b => b?.classList.remove('active'));
-    [paymongoView, qrphView, directView].forEach(v => { if (v) v.style.display = 'none'; });
-
-    activeTab?.classList.add('active');
-    if (activeView) activeView.style.display = 'block';
-  };
-
-  tabPayMongoBtn?.addEventListener('click', () => switchTab(tabPayMongoBtn, paymongoView));
-  tabQrphBtn?.addEventListener('click', () => switchTab(tabQrphBtn, qrphView));
-  tabDirectBtn?.addEventListener('click', () => switchTab(tabDirectBtn, directView));
-
-  // PayMongo Launch Checkout Button
-  const paymongoProceedBtn = document.getElementById('paymongoProceedBtn');
-  paymongoProceedBtn?.addEventListener('click', handlePayMongoCheckout);
-
-  // Verify QR Payment button
-  const verifyQrBtn = document.getElementById('gcashVerifyQrPaymentBtn');
-  verifyQrBtn?.addEventListener('click', handleQrPaymentVerification);
-
-  // Auto-fill sample reference button
-  const autoFillBtn = document.getElementById('autoFillSampleRefBtn');
-  autoFillBtn?.addEventListener('click', () => {
-    const sampleRef = '9' + Math.floor(100000000000 + Math.random() * 900000000000);
-    const refInput = document.getElementById('gcashRefInput');
-    if (refInput) {
-      refInput.value = sampleRef;
-      showToast('Sample GCash Reference populated!');
-    }
-  });
-
-  // Direct Pay Button
-  const directPayBtn = document.getElementById('gcashConfirmPayBtn');
-  directPayBtn?.addEventListener('click', handleDirectPaymentSubmit);
-
-  // Download QR Code button
-  const downloadQrBtn = document.getElementById('downloadQrBtn');
-  downloadQrBtn?.addEventListener('click', downloadQrImage);
-
-  // Copy Buttons
-  document.getElementById('copyGcashNumberBtn')?.addEventListener('click', () => {
-    const phone = document.getElementById('qrSellerGcash')?.textContent.replace(/\s+/g, '') || '';
-    copyToClipboard(phone, 'GCash number copied!');
-  });
-
-  document.getElementById('copyAmountBtn')?.addEventListener('click', () => {
-    const amt = Number(currentOrder?.total || 0).toFixed(2);
-    copyToClipboard(amt, 'Exact amount (₱' + amt + ') copied!');
-  });
-
-  // Cancel links
-  const cancelAction = () => {
-    window.location.href = `cart.html?payment=failed&orderId=${orderId}&reason=cancelled`;
-  };
-  document.getElementById('pmCancelBtn')?.addEventListener('click', cancelAction);
-  document.getElementById('gcashCancelBtn')?.addEventListener('click', cancelAction);
-  document.getElementById('gcashCancelBtnDirect')?.addEventListener('click', cancelAction);
-}
-
-/**
- * Handles PayMongo official checkout redirect
- */
-async function handlePayMongoCheckout() {
-  hideError();
-
-  const overlay = document.getElementById('gcashProcessingOverlay');
-  const title = document.getElementById('gcashProcessingTitle');
-  const msg = document.getElementById('gcashProcessingMsg');
-  const proceedBtn = document.getElementById('paymongoProceedBtn');
-
-  proceedBtn.disabled = true;
-  overlay.style.display = 'flex';
-
-  title.textContent = 'Connecting to PayMongo...';
-  msg.textContent = 'Preparing official GCash checkout session for Order #' + (currentOrder.orderNumber || orderId) + '...';
-
-  try {
-    const result = await PayMongo.createCheckoutSession(currentOrder);
-
-    if (result.success && result.checkoutUrl) {
-      title.textContent = 'Redirecting to Official GCash...';
-      msg.textContent = 'Opening the PayMongo payment gateway. Please authorize payment in the window...';
-      await delay(800);
-      window.location.href = result.checkoutUrl;
-      return;
-    }
-
-    if (result.needsSetup) {
-      overlay.style.display = 'none';
-      proceedBtn.disabled = false;
-      showError(
-        'PayMongo Secret Key is not configured yet. ' +
-        'Please go to the Admin Console > Payment Gateway tab to enter your sk_test_... or sk_live_... key. ' +
-        'In the meantime, you can switch to the "Scan QRPh Code" tab to test!'
-      );
-      return;
-    }
-
-    throw new Error(result.error || 'Failed to initialize PayMongo checkout.');
-
-  } catch (err) {
-    console.warn('PayMongo Checkout session issue:', err);
-    overlay.style.display = 'none';
-    proceedBtn.disabled = false;
-    showError(
-      'Could not initialize PayMongo Checkout: ' + err.message + '. ' +
-      'Check your Secret Key in Admin Console > Payment Gateway or use the Scan QRPh tab.'
-    );
-  }
-}
-
-/**
- * Handles QRPh Reference Verification flow
- */
-async function handleQrPaymentVerification() {
-  hideError();
-
-  const refInput = document.getElementById('gcashRefInput');
-  let refValue = (refInput?.value || '').trim().replace(/\s+/g, '');
-
-  if (!refValue) {
-    showError('Please enter the 13-digit GCash Reference Number from your GCash payment receipt or text message.');
-    refInput?.focus();
-    return;
-  }
-
-  if (refValue.length < 8) {
-    showError('GCash Reference numbers are typically 12-13 digits long. Please check your receipt.');
-    refInput?.focus();
-    return;
-  }
-
-  const overlay = document.getElementById('gcashProcessingOverlay');
-  const title = document.getElementById('gcashProcessingTitle');
-  const msg = document.getElementById('gcashProcessingMsg');
-  const verifyBtn = document.getElementById('gcashVerifyQrPaymentBtn');
-
-  verifyBtn.disabled = true;
-  overlay.style.display = 'flex';
-
-  try {
-    title.textContent = 'Connecting to GCash & QRPh...';
-    msg.textContent = `Validating transaction for Order ${currentOrder.orderNumber || orderId}...`;
-    await delay(1200);
-
-    title.textContent = 'Verifying BSP QRPh Settlement...';
-    msg.textContent = `Checking reference number #${refValue} with GCash Philippine clearing network...`;
-    await delay(1400);
-
-    title.textContent = 'Payment Successfully Verified!';
-    msg.textContent = `Received ₱${Number(currentOrder.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}. Updating your order status...`;
-
-    await ArtisanDB.updateOrder(orderId, {
-      paymentStatus: 'Paid',
-      orderStatus: 'Confirmed',
-      paymentMethod: 'GCash (QRPh)',
-      paymentReference: refValue,
-      paidAmount: Number(currentOrder.total || 0),
-      paidAt: new Date().toISOString()
-    });
-
-    if (currentOrder.items && Array.isArray(currentOrder.items)) {
-      for (const item of currentOrder.items) {
-        const prodId = item.productId || item.id;
-        const qty = Number(item.quantity) || 1;
-        if (prodId) {
-          try {
-            await ArtisanDB.decrementStock(prodId, qty);
-          } catch (e) {
-            console.warn('Stock decrement note:', e);
-          }
+      if (currentSession?.sessionId) {
+        const verifyRes = await PayMongo.verifyPayment(currentSession.sessionId);
+        if (verifyRes && verifyRes.paid) {
+          const paymentRef = verifyRes.paymentId || ('PM-GC-' + Date.now().toString(36).toUpperCase());
+          await ArtisanDB.updateOrder(orderId, {
+            paymentStatus: 'Paid',
+            orderStatus: 'Confirmed',
+            paymentMethod: 'GCash (PayMongo Live QR)',
+            paymentReference: paymentRef,
+            paidAt: new Date().toISOString()
+          });
+          handlePaymentSuccess(paymentRef);
+          return;
         }
       }
+
+      alert('No confirmed payment detected yet. Please ensure you have completed the GCash authorization in your app, then try again in a few moments.');
+    } catch (e) {
+      alert('Error verifying payment: ' + e.message);
+    } finally {
+      checkStatusBtn.disabled = false;
+      checkStatusBtn.textContent = '🔄 I Have Paid in GCash — Verify Payment Now';
     }
+  });
 
-    ArtisanDB.clearCart();
-    await delay(1000);
-    window.location.href = `cart.html?payment=success&orderId=${orderId}&ref=${refValue}`;
-
-  } catch (err) {
-    console.error('QR verification error:', err);
-    overlay.style.display = 'none';
-    verifyBtn.disabled = false;
-    showError('Payment verification failed: ' + err.message);
-  }
+  // Cancel link
+  const cancelBtn = document.getElementById('pmCancelBtn');
+  cancelBtn?.addEventListener('click', () => {
+    if (pollInterval) clearInterval(pollInterval);
+    if (timerInterval) clearInterval(timerInterval);
+    window.location.href = `cart.html?payment=failed&orderId=${orderId}&reason=cancelled&method=paymongo_gcash`;
+  });
 }
 
 /**
- * Handles GCash Direct Payment flow (Phone + MPIN)
+ * Starts 15-minute expiration countdown timer
  */
-async function handleDirectPaymentSubmit() {
-  hideError();
-
-  const phone = document.getElementById('gcashPhoneInput').value.trim();
-  const mpin = document.getElementById('gcashMpinInput').value.trim();
-
-  if (!phone || phone.length !== 10) {
-    showError('Please enter a valid 10-digit GCash mobile number (e.g. 9171234567).');
-    return;
-  }
-
-  if (!mpin || mpin.length !== 4) {
-    showError('Please enter your 4-digit GCash MPIN.');
-    return;
-  }
-
-  const overlay = document.getElementById('gcashProcessingOverlay');
-  const title = document.getElementById('gcashProcessingTitle');
-  const msg = document.getElementById('gcashProcessingMsg');
-  const payBtn = document.getElementById('gcashConfirmPayBtn');
-
-  payBtn.disabled = true;
-  overlay.style.display = 'flex';
-
-  try {
-    title.textContent = 'Connecting to GCash...';
-    msg.textContent = 'Contacting the GCash payments network...';
-    await delay(1000);
-
-    title.textContent = 'Authorizing Balance...';
-    msg.textContent = `Deducting ₱${Number(currentOrder.total || 0).toLocaleString()} from GCash account 09${phone.slice(1, 4)}••••${phone.slice(-3)}...`;
-    await delay(1200);
-
-    title.textContent = 'Payment Approved!';
-    msg.textContent = 'Transaction verified! Confirming order with ArtisanAisle...';
-
-    const gcashRef = '9' + Math.floor(100000000000 + Math.random() * 900000000000);
-
-    await ArtisanDB.updateOrder(orderId, {
-      paymentStatus: 'Paid',
-      orderStatus: 'Confirmed',
-      paymentReference: gcashRef,
-      paymentMethod: 'GCash (Direct)',
-      payerGcashPhone: `09${phone}`,
-      paidAmount: Number(currentOrder.total || 0),
-      paidAt: new Date().toISOString()
-    });
-
-    if (currentOrder.items && Array.isArray(currentOrder.items)) {
-      for (const item of currentOrder.items) {
-        const prodId = item.productId || item.id;
-        const qty = Number(item.quantity) || 1;
-        if (prodId) {
-          try {
-            await ArtisanDB.decrementStock(prodId, qty);
-          } catch (e) {
-            console.warn('Stock decrement note:', e);
-          }
-        }
-      }
-    }
-
-    ArtisanDB.clearCart();
-    await delay(1000);
-    window.location.href = `cart.html?payment=success&orderId=${orderId}&ref=${gcashRef}`;
-
-  } catch (err) {
-    console.error('GCash payment error:', err);
-    overlay.style.display = 'none';
-    payBtn.disabled = false;
-    showError('Payment authorization failed: ' + err.message);
-  }
-}
-
 function startCountdownTimer() {
   const timerDisplay = document.getElementById('qrTimerDisplay');
-  if (!timerDisplay) return;
-
-  if (timerInterval) clearInterval(timerInterval);
 
   timerInterval = setInterval(() => {
     timeLeftSeconds--;
+
     if (timeLeftSeconds <= 0) {
       clearInterval(timerInterval);
-      timerDisplay.textContent = 'Expired';
-      showError('This QRPh code has expired. Please refresh the page to generate a fresh QR code.');
-      const verifyBtn = document.getElementById('gcashVerifyQrPaymentBtn');
-      if (verifyBtn) verifyBtn.disabled = true;
+      if (pollInterval) clearInterval(pollInterval);
+      if (timerDisplay) timerDisplay.textContent = '00:00 (Expired)';
+      showError('This PayMongo GCash QR payment session has expired. Please return to your shopping cart to generate a new session.');
+      const proceedBtn = document.getElementById('paymongoProceedBtn');
+      if (proceedBtn) proceedBtn.disabled = true;
       return;
     }
 
-    const minutes = Math.floor(timeLeftSeconds / 60);
-    const seconds = timeLeftSeconds % 60;
-    timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const mins = Math.floor(timeLeftSeconds / 60);
+    const secs = timeLeftSeconds % 60;
+    if (timerDisplay) {
+      timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
   }, 1000);
 }
 
-function downloadQrImage() {
-  const qrImg = document.getElementById('qrphImageTag');
-  if (!qrImg || !qrImg.src) return;
-
-  const link = document.createElement('a');
-  link.href = qrImg.src;
-  link.download = `QRPh-GCash-${currentOrder?.orderNumber || 'ArtisanAisle'}.png`;
-  link.target = '_blank';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  showToast('QR Code download started! Scan from your GCash app gallery.');
-}
-
-function copyToClipboard(text, successMsg) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => {
-      showToast(successMsg);
-    }).catch(() => fallbackCopy(text, successMsg));
-  } else {
-    fallbackCopy(text, successMsg);
-  }
-}
-
-function fallbackCopy(text, successMsg) {
-  const el = document.createElement('textarea');
-  el.value = text;
-  document.body.appendChild(el);
-  el.select();
-  document.execCommand('copy');
-  document.body.removeChild(el);
-  showToast(successMsg);
-}
-
-function showToast(msg) {
-  const toast = document.getElementById('toastCopied');
-  if (!toast) return;
-  toast.textContent = msg;
-  toast.style.display = 'block';
-  setTimeout(() => {
-    toast.style.display = 'none';
-  }, 2200);
-}
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 function showError(msg) {
-  const errBox = document.getElementById('gcashErrorBanner');
-  if (errBox) {
-    errBox.textContent = msg;
-    errBox.style.display = 'block';
-    errBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const banner = document.getElementById('gcashErrorBanner');
+  if (banner) {
+    banner.textContent = msg;
+    banner.style.display = 'block';
   }
-}
-
-function hideError() {
-  const errBox = document.getElementById('gcashErrorBanner');
-  if (errBox) errBox.style.display = 'none';
 }

@@ -2,13 +2,35 @@ import { ArtisanDB } from './firebase-config.js';
 import { updateHeaderAuth } from './header-auth.js';
 import { PayMongo } from './paymongo-service.js';
 
+function getSavedPromo() {
+  try {
+    const raw = sessionStorage.getItem('artisan_applied_promo');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function savePromo(promo) {
+  try {
+    if (promo) {
+      sessionStorage.setItem('artisan_applied_promo', JSON.stringify(promo));
+    } else {
+      sessionStorage.removeItem('artisan_applied_promo');
+    }
+  } catch {}
+}
+
 let isSubmitting = false;
+let appliedPromotion = getSavedPromo();
+let currentDiscountAmount = 0;
 
 document.addEventListener('DOMContentLoaded', async () => {
   initTabs();
   setupCourierAutoDetect();
   renderCart();
   setupPaymentListener();
+  setupPromoListeners();
   setupPlaceOrder();
   loadSavedShipping();
   setupRealtimeStockSync();
@@ -189,18 +211,60 @@ async function renderCart() {
     });
   }
 
-  // Update Summary Sidebar with Courier Distance Rate
+  // Update Summary Sidebar with Courier Distance Rate & Promotional Discount
   const subtotal = cart.reduce((acc, i) => acc + (Number(i.price) * Number(i.quantity)), 0);
   const courierInfo = getCourierRateInfo();
   // Free shipping promo if subtotal >= 2500, otherwise courier rate based on distance
   const shipping = (cart.length > 0 && subtotal >= 2500) ? 0 : (cart.length > 0 ? courierInfo.rate : 0);
-  const grandTotal = subtotal + shipping;
+
+  // Recalculate promotion discount against live subtotal
+  let discount = 0;
+  if (appliedPromotion) {
+    const minSpend = Number(appliedPromotion.minSpend) || 0;
+    if (subtotal < minSpend) {
+      showPromoFeedback(`Cart subtotal fell below min spend of ₱${minSpend.toFixed(2)}. Promo removed.`, 'error');
+      clearAppliedPromo();
+    } else {
+      const type = String(appliedPromotion.discountType || 'percentage').toLowerCase();
+      const isPercent = type.includes('percent');
+      const discountVal = Number(appliedPromotion.discountValue) || 0;
+
+      if (isPercent) {
+        discount = subtotal * (discountVal / 100);
+        if (appliedPromotion.maxDiscountCap && Number(appliedPromotion.maxDiscountCap) > 0) {
+          discount = Math.min(discount, Number(appliedPromotion.maxDiscountCap));
+        }
+      } else {
+        discount = Math.min(discountVal, subtotal);
+      }
+      discount = Math.max(0, Math.round(discount * 100) / 100);
+      currentDiscountAmount = discount;
+    }
+  } else {
+    currentDiscountAmount = 0;
+  }
+
+  const grandTotal = Math.max(0, subtotal - discount) + shipping;
 
   const subtotalEl = document.getElementById('summarySubtotal');
+  const discountRow = document.getElementById('summaryDiscountRow');
+  const discountCodeEl = document.getElementById('summaryDiscountCode');
+  const discountAmountEl = document.getElementById('summaryDiscountAmount');
   const shippingEl = document.getElementById('summaryShipping');
   const grandTotalEl = document.getElementById('summaryGrandTotal');
 
   if (subtotalEl) subtotalEl.textContent = `₱${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+  if (discountRow) {
+    if (discount > 0 && appliedPromotion) {
+      discountRow.style.display = 'flex';
+      if (discountCodeEl) discountCodeEl.textContent = appliedPromotion.code;
+      if (discountAmountEl) discountAmountEl.textContent = `-₱${discount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    } else {
+      discountRow.style.display = 'none';
+    }
+  }
+
   if (shippingEl) {
     if (cart.length === 0) {
       shippingEl.textContent = '₱0.00';
@@ -211,6 +275,8 @@ async function renderCart() {
     }
   }
   if (grandTotalEl) grandTotalEl.textContent = `₱${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+  syncPromoBadgeUI();
 }
 
 function setupPaymentListener() {
@@ -335,11 +401,12 @@ function setupPlaceOrder() {
         }
       }
 
-      // 2. Prepare Order Payload with Courier Distance Rate
+      // 2. Prepare Order Payload with Courier Distance Rate & Promotion Snapshot
       const subtotal = cart.reduce((acc, i) => acc + (Number(i.price) * Number(i.quantity)), 0);
       const courierInfo = getCourierRateInfo();
       const shipping = subtotal >= 2500 ? 0 : courierInfo.rate;
-      const total = subtotal + shipping;
+      const discount = currentDiscountAmount || 0;
+      const total = Math.max(0, subtotal - discount) + shipping;
       const sellerIds = Array.from(new Set(cart.map(i => i.sellerId).filter(Boolean)));
 
       const orderPayload = {
@@ -355,8 +422,17 @@ function setupPlaceOrder() {
         paymentStatus,
         orderStatus,
         subtotal,
+        discount,
         shipping,
         total,
+        promotionApplied: appliedPromotion ? {
+          promotionId: appliedPromotion.id,
+          code: appliedPromotion.code,
+          name: appliedPromotion.name,
+          discountType: appliedPromotion.discountType,
+          discountValue: appliedPromotion.discountValue,
+          discountAmount: discount
+        } : null,
         courierZone: courierInfo.zone,
         courierRate: courierInfo.rate,
         shippingRegion: courierInfo.label,
@@ -366,12 +442,37 @@ function setupPlaceOrder() {
       // 3. Write to Firestore via ArtisanDB
       const createdOrder = await ArtisanDB.createOrder(orderPayload);
 
+      // 3.1 Record promotion redemption in Firestore if promotion was used
+      if (appliedPromotion) {
+        await ArtisanDB.recordPromotionRedemption({
+          promotionId: appliedPromotion.id,
+          promotionCode: appliedPromotion.code,
+          customerId: user.uid,
+          customerEmail: user.email || '',
+          customerName: fullName,
+          orderId: createdOrder.id,
+          orderTotal: total,
+          discountAmount: discount,
+          redeemedAt: new Date().toISOString()
+        });
+      }
+
       // 4. Clear cart on verified creation
       ArtisanDB.clearCart();
+      clearAppliedPromo();
       updateHeaderAuth();
 
-      // 5. IF GCASH: Redirect immediately to GCash payment gateway
+      // 5. IF GCASH: Only allow PayMongo live GCash QR payment (no other choices)
       if (paymentMethod === 'GCash') {
+        try {
+          const pmResult = await PayMongo.createCheckoutSession(createdOrder, 'gcash');
+          if (pmResult.success && pmResult.checkoutUrl) {
+            window.location.href = pmResult.checkoutUrl;
+            return;
+          }
+        } catch (e) {
+          console.warn('Direct PayMongo checkout redirect error, navigating to GCash QR gateway:', e);
+        }
         window.location.href = `gcash-checkout.html?orderId=${createdOrder.id}`;
         return;
       }
@@ -628,6 +729,10 @@ function openMayaSandboxModal(order) {
   const modal = document.getElementById('mayaCheckoutModal');
   if (!modal) return;
 
+  const subtotalEl = document.getElementById('mayaModalSubtotal');
+  const shippingEl = document.getElementById('mayaModalShipping');
+  const discountRow = document.getElementById('mayaModalDiscountRow');
+  const discountEl = document.getElementById('mayaModalDiscount');
   const amtEl = document.getElementById('mayaModalAmount');
   const refEl = document.getElementById('mayaModalOrderRef');
   const phoneInput = document.getElementById('mayaMobileInput');
@@ -636,7 +741,22 @@ function openMayaSandboxModal(order) {
   const closeBtn = document.getElementById('closeMayaModalBtn');
   const cancelBtn = document.getElementById('cancelMayaPayBtn');
 
-  if (amtEl) amtEl.textContent = `₱${Number(order.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  const subtotal = Number(order.subtotal || 0);
+  const shipping = Number(order.shipping || 0);
+  const discount = Number(order.discount || 0);
+  const total = Number(order.total || 0);
+
+  if (subtotalEl) subtotalEl.textContent = `₱${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  if (shippingEl) shippingEl.textContent = shipping > 0 ? `+₱${shipping.toLocaleString('en-US', { minimumFractionDigits: 2 })}` : 'FREE';
+  if (discountRow && discountEl) {
+    if (discount > 0) {
+      discountRow.style.display = 'flex';
+      discountEl.textContent = `-₱${discount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    } else {
+      discountRow.style.display = 'none';
+    }
+  }
+  if (amtEl) amtEl.textContent = `₱${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   if (refEl) refEl.textContent = order.orderNumber || order.id;
   if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
 
@@ -909,4 +1029,144 @@ function setupRealtimeStockSync() {
       renderCart();
     }
   });
+}
+
+
+/* ==========================================================================
+   Promotions & Discount Code Listeners (ARTISAN PROMO Integration)
+   ========================================================================== */
+function setupPromoListeners() {
+  const applyBtn = document.getElementById('applyPromoBtn');
+  const promoInput = document.getElementById('promoCodeInput');
+  const removeBtn = document.getElementById('removePromoBtn');
+
+  if (applyBtn && promoInput) {
+    applyBtn.addEventListener('click', async () => {
+      await handleApplyPromo();
+    });
+
+    promoInput.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        await handleApplyPromo();
+      }
+    });
+  }
+
+  if (removeBtn) {
+    removeBtn.addEventListener('click', () => {
+      clearAppliedPromo();
+      showPromoFeedback('Promotion removed.', 'info');
+      renderCart();
+    });
+  }
+}
+
+function syncPromoBadgeUI() {
+  const badge = document.getElementById('appliedPromoBadge');
+  const inputRow = document.getElementById('promoInputRow');
+  const codeDisplay = document.getElementById('appliedPromoCodeDisplay');
+  const descDisplay = document.getElementById('appliedPromoDescDisplay');
+
+  if (appliedPromotion && badge && inputRow && codeDisplay) {
+    codeDisplay.textContent = appliedPromotion.code;
+    const isPercent = String(appliedPromotion.discountType || '').toLowerCase().includes('percent');
+    if (descDisplay) {
+      descDisplay.textContent = isPercent
+        ? `${appliedPromotion.discountValue}% OFF (Saved ₱${currentDiscountAmount.toFixed(2)})`
+        : `₱${Number(appliedPromotion.discountValue).toFixed(2)} OFF (Saved ₱${currentDiscountAmount.toFixed(2)})`;
+    }
+    badge.style.display = 'flex';
+    inputRow.style.display = 'none';
+  } else if (badge && inputRow) {
+    badge.style.display = 'none';
+    inputRow.style.display = 'flex';
+  }
+}
+
+async function handleApplyPromo() {
+  const promoInput = document.getElementById('promoCodeInput');
+  const applyBtn = document.getElementById('applyPromoBtn');
+  if (!promoInput) return;
+
+  const rawCode = promoInput.value.trim().toUpperCase();
+  if (!rawCode) {
+    showPromoFeedback('Please enter a promotion code.', 'error');
+    return;
+  }
+
+  const cart = ArtisanDB.getCart();
+  const subtotal = cart.reduce((acc, i) => acc + (Number(i.price) * Number(i.quantity)), 0);
+
+  if (cart.length === 0 || subtotal <= 0) {
+    showPromoFeedback('Your cart is empty. Add items to apply a promotion code.', 'error');
+    return;
+  }
+
+  const currentUser = ArtisanDB.currentUser;
+
+  try {
+    if (applyBtn) {
+      applyBtn.disabled = true;
+      applyBtn.textContent = '...';
+    }
+
+    const result = await ArtisanDB.validatePromotionCode(rawCode, subtotal, currentUser?.uid);
+    if (!result.valid) {
+      showPromoFeedback(result.message, 'error');
+      clearAppliedPromo();
+      renderCart();
+      return;
+    }
+
+    appliedPromotion = result.promotion;
+    currentDiscountAmount = result.discountAmount;
+    savePromo(appliedPromotion);
+
+    syncPromoBadgeUI();
+    showPromoFeedback(result.message, 'success');
+    renderCart();
+
+  } catch (err) {
+    console.error('Apply promo error:', err);
+    showPromoFeedback('Failed to validate promotion code.', 'error');
+  } finally {
+    if (applyBtn) {
+      applyBtn.disabled = false;
+      applyBtn.textContent = 'Apply';
+    }
+  }
+}
+
+function clearAppliedPromo() {
+  appliedPromotion = null;
+  currentDiscountAmount = 0;
+  savePromo(null);
+
+  const badge = document.getElementById('appliedPromoBadge');
+  const inputRow = document.getElementById('promoInputRow');
+  const promoInput = document.getElementById('promoCodeInput');
+
+  if (badge) badge.style.display = 'none';
+  if (inputRow) inputRow.style.display = 'flex';
+  if (promoInput) promoInput.value = '';
+
+  const discountRow = document.getElementById('summaryDiscountRow');
+  if (discountRow) discountRow.style.display = 'none';
+}
+
+function showPromoFeedback(msg, type = 'info') {
+  const el = document.getElementById('promoFeedbackMsg');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `promo-feedback-msg ${type}`;
+  el.style.display = 'block';
+
+  if (type === 'success' || type === 'info') {
+    setTimeout(() => {
+      if (el.textContent === msg) {
+        el.style.display = 'none';
+      }
+    }, 4500);
+  }
 }

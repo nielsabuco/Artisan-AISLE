@@ -31,6 +31,9 @@ export default async function handler(req, res) {
       orderId,
       orderNumber,
       total,
+      subtotal,
+      shipping,
+      discount,
       items = [],
       customerName,
       customerEmail,
@@ -51,23 +54,62 @@ export default async function handler(req, res) {
       });
     }
 
+    const orderTotal = Number(total || 0);
+    const shippingFee = Number(shipping || 0);
+    const discountAmount = Number(discount || 0);
+    const targetTotalCentavos = Math.round(orderTotal * 100);
+
     // Format line items for PayMongo (amount must be integer in Philippine centavos)
     let lineItems = [];
-    if (Array.isArray(items) && items.length > 0) {
-      lineItems = items.map(item => ({
-        currency: 'PHP',
-        amount: Math.round(Number(item.price || 0) * 100),
-        name: item.name || 'Handcrafted Artisan Item',
-        quantity: Math.max(1, Number(item.quantity || 1)),
-        description: `Artisan item by ${item.sellerName || 'Verified Guild Member'}`
-      }));
+    if (Array.isArray(items) && items.length > 0 && targetTotalCentavos > 0) {
+      const originalSubtotal = items.reduce((acc, item) => acc + (Number(item.price || 0) * Math.max(1, Number(item.quantity || 1))), 0);
+      const netMerchandiseTotal = Math.max(0, (Number(subtotal) || originalSubtotal) - discountAmount);
+
+      // If discount applied, distribute discount proportionally across items
+      const discountScale = (originalSubtotal > 0 && discountAmount > 0)
+        ? Math.max(0, netMerchandiseTotal / originalSubtotal)
+        : 1.0;
+
+      lineItems = items.map(item => {
+        const unitPrice = Number(item.price || 0);
+        const adjustedUnitPrice = Math.max(1, Math.round(unitPrice * discountScale));
+        return {
+          currency: 'PHP',
+          amount: Math.round(adjustedUnitPrice * 100),
+          name: discountAmount > 0 ? `${item.name || 'Artisan Item'} (Discounted)` : (item.name || 'Handcrafted Artisan Item'),
+          quantity: Math.max(1, Number(item.quantity || 1)),
+          description: `Artisan item by ${item.sellerName || 'Verified Guild Member'}`
+        };
+      });
+
+      // Explicitly append Shipping & Delivery Fee as a distinct line item
+      if (shippingFee > 0) {
+        lineItems.push({
+          currency: 'PHP',
+          amount: Math.round(shippingFee * 100),
+          name: 'Shipping & Delivery Fee',
+          quantity: 1,
+          description: 'Courier delivery fee for standard shipping'
+        });
+      }
+
+      // Reconcile any single-centavo rounding differences with target order total
+      const currentSumCentavos = lineItems.reduce((acc, li) => acc + (li.amount * li.quantity), 0);
+      const centavoDiff = targetTotalCentavos - currentSumCentavos;
+      if (centavoDiff !== 0 && lineItems.length > 0) {
+        lineItems[0].amount = Math.max(100, lineItems[0].amount + centavoDiff);
+      }
     } else {
+      // Single consolidated line item including shipping fee
       lineItems = [
         {
           currency: 'PHP',
-          amount: Math.round(Number(total || 0) * 100),
+          amount: Math.max(100, targetTotalCentavos),
           name: `ArtisanAisle Order #${orderNumber || orderId}`,
-          quantity: 1
+          quantity: 1,
+          description: shippingFee > 0 
+            ? `Order total (includes ₱${shippingFee.toFixed(2)} shipping fee)` 
+            : 'Artisan order total'
         }
       ];
     }

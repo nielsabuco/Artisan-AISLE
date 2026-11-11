@@ -503,7 +503,7 @@
   <header class="gcash-header">
     <div class="gcash-brand">
       <div class="gcash-logo-icon">G</div>
-      <span>GCash × QRPh</span>
+      <span>GCash × PayMongo Live QR</span>
     </div>
     <div class="gcash-secure-pill">
       <span>🔒</span>
@@ -518,7 +518,7 @@
       <div id="gcashProcessingOverlay" class="gcash-status-overlay">
         <div class="gcash-spinner-pulse"></div>
         <h3 id="gcashProcessingTitle" style="color:#007DFE; font-size: 20px; margin:0 0 10px;">Verifying with GCash...</h3>
-        <p id="gcashProcessingMsg" style="color:#64748b; font-size:14px; margin:0; max-width: 340px; line-height: 1.5;">Contacting Bangko Sentral ng Pilipinas QRPh settlement network...</p>
+        <p id="gcashProcessingMsg" style="color:#64748b; font-size:14px; margin:0; max-width: 340px; line-height: 1.5;">Checking live PayMongo GCash payment status...</p>
       </div>
 
       <!-- Merchant & Amount Banner -->
@@ -528,81 +528,29 @@
         <div class="gcash-order-tag" id="gcashOrderNumberTag">Order Reference: Loading...</div>
       </div>
 
-      <!-- Mode Switcher Tabs -->
-      <div class="gcash-tab-nav">
-        <button type="button" class="gcash-tab-btn active" id="tabPayMongoBtn">
-          <span>⚡ PayMongo GCash</span>
-          <span class="gcash-tab-badge" id="pmBadgeStatus">Live Gateway</span>
-        </button>
-        <button type="button" class="gcash-tab-btn" id="tabQrphBtn">
-          <span>📷 Scan QRPh Code</span>
-        </button>
-        <button type="button" class="gcash-tab-btn" id="tabDirectBtn">
-          <span>📱 Direct Express</span>
-        </button>
-      </div>
-
       <!-- Error notification -->
       <div id="gcashErrorBanner" style="display:none; background:#fef2f2; color:#b91c1c; border-left: 4px solid #ef4444; padding:12px 16px; font-size:13px; margin: 16px 24px 0;"></div>
 
-      <!-- VIEW 0: PayMongo Official Gateway (Real GCash) -->
+      <!-- SOLE VIEW: PayMongo Live GCash QR Gateway -->
       <div id="paymongoViewContainer" class="gcash-form-body">
         
         <div id="pmGatewayStatusCard" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
           <div>
             <div style="font-weight: 700; color: #166534; font-size: 14px; display: flex; align-items: center; gap: 6px;">
               <span>🟢</span>
-              <span id="pmStatusTitle">PayMongo Official Gateway</span>
+              <span id="pmStatusTitle">PayMongo Live GCash QR Gateway</span>
             </div>
             <span id="pmModeIndicatorText" style="font-size: 12px; color: #15803d; display: block; margin-top: 2px;">
-              Ready to process real GCash payment
+              Live QR payment enabled — scan with GCash app to pay
             </span>
           </div>
           <span style="background: #dcfce7; color: #15803d; font-weight: 800; font-size: 11px; padding: 4px 10px; border-radius: 999px; text-transform: uppercase;">
-            SECURE BSP
+            PAYMONGO LIVE
           </span>
         </div>
 
-        <div class="merchant-info-card" style="margin-bottom: 22px;">
-          <div class="merchant-info-row">
-            <span>Payable Amount:</span>
-            <strong id="pmPayableAmount" style="color: #007DFE; font-size: 18px;">₱0.00</strong>
-          </div>
-          <div class="merchant-info-row">
-            <span>Order Reference:</span>
-            <strong id="pmOrderRefText">#ORD-000000</strong>
-          </div>
-          <div class="merchant-info-row">
-            <span>Payment Method:</span>
-            <strong>GCash (Official Web Checkout)</strong>
-          </div>
-        </div>
-
-        <!-- How PayMongo GCash Works -->
-        <div class="qr-steps-list" style="margin-bottom: 24px;">
-          <h4>How Real GCash Payment Works:</h4>
-          <ol>
-            <li>Click the button below to open the official PayMongo checkout.</li>
-            <li>Select <strong>GCash</strong> and enter your mobile number.</li>
-            <li>Input the 6-digit authentication code (OTP) sent to your phone.</li>
-            <li>Authorize the payment; you will be returned here automatically with your verified receipt!</li>
-          </ol>
-        </div>
-
-        <!-- Launch Button -->
-        <button type="button" id="paymongoProceedBtn" class="gcash-pay-btn" style="padding: 16px; font-size: 16px;">
-          <span>🚀 Launch Official GCash Portal</span>
-          <span id="pmBtnAmount">₱0.00</span>
-        </button>
-
-        <!-- Cancel link -->
-        <a id="pmCancelBtn" class="gcash-cancel-link">Cancel and choose another payment method (COD)</a>
-      </div>
-
-      <!-- VIEW 1: QRPh Code Scanner (Secondary) -->
-      <div id="qrphViewContainer" class="gcash-form-body" style="display: none;">
-        
-        <div class="qrph-official-banner">
+        <!-- Dynamic Live GCash QR Code Container -->
+        <div class="qrph-official-banner" style="margin-bottom: 20px;">
           <div class="qrph-header-row">
             <div class="qrph-emblem">
               <span class="qrph-triangles">
@@ -610,141 +558,91 @@
                 <span class="tri-yellow"></span>
                 <span class="tri-blue"></span>
               </span>
-              <span>QRPh</span>
+              <span>QRPh / GCash</span>
             </div>
-            <span class="qrph-subtext">National QR Code Standard</span>
+            <span class="qrph-subtext">Scan to Pay via GCash App</span>
           </div>
 
-          <!-- Dynamic QR Code Container -->
-          <div class="qrph-box-container">
-            <img id="qrphImageTag" src="" alt="Dynamic QRPh Payment Code" />
+          <div class="qrph-box-container" style="position: relative;">
+            <img id="qrphImageTag" src="" alt="PayMongo Live GCash QR Code" style="display: block;" />
             <div class="qrph-center-badge">G</div>
           </div>
 
           <div class="qrph-timer-bar">
             <span>⏳</span>
-            <span>QR Code Expires in: <strong id="qrTimerDisplay">15:00</strong></span>
+            <span>QR Session Expires in: <strong id="qrTimerDisplay">15:00</strong></span>
           </div>
 
-          <div>
-            <button type="button" class="qr-download-btn" id="downloadQrBtn">
-              <span>📥 Save QR to Photos</span>
-            </button>
+          <div style="margin-top: 8px;">
+            <span id="pmAutoCheckPill" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #0284c7; background: #e0f2fe; padding: 4px 12px; border-radius: 999px; font-weight: 600;">
+              <span class="spinner-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#0284c7; animation: gcashSpin 1s infinite alternate;"></span>
+              Listening for GCash payment confirmation...
+            </span>
           </div>
         </div>
 
-        <!-- Artisan Merchant Account Details -->
-        <div class="merchant-info-card">
+        <!-- Order & Shipping Fee Breakdown -->
+        <div class="merchant-info-card" style="margin-bottom: 22px;">
           <div class="merchant-info-row">
-            <span>Merchant / Artisan:</span>
-            <strong id="qrSellerName">Eugene Marciene Jerusalem</strong>
+            <span>Items Subtotal:</span>
+            <strong id="pmItemsSubtotalText">₱0.00</strong>
           </div>
-          <div class="merchant-info-row">
-            <span>GCash Number:</span>
-            <div>
-              <strong id="qrSellerGcash">0976 494 8458</strong>
-              <button type="button" class="copy-chip-btn" id="copyGcashNumberBtn" title="Copy phone number">Copy</button>
-            </div>
+          <div class="merchant-info-row" style="background: #f0fdf4; margin: 0 -18px; padding: 6px 18px;">
+            <span style="color: #166534; font-weight: 600;">Shipping Fee (Courier Delivery):</span>
+            <strong id="pmShippingFeeText" style="color: #166534;">₱0.00</strong>
           </div>
-          <div class="merchant-info-row">
-            <span>Exact Payable:</span>
-            <div>
-              <strong id="qrPayableAmount" style="color:#007DFE;">₱0.00</strong>
-              <button type="button" class="copy-chip-btn" id="copyAmountBtn" title="Copy exact amount">Copy</button>
-            </div>
+          <div class="merchant-info-row" id="pmDiscountRow" style="display: none; background: #fefce8; margin: 0 -18px; padding: 6px 18px;">
+            <span style="color: #854d0e; font-weight: 600;">Promotion Discount:</span>
+            <strong id="pmDiscountText" style="color: #16a34a;">-₱0.00</strong>
+          </div>
+          <div class="merchant-info-row" style="border-top: 1px solid #cbd5e1; margin-top: 4px; padding-top: 8px;">
+            <span style="font-weight: 700;">Total Charged via PayMongo:</span>
+            <strong id="pmPayableAmount" style="color: #007DFE; font-size: 20px;">₱0.00</strong>
           </div>
           <div class="merchant-info-row">
             <span>Order Reference:</span>
-            <strong id="qrOrderRefText">#ORD-000000</strong>
+            <strong id="pmOrderRefText">#ORD-000000</strong>
+          </div>
+          <div class="merchant-info-row">
+            <span>Payment Method:</span>
+            <strong style="color: #007DFE;">PayMongo Live GCash QR</strong>
           </div>
         </div>
 
-        <!-- How to Pay Instructions -->
-        <div class="qr-steps-list">
-          <h4>How to Pay via QRPh:</h4>
+        <!-- How PayMongo GCash Works -->
+        <div class="qr-steps-list" style="margin-bottom: 24px;">
+          <h4>How to Complete GCash QR Payment:</h4>
           <ol>
-            <li>Open your <strong>GCash App</strong> (or Maya, BDO, BPI, Landbank).</li>
-            <li>Tap <strong>"Scan QR"</strong> and scan the code above (or choose <em>Upload QR</em> from your gallery).</li>
-            <li>Confirm transfer of <strong id="qrStepAmount">₱0.00</strong> to the artisan merchant.</li>
-            <li>Copy the <strong>13-Digit GCash Ref No.</strong> from your SMS/receipt and enter below:</li>
+            <li>Open your <strong>GCash App</strong> on your mobile phone.</li>
+            <li>Tap <strong>"Scan QR"</strong> and point your camera at the QR code above.</li>
+            <li>Verify the total amount of <strong id="qrStepAmount">₱0.00</strong> (includes delivery fee).</li>
+            <li>Authorize the payment; your order will be confirmed automatically!</li>
           </ol>
         </div>
 
-        <!-- Reference Number Input Field -->
-        <div class="gcash-input-group">
-          <div class="gcash-step-title">
-            <span class="gcash-step-badge">✓</span>
-            <span>GCash Reference Number</span>
-          </div>
-          <div class="gcash-input-wrap">
-            <span class="gcash-input-prefix">Ref:</span>
-            <input type="text" id="gcashRefInput" class="gcash-input-field" placeholder="e.g. 9023 4819 2841" maxlength="18" required />
-          </div>
-          <small style="color:#64748b; font-size:12px; margin-top:5px; display:block;">
-            Found on your GCash transaction confirmation screen or SMS text message.
-          </small>
-        </div>
-
-        <!-- Confirm QR Payment Button -->
-        <button type="button" id="gcashVerifyQrPaymentBtn" class="gcash-pay-btn">
-          <span>✓ I Have Paid via GCash — Verify & Confirm</span>
+        <!-- Launch / Pay on Mobile Button -->
+        <button type="button" id="paymongoProceedBtn" class="gcash-pay-btn" style="padding: 16px; font-size: 16px;">
+          <span>🚀 Open GCash App / PayMongo Checkout</span>
+          <span id="pmBtnAmount">₱0.00</span>
         </button>
 
-        <!-- Quick Sample Ref button for demo / convenience -->
-        <button type="button" id="autoFillSampleRefBtn" class="gcash-secondary-btn">
-          <span>⚡ Auto-fill Sample Reference Number (for fast demo)</span>
+        <!-- Manual Check Status Button -->
+        <button type="button" id="gcashCheckStatusBtn" class="gcash-secondary-btn" style="margin-top: 12px;">
+          <span>🔄 I Have Paid in GCash — Verify Payment Now</span>
         </button>
 
-        <!-- Cancel / Alternative link -->
-        <a id="gcashCancelBtn" class="gcash-cancel-link">Cancel and choose another payment method (COD)</a>
-      </div>
-
-      <!-- VIEW 2: GCash Direct Express Pay (Secondary) -->
-      <div id="directViewContainer" class="gcash-form-body" style="display: none;">
-        
-        <!-- Step 1: Mobile Number -->
-        <div class="gcash-input-group">
-          <div class="gcash-step-title">
-            <span class="gcash-step-badge">1</span>
-            <span>GCash Mobile Number</span>
-          </div>
-          <div class="gcash-input-wrap">
-            <span class="gcash-input-prefix">+63</span>
-            <input type="tel" id="gcashPhoneInput" class="gcash-input-field" placeholder="9XXXXXXXXX" maxlength="10" />
-          </div>
-          <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">Enter your 10-digit GCash mobile number (e.g. 9171234567)</small>
-        </div>
-
-        <!-- Step 2: MPIN Authorization -->
-        <div class="gcash-input-group">
-          <div class="gcash-step-title">
-            <span class="gcash-step-badge">2</span>
-            <span>4-Digit MPIN</span>
-          </div>
-          <div class="gcash-input-wrap">
-            <input type="password" id="gcashMpinInput" class="gcash-input-field" placeholder="••••" maxlength="4" style="letter-spacing: 6px; font-size: 20px !important;" />
-          </div>
-          <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">Enter your MPIN to authorize immediate balance deduction</small>
-        </div>
-
-        <!-- Pay Button -->
-        <button type="button" id="gcashConfirmPayBtn" class="gcash-pay-btn">
-          <span>Authorize & Pay</span>
-          <span id="gcashBtnAmount">₱0.00</span>
-        </button>
-
-        <!-- Cancel / Alternative link -->
-        <a id="gcashCancelBtnDirect" class="gcash-cancel-link">Cancel and choose another payment method (COD)</a>
+        <!-- Cancel link -->
+        <a id="pmCancelBtn" class="gcash-cancel-link" style="margin-top: 16px;">Cancel and return to cart</a>
       </div>
 
     </div>
 
     <!-- Official Footer Notes & Bank Network -->
     <div class="gcash-footer-notes">
-      Official Bangko Sentral ng Pilipinas (BSP) National QR Code Standard (QRPh).<br>
+      Official PayMongo Live Payment Gateway with Bangko Sentral ng Pilipinas (BSP) QRPh Standard.<br>
       Licensed and protected under Philippine electronic commerce regulations.
       <div class="qrph-partner-logos">
-        <span>GCash</span> • <span>Maya</span> • <span>BDO</span> • <span>BPI</span> • <span>Landbank</span> • <span>UnionBank</span>
+        <span>GCash</span> • <span>QRPh</span> • <span>PayMongo Live</span>
       </div>
     </div>
   </main>

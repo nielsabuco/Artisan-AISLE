@@ -77,10 +77,18 @@ class PayMongoService {
     const successUrl = `${currentOrigin}/cart.html?payment=success&orderId=${order.id}&method=${methodTag}`;
     const cancelUrl = `${currentOrigin}/cart.html?payment=failed&orderId=${order.id}&reason=cancelled&method=${methodTag}`;
 
+    const subtotal = Number(order.subtotal || 0) || (Array.isArray(order.items) ? order.items.reduce((acc, i) => acc + (Number(i.price || 0) * Number(i.quantity || 1)), 0) : 0);
+    const shipping = Number(order.shipping || 0);
+    const discount = Number(order.discount || 0);
+    const total = Number(order.total || 0) || Math.max(0, subtotal - discount) + shipping;
+
     const payload = {
       orderId: order.id,
       orderNumber: order.orderNumber || order.id,
-      total: Number(order.total || 0),
+      total: total,
+      subtotal: subtotal,
+      shipping: shipping,
+      discount: discount,
       items: order.items || [],
       customerName: order.customerName,
       customerEmail: order.customerEmail,

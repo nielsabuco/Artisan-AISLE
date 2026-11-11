@@ -7923,3 +7923,157 @@ button:disabled,
   cursor: not-allowed !important;
   opacity: 0.85 !important;
 }
+
+
+/* ==========================================================================
+   Promotions & Discount Vouchers (ARTISAN PROMO Integration)
+   ========================================================================== */
+.promo-section-box {
+  margin: 15px 0;
+  padding: 12px;
+  background: #fbf9f5;
+  border: 1px dashed #cfc2ad;
+  border-radius: 8px;
+}
+
+.promo-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.promo-icon {
+  font-size: 14px;
+}
+
+.promo-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a3e30;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.promo-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.promo-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d4c8b6;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #fff;
+  color: #2b2b2b;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.promo-input:focus {
+  border-color: #c07828;
+  box-shadow: 0 0 0 2px rgba(192, 120, 40, 0.15);
+}
+
+.promo-apply-btn {
+  padding: 8px 16px;
+  background: #c07828;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.promo-apply-btn:hover {
+  background: #a9661c;
+}
+
+.promo-apply-btn:active {
+  transform: scale(0.98);
+}
+
+.promo-apply-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.applied-promo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #edf7ed;
+  border: 1px solid #b7deb8;
+  border-radius: 6px;
+}
+
+.applied-promo-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.applied-promo-code {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: #1e5927;
+  letter-spacing: 0.5px;
+}
+
+.applied-promo-desc {
+  font-size: 11px;
+  color: #2e7d32;
+}
+
+.promo-remove-btn {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.promo-remove-btn:hover {
+  color: #d32f2f;
+  background: #fbe9e7;
+}
+
+.promo-feedback-msg {
+  font-size: 12px;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  line-height: 1.3;
+}
+
+.promo-feedback-msg.error {
+  background: #fdf2f2;
+  color: #c53030;
+  border: 1px solid #fed7d7;
+}
+
+.promo-feedback-msg.success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.summary-line.discount-line {
+  color: #1e7e34;
+  font-weight: 600;
+}
+
+.summary-line.discount-line .discount-amount {
+  color: #1e7e34;
+}

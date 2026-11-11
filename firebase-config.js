@@ -26,7 +26,8 @@ import {
   query,
   where,
   orderBy,
-  serverTimestamp
+  serverTimestamp,
+  increment
 } from 'firebase/firestore';
 
 export const firebaseConfig = {
@@ -1259,6 +1260,143 @@ export const ArtisanDB = {
       success: true,
       deletedProductsCount
     };
+  },
+
+  // --- Promotions & Discount Codes (ARTISAN PROMO) ---
+  async validatePromotionCode(rawCode, subtotal, customerId) {
+    if (!rawCode || typeof rawCode !== 'string') {
+      return { valid: false, message: 'Please enter a valid promotion code.' };
+    }
+    const cleanCode = rawCode.trim().toUpperCase();
+    if (!cleanCode) {
+      return { valid: false, message: 'Please enter a valid promotion code.' };
+    }
+
+    try {
+      // 1. Query by normalized uppercase code first
+      let snap = await getDocs(query(collection(db, 'promotions'), where('code', '==', cleanCode)));
+      
+      // Fallback: Query by original trimmed code if not found
+      if (snap.empty && rawCode.trim() !== cleanCode) {
+        snap = await getDocs(query(collection(db, 'promotions'), where('code', '==', rawCode.trim())));
+      }
+
+      if (snap.empty) {
+        return { valid: false, message: `Promo code "${cleanCode}" does not exist.` };
+      }
+
+      const promoDoc = snap.docs[0];
+      const promo = { id: promoDoc.id, ...promoDoc.data() };
+
+      if (!promo.isActive) {
+        return { valid: false, message: `Promotion "${cleanCode}" is currently inactive.` };
+      }
+
+      const toValidDate = (val) => {
+        if (!val) return null;
+        if (typeof val.toDate === 'function') return val.toDate();
+        if (typeof val === 'object' && val.seconds) return new Date(val.seconds * 1000);
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? null : d;
+      };
+
+      const now = new Date();
+      const startDate = toValidDate(promo.startDate);
+      const endDate = toValidDate(promo.endDate);
+
+      if (startDate && now < startDate) {
+        return { valid: false, message: `Promotion "${cleanCode}" has not started yet.` };
+      }
+
+      if (endDate && now > endDate) {
+        return { valid: false, message: `Promotion "${cleanCode}" has expired.` };
+      }
+
+      const minSpend = Number(promo.minSpend) || 0;
+      if (subtotal < minSpend) {
+        return {
+          valid: false,
+          message: `Minimum order of ₱${minSpend.toLocaleString('en-US', { minimumFractionDigits: 2 })} required for this code.`
+        };
+      }
+
+      const usageLimit = Number(promo.usageLimit);
+      const usageCount = Number(promo.usageCount) || 0;
+      if (usageLimit > 0 && usageCount >= usageLimit) {
+        return {
+          valid: false,
+          message: `Promotion "${cleanCode}" has reached its total usage limit (${usageCount}/${usageLimit}).`
+        };
+      }
+
+      // Check per-user redemption limit if user is authenticated
+      if (customerId) {
+        try {
+          const perUserLimit = Number(promo.perUserLimit) || 1;
+          const userRedemptionsQ = query(
+            collection(db, 'promotionRedemptions'),
+            where('promotionId', '==', promo.id),
+            where('customerId', '==', customerId)
+          );
+          const userRedemptionsSnap = await getDocs(userRedemptionsQ);
+          if (userRedemptionsSnap.size >= perUserLimit) {
+            return {
+              valid: false,
+              message: `You have already redeemed promotion "${cleanCode}" the maximum number of times allowed (${perUserLimit}x).`
+            };
+          }
+        } catch (perUserErr) {
+          console.warn('Per-user redemption verification skipped:', perUserErr.message);
+        }
+      }
+
+      // Calculate discount amount with flexible type matching
+      let discountAmount = 0;
+      const type = String(promo.discountType || 'percentage').toLowerCase();
+      const isPercentage = type.includes('percent');
+      const discountVal = Number(promo.discountValue) || 0;
+
+      if (isPercentage) {
+        discountAmount = subtotal * (discountVal / 100);
+        if (promo.maxDiscountCap && Number(promo.maxDiscountCap) > 0) {
+          discountAmount = Math.min(discountAmount, Number(promo.maxDiscountCap));
+        }
+      } else {
+        discountAmount = Math.min(discountVal, subtotal);
+      }
+
+      discountAmount = Math.max(0, Math.round(discountAmount * 100) / 100);
+
+      return {
+        valid: true,
+        promotion: promo,
+        discountAmount,
+        message: `Promo "${cleanCode}" applied! You save ₱${discountAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}.`
+      };
+    } catch (err) {
+      console.error('Error validating promo code:', err);
+      return { valid: false, message: 'Unable to validate promo code. Please try again.' };
+    }
+  },
+
+  async recordPromotionRedemption(redemptionPayload) {
+    try {
+      const redemptionsCol = collection(db, 'promotionRedemptions');
+      await addDoc(redemptionsCol, {
+        ...redemptionPayload,
+        redeemedAt: serverTimestamp()
+      });
+
+      if (redemptionPayload.promotionId) {
+        const promoRef = doc(db, 'promotions', redemptionPayload.promotionId);
+        await updateDoc(promoRef, {
+          usageCount: increment(1),
+          updatedAt: serverTimestamp()
+        }).catch(err => console.warn('Failed to increment promo usageCount:', err));
+      }
+    } catch (err) {
+      console.error('Error recording promo redemption:', err);
+    }
   },
 
   // --- Orders & Payments ---
